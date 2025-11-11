@@ -7,7 +7,7 @@ import { FiLock } from "react-icons/fi"
 import { type ApiError, LoginService, type NewPassword } from "@/client"
 import { Button } from "@/components/ui/button"
 import { PasswordInput } from "@/components/ui/password-input"
-import { isLoggedIn } from "@/hooks/useAuth"
+import { isLoggedIn, loginParams } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { confirmPasswordRules, handleError, passwordRules } from "@/utils"
 
@@ -44,7 +44,7 @@ function ResetPassword() {
   const navigate = useNavigate()
 
   const resetPassword = async (data: NewPassword) => {
-    const token = new URLSearchParams(window.location.search).get("token")
+    const token = new URLSearchParams(globalThis.location.search).get("token")
     if (!token) return
     await LoginService.resetPassword({
       requestBody: { new_password: data.new_password, token: token },
@@ -56,7 +56,7 @@ function ResetPassword() {
     onSuccess: () => {
       showSuccessToast("Password updated successfully.")
       reset()
-      navigate({ to: "/login" })
+      navigate({ to: "/login", search: () => loginParams })
     },
     onError: (err: ApiError) => {
       handleError(err)

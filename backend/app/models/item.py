@@ -1,12 +1,16 @@
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 from sqlmodel import Field as SQLField
-from sqlmodel import Relationship, SQLModel
+from sqlmodel import Relationship
+
+from app.models.common import TimestampModel
+from app.models.role import RoleEnum
 
 if TYPE_CHECKING:
-    from .user import User
+    from app.models.user import User
 
 
 class ItemBase(BaseModel):
@@ -24,19 +28,24 @@ class ItemUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=255)
 
 
-class Item(SQLModel, table=True):
-    id: uuid.UUID = SQLField(default_factory=uuid.uuid4, primary_key=True)
+class Item(TimestampModel, table=True):
     title: str = SQLField(min_length=1, max_length=255)
     description: str | None = SQLField(default=None, max_length=255)
     owner_id: uuid.UUID = SQLField(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
+    role_context: RoleEnum = SQLField(
+        default=RoleEnum.CUSTOMER
+    )  # Which role created this
     owner: Optional["User"] = Relationship(back_populates="items")
 
 
 class ItemPublic(ItemBase):
     id: uuid.UUID
     owner_id: uuid.UUID
+    role_context: RoleEnum
+    created_at: datetime
+    updated_at: datetime
 
 
 class ItemsPublic(BaseModel):

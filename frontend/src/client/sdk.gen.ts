@@ -3,12 +3,13 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsHealthResponse } from './types.gen';
+import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UtilsHealthResponse } from './types.gen';
 
 export class ItemsService {
     /**
      * Read Items
-     * Retrieve items.
+     * Retrieve items for current user's active role.
+     * Admins can see all items.
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
@@ -31,7 +32,7 @@ export class ItemsService {
     
     /**
      * Create Item
-     * Create new item.
+     * Create new item in the context of the user's active role.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns ItemPublic Successful Response
@@ -177,6 +178,32 @@ export class LoginService {
             }
         });
     }
+    
+    /**
+     * Login With Google
+     * Redirect the user to the Google OAuth consent screen.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static loginWithGoogle(): CancelablePromise<LoginLoginWithGoogleResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/login/google'
+        });
+    }
+    
+    /**
+     * Login With Google Callback
+     * Handle Google's OAuth callback and issue an access token.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static loginWithGoogleCallback(): CancelablePromise<LoginLoginWithGoogleCallbackResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/login/google/callback'
+        });
+    }
 }
 
 export class UsersService {
@@ -238,7 +265,7 @@ export class UsersService {
     
     /**
      * Delete User Me
-     * Delete own user.
+     * Deactivate own user account.
      * @returns Message Successful Response
      * @throws ApiError
      */
@@ -356,7 +383,7 @@ export class UsersService {
     
     /**
      * Delete User
-     * Delete a user.
+     * Deactivate a user account.
      * @param data The data for the request.
      * @param data.userId
      * @returns Message Successful Response
@@ -369,6 +396,80 @@ export class UsersService {
             path: {
                 user_id: data.userId
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get User Roles
+     * Get all roles for the current user.
+     * @returns RoleEnum Successful Response
+     * @throws ApiError
+     */
+    public static getUserRoles(): CancelablePromise<UsersGetUserRolesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/me/roles'
+        });
+    }
+    
+    /**
+     * Add User Role
+     * Add a role to the current user.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserPublic Successful Response
+     * @throws ApiError
+     */
+    public static addUserRole(data: UsersAddUserRoleData): CancelablePromise<UsersAddUserRoleResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/me/roles',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Remove User Role
+     * Remove a role from the current user.
+     * WARNING: All data associated with this role context will become inaccessible.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserPublic Successful Response
+     * @throws ApiError
+     */
+    public static removeUserRole(data: UsersRemoveUserRoleData): CancelablePromise<UsersRemoveUserRoleResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/users/me/roles',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Switch User Role
+     * Switch the active role for the current user.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns UserPublic Successful Response
+     * @throws ApiError
+     */
+    public static switchUserRole(data: UsersSwitchUserRoleData): CancelablePromise<UsersSwitchUserRoleResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/users/me/active-role',
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }

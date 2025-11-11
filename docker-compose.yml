@@ -58,6 +58,7 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
+      - BACKEND_HOST=${BACKEND_HOST?Variable not set}
       - ENVIRONMENT=${ENVIRONMENT}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
       - SECRET_KEY=${SECRET_KEY?Variable not set}
@@ -73,6 +74,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
 
   backend:
     restart: always
@@ -90,6 +93,7 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}
+      - BACKEND_HOST=${BACKEND_HOST?Variable not set}
       - ENVIRONMENT=${ENVIRONMENT}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
       - SECRET_KEY=${SECRET_KEY?Variable not set}
@@ -105,6 +109,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health/"]

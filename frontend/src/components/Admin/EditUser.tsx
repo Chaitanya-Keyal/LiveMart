@@ -162,20 +162,6 @@ const EditUser = ({ user }: EditUserProps) => {
             <Flex mt={4} direction="column" gap={4}>
               <Controller
                 control={control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <Field disabled={field.disabled} colorPalette="teal">
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
-                    >
-                      Is superuser?
-                    </Checkbox>
-                  </Field>
-                )}
-              />
-              <Controller
-                control={control}
                 name="is_active"
                 render={({ field }) => (
                   <Field disabled={field.disabled} colorPalette="teal">

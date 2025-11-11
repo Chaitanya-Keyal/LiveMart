@@ -3,7 +3,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
-import { isLoggedIn } from "@/hooks/useAuth"
+import { isLoggedIn, loginParams } from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -11,6 +11,7 @@ export const Route = createFileRoute("/_layout")({
     if (!isLoggedIn()) {
       throw redirect({
         to: "/login",
+        search: loginParams,
       })
     }
   },

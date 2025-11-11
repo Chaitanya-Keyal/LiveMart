@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { Controller, type SubmitHandler, useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { FaPlus } from "react-icons/fa"
 import { type UserCreate, UsersService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
@@ -50,7 +50,7 @@ const AddUser = () => {
       full_name: "",
       password: "",
       confirm_password: "",
-      is_superuser: false,
+      roles: ["customer"],
       is_active: false,
     },
   })
@@ -71,7 +71,7 @@ const AddUser = () => {
     },
   })
 
-  const onSubmit: SubmitHandler<UserCreateForm> = (data) => {
+  const onSubmit = (data: UserCreateForm) => {
     mutation.mutate(data)
   }
 
@@ -165,20 +165,6 @@ const AddUser = () => {
             </VStack>
 
             <Flex mt={4} direction="column" gap={4}>
-              <Controller
-                control={control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <Field disabled={field.disabled} colorPalette="teal">
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
-                    >
-                      Is superuser?
-                    </Checkbox>
-                  </Field>
-                )}
-              />
               <Controller
                 control={control}
                 name="is_active"

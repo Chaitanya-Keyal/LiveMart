@@ -127,10 +127,23 @@ export const ItemPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Owner Id'
+        },
+        role_context: {
+            '$ref': '#/components/schemas/RoleEnum'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         }
     },
     type: 'object',
-    required: ['title', 'id', 'owner_id'],
+    required: ['title', 'id', 'owner_id', 'role_context', 'created_at', 'updated_at'],
     title: 'ItemPublic'
 } as const;
 
@@ -215,6 +228,49 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const RoleAddSchema = {
+    properties: {
+        role: {
+            '$ref': '#/components/schemas/RoleEnum'
+        }
+    },
+    type: 'object',
+    required: ['role'],
+    title: 'RoleAdd',
+    description: 'Request to add a role to user.'
+} as const;
+
+export const RoleEnumSchema = {
+    type: 'string',
+    enum: ['admin', 'customer', 'retailer', 'wholesaler', 'delivery_partner'],
+    title: 'RoleEnum',
+    description: 'Available user roles in the system.'
+} as const;
+
+export const RoleRemoveSchema = {
+    properties: {
+        role: {
+            '$ref': '#/components/schemas/RoleEnum'
+        }
+    },
+    type: 'object',
+    required: ['role'],
+    title: 'RoleRemove',
+    description: 'Request to remove a role from user.'
+} as const;
+
+export const RoleSwitchSchema = {
+    properties: {
+        role: {
+            '$ref': '#/components/schemas/RoleEnum'
+        }
+    },
+    type: 'object',
+    required: ['role'],
+    title: 'RoleSwitch',
+    description: 'Request to switch active role.'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -265,11 +321,6 @@ export const UserCreateSchema = {
             title: 'Is Active',
             default: true
         },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
-        },
         full_name: {
             anyOf: [
                 {
@@ -287,6 +338,13 @@ export const UserCreateSchema = {
             maxLength: 128,
             minLength: 8,
             title: 'Password'
+        },
+        roles: {
+            items: {
+                '$ref': '#/components/schemas/RoleEnum'
+            },
+            type: 'array',
+            title: 'Roles'
         }
     },
     type: 'object',
@@ -307,11 +365,6 @@ export const UserPublicSchema = {
             title: 'Is Active',
             default: true
         },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
-        },
         full_name: {
             anyOf: [
                 {
@@ -328,10 +381,38 @@ export const UserPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        roles: {
+            items: {
+                '$ref': '#/components/schemas/RoleEnum'
+            },
+            type: 'array',
+            title: 'Roles',
+            default: []
+        },
+        active_role: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/RoleEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
         }
     },
     type: 'object',
-    required: ['email', 'id'],
+    required: ['email', 'id', 'created_at', 'updated_at'],
     title: 'UserPublic'
 } as const;
 
@@ -360,6 +441,14 @@ export const UserRegisterSchema = {
                 }
             ],
             title: 'Full Name'
+        },
+        roles: {
+            items: {
+                '$ref': '#/components/schemas/RoleEnum'
+            },
+            type: 'array',
+            minItems: 1,
+            title: 'Roles'
         }
     },
     type: 'object',
@@ -386,11 +475,6 @@ export const UserUpdateSchema = {
             type: 'boolean',
             title: 'Is Active',
             default: true
-        },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
         },
         full_name: {
             anyOf: [

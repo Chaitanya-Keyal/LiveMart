@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SelectRoleRouteImport } from './routes/select-role'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
@@ -18,10 +19,16 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as OauthGoogleCallbackRouteImport } from './routes/oauth.google.callback'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SelectRoleRoute = SelectRoleRouteImport.update({
+  id: '/select-role',
+  path: '/select-role',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -63,26 +70,35 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const OauthGoogleCallbackRoute = OauthGoogleCallbackRouteImport.update({
+  id: '/oauth/google/callback',
+  path: '/oauth/google/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/select-role': typeof SelectRoleRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/oauth/google/callback': typeof OauthGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/select-role': typeof SelectRoleRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/oauth/google/callback': typeof OauthGoogleCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -90,11 +106,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/select-role': typeof SelectRoleRoute
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/oauth/google/callback': typeof OauthGoogleCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -102,32 +120,38 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover-password'
     | '/reset-password'
+    | '/select-role'
     | '/signup'
     | '/admin'
     | '/items'
     | '/settings'
     | '/'
+    | '/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/recover-password'
     | '/reset-password'
+    | '/select-role'
     | '/signup'
     | '/admin'
     | '/items'
     | '/settings'
     | '/'
+    | '/oauth/google/callback'
   id:
     | '__root__'
     | '/_layout'
     | '/login'
     | '/recover-password'
     | '/reset-password'
+    | '/select-role'
     | '/signup'
     | '/_layout/admin'
     | '/_layout/items'
     | '/_layout/settings'
     | '/_layout/'
+    | '/oauth/google/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -135,7 +159,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RecoverPasswordRoute: typeof RecoverPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SelectRoleRoute: typeof SelectRoleRoute
   SignupRoute: typeof SignupRoute
+  OauthGoogleCallbackRoute: typeof OauthGoogleCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -145,6 +171,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/select-role': {
+      id: '/select-role'
+      path: '/select-role'
+      fullPath: '/select-role'
+      preLoaderRoute: typeof SelectRoleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -203,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/oauth/google/callback': {
+      id: '/oauth/google/callback'
+      path: '/oauth/google/callback'
+      fullPath: '/oauth/google/callback'
+      preLoaderRoute: typeof OauthGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -228,7 +268,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RecoverPasswordRoute: RecoverPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SelectRoleRoute: SelectRoleRoute,
   SignupRoute: SignupRoute,
+  OauthGoogleCallbackRoute: OauthGoogleCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

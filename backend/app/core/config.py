@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     FRONTEND_HOST: str = "http://localhost:5173"
+    BACKEND_HOST: str = "http://localhost:8000"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     BACKEND_CORS_ORIGINS: Annotated[
@@ -91,6 +92,9 @@ class Settings(BaseSettings):
 
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: str | None = None
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

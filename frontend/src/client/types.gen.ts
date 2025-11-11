@@ -26,6 +26,9 @@ export type ItemPublic = {
     description?: (string | null);
     id: string;
     owner_id: string;
+    role_context: RoleEnum;
+    created_at: string;
+    updated_at: string;
 };
 
 export type ItemsPublic = {
@@ -47,6 +50,32 @@ export type NewPassword = {
     new_password: string;
 };
 
+/**
+ * Request to add a role to user.
+ */
+export type RoleAdd = {
+    role: RoleEnum;
+};
+
+/**
+ * Available user roles in the system.
+ */
+export type RoleEnum = 'admin' | 'customer' | 'retailer' | 'wholesaler' | 'delivery_partner';
+
+/**
+ * Request to remove a role from user.
+ */
+export type RoleRemove = {
+    role: RoleEnum;
+};
+
+/**
+ * Request to switch active role.
+ */
+export type RoleSwitch = {
+    role: RoleEnum;
+};
+
 export type Token = {
     access_token: string;
     token_type?: string;
@@ -60,23 +89,27 @@ export type UpdatePassword = {
 export type UserCreate = {
     email: string;
     is_active?: boolean;
-    is_superuser?: boolean;
     full_name?: (string | null);
     password: string;
+    roles?: Array<RoleEnum>;
 };
 
 export type UserPublic = {
     email: string;
     is_active?: boolean;
-    is_superuser?: boolean;
     full_name?: (string | null);
     id: string;
+    roles?: Array<RoleEnum>;
+    active_role?: (RoleEnum | null);
+    created_at: string;
+    updated_at: string;
 };
 
 export type UserRegister = {
     email: string;
     password: string;
     full_name?: (string | null);
+    roles?: Array<RoleEnum>;
 };
 
 export type UsersPublic = {
@@ -87,7 +120,6 @@ export type UsersPublic = {
 export type UserUpdate = {
     email?: (string | null);
     is_active?: boolean;
-    is_superuser?: boolean;
     full_name?: (string | null);
     password?: (string | null);
 };
@@ -153,6 +185,10 @@ export type LoginResetPasswordData = {
 
 export type LoginResetPasswordResponse = (Message);
 
+export type LoginLoginWithGoogleResponse = (unknown);
+
+export type LoginLoginWithGoogleCallbackResponse = (unknown);
+
 export type UsersReadUsersData = {
     limit?: number;
     skip?: number;
@@ -206,5 +242,25 @@ export type UsersDeleteUserData = {
 };
 
 export type UsersDeleteUserResponse = (Message);
+
+export type UsersGetUserRolesResponse = (Array<RoleEnum>);
+
+export type UsersAddUserRoleData = {
+    requestBody: RoleAdd;
+};
+
+export type UsersAddUserRoleResponse = (UserPublic);
+
+export type UsersRemoveUserRoleData = {
+    requestBody: RoleRemove;
+};
+
+export type UsersRemoveUserRoleResponse = (UserPublic);
+
+export type UsersSwitchUserRoleData = {
+    requestBody: RoleSwitch;
+};
+
+export type UsersSwitchUserRoleResponse = (UserPublic);
 
 export type UtilsHealthResponse = (boolean);

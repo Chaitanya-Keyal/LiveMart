@@ -4,7 +4,15 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import (
+    Item,
+    ItemCreate,
+    RoleEnum,
+    User,
+    UserCreate,
+    UserRole,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -12,6 +20,15 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
     )
     session.add(db_obj)
+    session.flush()
+
+    for role in user_create.roles:
+        user_role = UserRole(user_id=db_obj.id, role=role)
+        session.add(user_role)
+
+    if user_create.roles:
+        db_obj.active_role = user_create.roles[0]
+
     session.commit()
     session.refresh(db_obj)
     return db_obj
@@ -46,8 +63,60 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-    db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+def add_role_to_user(*, session: Session, user: User, role: RoleEnum) -> User:
+    """Add a role to a user if they don't already have it."""
+    if not user.has_role(role):
+        user_role = UserRole(user_id=user.id, role=role)
+        session.add(user_role)
+        if not user.active_role:
+            user.active_role = role
+        session.commit()
+        session.refresh(user)
+    return user
+
+
+def remove_role_from_user(*, session: Session, user: User, role: RoleEnum) -> User:
+    """Remove a role from a user."""
+    if role == RoleEnum.ADMIN:
+        raise ValueError("Cannot remove admin role")
+
+    for user_role in user.user_roles:
+        if user_role.role == role:
+            session.delete(user_role)
+
+            if user.active_role == role:
+                remaining_roles = [ur.role for ur in user.user_roles if ur.role != role]
+                user.active_role = remaining_roles[0] if remaining_roles else None
+
+            session.commit()
+            session.refresh(user)
+            break
+
+    return user
+
+
+def switch_active_role(*, session: Session, user: User, role: RoleEnum) -> User:
+    """Switch the user's active role."""
+    if not user.has_role(role):
+        raise ValueError(f"User does not have role: {role}")
+
+    user.active_role = role
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def create_item(
+    *,
+    session: Session,
+    item_in: ItemCreate,
+    owner_id: uuid.UUID,
+    role_context: RoleEnum,
+) -> Item:
+    db_item = Item.model_validate(
+        item_in, update={"owner_id": owner_id, "role_context": role_context}
+    )
     session.add(db_item)
     session.commit()
     session.refresh(db_item)
