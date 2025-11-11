@@ -189,18 +189,18 @@ async def login_with_google_callback(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = security.create_access_token(
+        user.id, expires_delta=access_token_expires
+    )
+
     # Redirect new users to role selection page
     if is_new_user:
-        access_token = security.create_access_token(user.id)
         return RedirectResponse(
             url=f"{settings.FRONTEND_HOST}/select-role?{urlencode({'token': access_token, 'new_user': 'true'})}",
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = security.create_access_token(
-        user.id, expires_delta=access_token_expires
-    )
     return RedirectResponse(
         url=f"{base_url}?{urlencode({'token': access_token})}",
         status_code=status.HTTP_303_SEE_OTHER,
