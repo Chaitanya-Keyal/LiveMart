@@ -4,12 +4,14 @@ import { createFileRoute } from "@tanstack/react-router"
 import Appearance from "@/components/UserSettings/Appearance"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
+import ManageRoles from "@/components/UserSettings/ManageRoles"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import useAuth from "@/hooks/useAuth"
 
 const tabsConfig = [
   { value: "my-profile", title: "My profile", component: UserInformation },
   { value: "password", title: "Password", component: ChangePassword },
+  { value: "roles", title: "Roles", component: ManageRoles },
   { value: "appearance", title: "Appearance", component: Appearance },
   { value: "danger-zone", title: "Danger zone", component: DeleteAccount },
 ]
@@ -19,9 +21,12 @@ export const Route = createFileRoute("/_layout/settings")({
 })
 
 function UserSettings() {
-  const { user: currentUser } = useAuth()
-  const finalTabs = currentUser?.is_superuser
-    ? tabsConfig.slice(0, 3)
+  const { user: currentUser, availableRoles } = useAuth()
+  const isAdmin = availableRoles.includes("admin")
+
+  // Admin users can't delete themselves, so exclude danger zone tab
+  const finalTabs = isAdmin
+    ? tabsConfig.slice(0, 4) // Exclude danger zone
     : tabsConfig
 
   if (!currentUser) {
