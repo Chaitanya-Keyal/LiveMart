@@ -173,15 +173,3 @@ Development URLs for the default `localhost` setup.
 * Adminer: [http://localhost:8080](http://localhost:8080)
 * Traefik UI: [http://localhost:8090](http://localhost:8090)
 * MailCatcher: [http://localhost:1080](http://localhost:1080)
-
-### Development URLs with a custom domain
-
-If you configure `DOMAIN=127.0.0.1.nip.io` (or any other wildcard domain pointing to `127.0.0.1`), Traefik will expose the services on subdomains.
-
-* Frontend: [http://dashboard.127.0.0.1.nip.io](http://dashboard.127.0.0.1.nip.io)
-* Backend: [http://api.127.0.0.1.nip.io](http://api.127.0.0.1.nip.io)
-* Swagger UI: [http://api.127.0.0.1.nip.io/docs](http://api.127.0.0.1.nip.io/docs)
-* ReDoc: [http://api.127.0.0.1.nip.io/redoc](http://api.127.0.0.1.nip.io/redoc)
-* Adminer: [http://127.0.0.1.nip.io:8080](http://127.0.0.1.nip.io:8080)
-* Traefik UI: [http://127.0.0.1.nip.io:8090](http://127.0.0.1.nip.io:8090)
-* MailCatcher: [http://127.0.0.1.nip.io:1080](http://127.0.0.1.nip.io:1080)

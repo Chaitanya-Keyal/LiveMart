@@ -114,6 +114,8 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        self.BACKEND_HOST = self.BACKEND_HOST.rstrip("/")
+        self.FRONTEND_HOST = self.FRONTEND_HOST.rstrip("/")
 
         return self
 
