@@ -1,3 +1,11 @@
+from .addresses import (
+    create_address,
+    delete_address,
+    get_address_for_user,
+    get_addresses_for_user,
+    set_active_address,
+    update_address,
+)
 from .items import create_item
 from .otp import create_otp, verify_otp
 from .users import (
@@ -18,6 +26,12 @@ __all__ = [
     "add_role_to_user",
     "remove_role_from_user",
     "switch_active_role",
+    "create_address",
+    "update_address",
+    "delete_address",
+    "get_addresses_for_user",
+    "get_address_for_user",
+    "set_active_address",
     "create_item",
     "create_otp",
     "verify_otp",

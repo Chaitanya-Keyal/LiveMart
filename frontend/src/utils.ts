@@ -1,6 +1,15 @@
 import type { ApiError } from "./client"
 import useCustomToast from "./hooks/useCustomToast"
 
+export const COORDINATE_PRECISION = 6
+export const DEFAULT_COORDINATE = {
+  lat: 17.545067,
+  lng: 78.571545,
+}
+
+export const roundCoordinate = (value: number) =>
+  Number(value.toFixed(COORDINATE_PRECISION))
+
 export const emailPattern = {
   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
   message: "Invalid email address",

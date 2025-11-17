@@ -8,9 +8,11 @@ from app.models.user import User, UserCreate, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
-    db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
+    db_obj = User(
+        **user_create.model_dump(exclude={"password"}),
     )
+    hashed_password = get_password_hash(user_create.password)
+    db_obj.hashed_password = hashed_password
     session.add(db_obj)
     session.flush()
 

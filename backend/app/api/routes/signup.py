@@ -53,10 +53,9 @@ def register_user(session: SessionDep, user_in: UserRegister) -> UserPublicWithT
         user.id, expires_delta=access_token_expires
     )
 
-    return UserPublicWithToken(
-        user=UserPublic(**user.model_dump(), roles=user.get_roles()),
-        access_token=access_token,
-    )
+    user_public = UserPublic.model_validate(user)
+    user_public.roles = user.get_roles()
+    return UserPublicWithToken(user=user_public, access_token=access_token)
 
 
 @router.post("/verify-email")
