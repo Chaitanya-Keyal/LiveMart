@@ -8,14 +8,16 @@ export const Route = createFileRoute("/oauth/google/callback")({
   validateSearch: (search) => {
     const token = typeof search.token === "string" ? search.token : null
     const error = typeof search.error === "string" ? search.error : null
-    return { token, error }
+    const new_user =
+      typeof search.new_user === "string" ? search.new_user : null
+    return { token, error, new_user }
   },
 })
 
 function OAuthCallback() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { token, error } = Route.useSearch()
+  const { token, error, new_user } = Route.useSearch()
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -30,7 +32,11 @@ function OAuthCallback() {
       if (token) {
         localStorage.setItem("access_token", token)
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] })
-        await navigate({ to: "/" })
+        if (new_user === "true") {
+          await navigate({ to: "/select-role", search: { token, new_user } })
+        } else {
+          await navigate({ to: "/" })
+        }
       } else {
         await navigate({
           to: "/login",
@@ -40,7 +46,7 @@ function OAuthCallback() {
     }
 
     handleCallback()
-  }, [error, navigate, queryClient.invalidateQueries, token])
+  }, [error, navigate, queryClient.invalidateQueries, token, new_user])
 
   return (
     <Container

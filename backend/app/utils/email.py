@@ -1,18 +1,14 @@
 import logging
+import secrets
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-import emails  # type: ignore
-import jwt
+import emails
 from jinja2 import Template
-from jwt.exceptions import InvalidTokenError
 
-from app.core import security
 from app.core.config import settings
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -22,27 +18,28 @@ class EmailData:
     subject: str
 
 
+def _templates_build_dir() -> Path:
+    return Path(__file__).resolve().parents[1] / "email-templates" / "build"
+
+
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
-    template_str = (
-        Path(__file__).parent / "email-templates" / "build" / template_name
-    ).read_text()
+    template_path = _templates_build_dir() / template_name
+    template_str = template_path.read_text()
     html_content = Template(template_str).render(context)
     return html_content
 
 
-def send_email(
-    *,
-    email_to: str,
-    subject: str = "",
-    html_content: str = "",
-) -> None:
+def send_email(*, email_to: str, subject: str = "", html_content: str = "") -> None:
     assert settings.emails_enabled, "no provided configuration for email variables"
     message = emails.Message(
         subject=subject,
         html=html_content,
         mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
     )
-    smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}
+    smtp_options: dict[str, Any] = {
+        "host": settings.SMTP_HOST,
+        "port": settings.SMTP_PORT,
+    }
     if settings.SMTP_TLS:
         smtp_options["tls"] = True
     elif settings.SMTP_SSL:
@@ -90,24 +87,32 @@ def generate_new_account_email(
     return EmailData(html_content=html_content, subject=subject)
 
 
-def generate_password_reset_token(email: str) -> str:
-    delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
-    now = datetime.now(UTC)
-    expires = now + delta
-    exp = expires.timestamp()
-    encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "sub": email},
-        settings.SECRET_KEY,
-        algorithm=security.ALGORITHM,
+def generate_otp() -> str:
+    return "".join([str(secrets.randbelow(10)) for _ in range(6)])
+
+
+def generate_otp_email(
+    email_to: str, username: str, code: str, purpose: str
+) -> EmailData:
+    project_name = settings.PROJECT_NAME
+
+    if purpose == "login":
+        subject = f"{project_name} - Your Login Code"
+        message = f"Your login code is: {code}"
+        valid_minutes = 10
+    else:
+        subject = f"{project_name} - Verify Your Email"
+        message = f"Your verification code is: {code}"
+        valid_minutes = 15
+
+    html_content = render_email_template(
+        template_name="otp.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "username": username,
+            "email": email_to,
+            "valid_minutes": valid_minutes,
+            "message": message,
+        },
     )
-    return encoded_jwt
-
-
-def verify_password_reset_token(token: str) -> str | None:
-    try:
-        decoded_token = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
-        )
-        return str(decoded_token["sub"])
-    except InvalidTokenError:
-        return None
+    return EmailData(html_content=html_content, subject=subject)

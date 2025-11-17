@@ -12,8 +12,8 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
-from app.models import RoleEnum
 from app.models.common import Message
+from app.models.role import RoleEnum
 from app.models.user import (
     RoleAdd,
     RoleRemove,
@@ -22,7 +22,6 @@ from app.models.user import (
     User,
     UserCreate,
     UserPublic,
-    UserRegister,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
@@ -145,34 +144,6 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     session.add(current_user)
     session.commit()
     return Message(message="User account deactivated successfully")
-
-
-@router.post("/signup", response_model=UserPublic)
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
-    """
-    Create new user without the need to be logged in.
-    """
-    if RoleEnum.ADMIN in user_in.roles:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot sign up with admin role",
-        )
-
-    user = crud.get_user_by_email(session=session, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system",
-        )
-
-    user_create = UserCreate(
-        email=user_in.email,
-        password=user_in.password,
-        full_name=user_in.full_name,
-        roles=user_in.roles,
-    )
-    user = crud.create_user(session=session, user_create=user_create)
-    return user
 
 
 @router.get("/{user_id}", response_model=UserPublic)

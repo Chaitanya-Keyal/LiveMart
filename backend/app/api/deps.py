@@ -11,7 +11,9 @@ from sqlmodel import Session
 from app.core import security
 from app.core.config import settings
 from app.core.db import engine
-from app.models import RoleEnum, TokenPayload, User
+from app.models.common import TokenPayload
+from app.models.role import RoleEnum
+from app.models.user import User
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
@@ -27,7 +29,7 @@ SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-def get_current_user(session: SessionDep, token: TokenDep) -> User:
+def _get_current_user_unverified(session: SessionDep, token: TokenDep) -> User:
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
@@ -46,7 +48,15 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     return user
 
 
+def get_current_user(session: SessionDep, token: TokenDep) -> User:
+    user = _get_current_user_unverified(session, token)
+    if not getattr(user, "email_verified", False):
+        raise HTTPException(status_code=400, detail="Email not verified")
+    return user
+
+
 CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentUserUnverified = Annotated[User, Depends(_get_current_user_unverified)]
 
 
 def require_role(*allowed_roles: RoleEnum):

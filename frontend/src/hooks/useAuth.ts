@@ -11,8 +11,10 @@ import {
   type RoleRemove,
   type RoleSwitch,
   type UserPublic,
+  type UserPublicWithToken,
   type UserRegister,
   UsersService,
+  UsersSignupService,
 } from "@/client"
 import { handleError } from "@/utils"
 
@@ -31,15 +33,21 @@ const useAuth = () => {
   const { data: user } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
     queryFn: UsersService.readUserMe,
-    enabled: isLoggedIn(),
+    enabled: isLoggedIn() && localStorage.getItem("email_verified") === "true",
+    retry: false,
   })
 
   const signUpMutation = useMutation({
     mutationFn: (data: UserRegister) =>
-      UsersService.registerUser({ requestBody: data }),
+      UsersSignupService.registerUser({ requestBody: data }),
 
-    onSuccess: () => {
-      navigate({ to: "/login", search: () => loginParams })
+    onSuccess: (response: UserPublicWithToken) => {
+      // Store the access token and pending email for verification
+      localStorage.setItem("access_token", response.access_token)
+      localStorage.setItem("pending_email", response.user.email)
+      // Do NOT attempt to fetch current user yet (requires verified email)
+      // Navigate to verify email page
+      navigate({ to: "/verify-email" })
     },
     onError: (err: ApiError) => {
       handleError(err)
@@ -76,7 +84,14 @@ const useAuth = () => {
 
   const logout = () => {
     localStorage.removeItem("access_token")
+    localStorage.removeItem("pending_email")
+    localStorage.removeItem("email_verified")
     navigate({ to: "/login", search: () => loginParams })
+  }
+
+  const loginWithToken = async (token: string) => {
+    localStorage.setItem("access_token", token)
+    await queryClient.invalidateQueries({ queryKey: ["currentUser"] })
   }
 
   // Role management
@@ -119,6 +134,7 @@ const useAuth = () => {
     signUpMutation,
     loginMutation,
     logout,
+    loginWithToken,
     user,
     error,
     resetError: () => setError(null),
@@ -128,6 +144,8 @@ const useAuth = () => {
     removeRoleMutation,
     activeRole: user?.active_role,
     availableRoles: user?.roles || [],
+    isEmailVerified: localStorage.getItem("email_verified") === "true",
+    pendingEmail: localStorage.getItem("pending_email"),
   }
 }
 

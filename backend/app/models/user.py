@@ -56,6 +56,7 @@ class User(TimestampModel, table=True):
     is_active: bool = SQLField(default=True)
     full_name: str | None = SQLField(default=None, max_length=255)
     active_role: RoleEnum | None = SQLField(default=None)
+    email_verified: bool = SQLField(default=False)
 
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     user_roles: list["UserRole"] = Relationship(
@@ -77,6 +78,13 @@ class UserPublic(UserBase):
     active_role: RoleEnum | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class UserPublicWithToken(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    user: UserPublic
+    access_token: str
+    token_type: str = "bearer"
 
 
 class UsersPublic(BaseModel):

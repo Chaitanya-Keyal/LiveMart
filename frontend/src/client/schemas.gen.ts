@@ -228,6 +228,36 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const OTPCreateSchema = {
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email',
+            title: 'Email'
+        }
+    },
+    type: 'object',
+    required: ['email'],
+    title: 'OTPCreate'
+} as const;
+
+export const OTPVerifySchema = {
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email',
+            title: 'Email'
+        },
+        code: {
+            type: 'string',
+            title: 'Code'
+        }
+    },
+    type: 'object',
+    required: ['email', 'code'],
+    title: 'OTPVerify'
+} as const;
+
 export const RoleAddSchema = {
     properties: {
         role: {
@@ -414,6 +444,27 @@ export const UserPublicSchema = {
     type: 'object',
     required: ['email', 'id', 'created_at', 'updated_at'],
     title: 'UserPublic'
+} as const;
+
+export const UserPublicWithTokenSchema = {
+    properties: {
+        user: {
+            '$ref': '#/components/schemas/UserPublic'
+        },
+        access_token: {
+            type: 'string',
+            title: 'Access Token'
+        },
+        token_type: {
+            type: 'string',
+            title: 'Token Type',
+            default: 'bearer'
+        }
+    },
+    type: 'object',
+    required: ['user', 'access_token'],
+    title: 'UserPublicWithToken',
+    description: 'User public info with access token for signup flow.'
 } as const;
 
 export const UserRegisterSchema = {

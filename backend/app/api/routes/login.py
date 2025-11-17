@@ -13,10 +13,12 @@ from app.api.deps import SessionDep
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.models import RoleEnum
 from app.models.common import Message, NewPassword, Token
+from app.models.otp import OTPCreate, OTPPurpose, OTPVerify
+from app.models.role import RoleEnum
 from app.models.user import UserCreate
 from app.utils import (
+    generate_otp_email,
     generate_password_reset_token,
     generate_reset_password_email,
     send_email,
@@ -27,6 +29,8 @@ router = APIRouter(tags=["login"])
 
 _oauth = OAuth()
 OAUTH_CALLBACK_PATH = "/oauth/google/callback"
+
+INACTIVE_USER_MSG = "Inactive user"
 
 
 def _get_google_client():
@@ -61,7 +65,7 @@ def login_access_token(
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail=INACTIVE_USER_MSG)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
@@ -83,9 +87,7 @@ def recover_password(email: str, session: SessionDep) -> Message:
             detail="The user with this email does not exist in the system.",
         )
     password_reset_token = generate_password_reset_token(email=email)
-    email_data = generate_reset_password_email(
-        email_to=user.email, email=email, token=password_reset_token
-    )
+    email_data = generate_reset_password_email(user.email, email, password_reset_token)
     send_email(
         email_to=user.email,
         subject=email_data.subject,
@@ -109,7 +111,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
             detail="The user with this email does not exist in the system.",
         )
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail=INACTIVE_USER_MSG)
     hashed_password = get_password_hash(password=body.new_password)
     user.hashed_password = hashed_password
     session.add(user)
@@ -182,6 +184,10 @@ async def login_with_google_callback(
             roles=[RoleEnum.CUSTOMER],  # Default role for OAuth users
         )
         user = crud.create_user(session=session, user_create=user_create)
+        if hasattr(user, "email_verified") and not user.email_verified:
+            user.email_verified = True
+            session.add(user)
+            session.commit()
         is_new_user = True
     elif not user.is_active:
         return RedirectResponse(
@@ -204,4 +210,74 @@ async def login_with_google_callback(
     return RedirectResponse(
         url=f"{base_url}?{urlencode({'token': access_token})}",
         status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@router.post("/login/otp/request")
+def request_login_otp(body: OTPCreate, session: SessionDep) -> Message:
+    """
+    Request OTP for email-based login.
+    """
+    user = crud.get_user_by_email(session=session, email=body.email)
+
+    if not user:
+        return Message(message="If the email exists, an OTP has been sent")
+
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail=INACTIVE_USER_MSG)
+
+    otp = crud.create_otp(
+        session=session,
+        user_id=user.id,
+        purpose=OTPPurpose.LOGIN,
+        expiry_minutes=10,
+    )
+
+    if settings.emails_enabled:
+        email_data = generate_otp_email(
+            email_to=user.email,
+            username=user.email,
+            code=otp.code,
+            purpose="login",
+        )
+        send_email(
+            email_to=user.email,
+            subject=email_data.subject,
+            html_content=email_data.html_content,
+        )
+
+    return Message(message="If the email exists, an OTP has been sent")
+
+
+@router.post("/login/otp/verify")
+def verify_login_otp(body: OTPVerify, session: SessionDep) -> Token:
+    """
+    Verify OTP and login.
+    """
+    user = crud.get_user_by_email(session=session, email=body.email)
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+
+    is_valid = crud.verify_otp(
+        session=session,
+        user_id=user.id,
+        code=body.code,
+        purpose=OTPPurpose.LOGIN,
+    )
+
+    if not is_valid:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired OTP code",
+        )
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        )
     )
