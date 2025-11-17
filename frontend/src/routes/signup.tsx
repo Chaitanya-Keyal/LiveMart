@@ -78,6 +78,8 @@ function SignUp() {
   })
 
   const onSubmit: SubmitHandler<UserRegisterForm> = (data) => {
+    // Guard against duplicate submissions while the mutation is in flight
+    if (signUpMutation.isPending) return
     signUpMutation.mutate({
       ...data,
       roles: selectedRoles as RoleEnum[],
@@ -213,7 +215,7 @@ function SignUp() {
             <Button
               variant="solid"
               type="submit"
-              loading={isSubmitting}
+              loading={isSubmitting || signUpMutation.isPending}
               size="lg"
               mt={2}
             >
