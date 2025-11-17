@@ -108,6 +108,11 @@ services:
     networks:
       - traefik-public
       - default
+    env_file:
+      - .env
+    environment:
+      - VITE_API_URL=https://api.${DOMAIN?Variable not set}
+      - VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
     build:
       context: ./frontend
       args:

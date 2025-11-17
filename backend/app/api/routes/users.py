@@ -47,12 +47,12 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     statement = select(User).offset(skip).limit(limit)
     users = session.exec(statement).all()
 
-    return UsersPublic(
-        data=[
-            UserPublic(**user.model_dump(), roles=user.get_roles()) for user in users
-        ],
-        count=count,
-    )
+    data = []
+    for user in users:
+        up = UserPublic.model_validate(user)
+        up.roles = user.get_roles()
+        data.append(up)
+    return UsersPublic(data=data, count=count)
 
 
 @router.post("/", dependencies=[Depends(require_admin)], response_model=UserPublic)
@@ -127,7 +127,9 @@ def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
-    return UserPublic(**current_user.model_dump(), roles=current_user.get_roles())
+    user_public = UserPublic.model_validate(current_user)
+    user_public.roles = current_user.get_roles()
+    return user_public
 
 
 @router.delete("/me", response_model=Message)
@@ -164,7 +166,9 @@ def read_user_by_id(
             status_code=403,
             detail="The user doesn't have enough privileges",
         )
-    return UserPublic(**user.model_dump(), roles=user.get_roles())
+    user_public = UserPublic.model_validate(user)
+    user_public.roles = user.get_roles()
+    return user_public
 
 
 @router.patch(

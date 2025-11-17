@@ -3,7 +3,103 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+
+export class AddressesService {
+    /**
+     * List Addresses
+     * @returns AddressPublic Successful Response
+     * @throws ApiError
+     */
+    public static listAddresses(): CancelablePromise<AddressesListAddressesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/me/addresses/'
+        });
+    }
+    
+    /**
+     * Create Address
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns AddressPublic Successful Response
+     * @throws ApiError
+     */
+    public static createAddress(data: AddressesCreateAddressData): CancelablePromise<AddressesCreateAddressResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/me/addresses/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Address
+     * @param data The data for the request.
+     * @param data.addressId
+     * @param data.requestBody
+     * @returns AddressPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateAddress(data: AddressesUpdateAddressData): CancelablePromise<AddressesUpdateAddressResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/users/me/addresses/{address_id}',
+            path: {
+                address_id: data.addressId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Address
+     * @param data The data for the request.
+     * @param data.addressId
+     * @returns void Successful Response
+     * @throws ApiError
+     */
+    public static deleteAddress(data: AddressesDeleteAddressData): CancelablePromise<AddressesDeleteAddressResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/users/me/addresses/{address_id}',
+            path: {
+                address_id: data.addressId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Set Active Address
+     * @param data The data for the request.
+     * @param data.addressId
+     * @returns AddressPublic Successful Response
+     * @throws ApiError
+     */
+    public static setActiveAddress(data: AddressesSetActiveAddressData): CancelablePromise<AddressesSetActiveAddressResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/users/me/addresses/{address_id}/set-active',
+            path: {
+                address_id: data.addressId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**

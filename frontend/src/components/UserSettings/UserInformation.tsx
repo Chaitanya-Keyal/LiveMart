@@ -5,6 +5,7 @@ import {
   Flex,
   Heading,
   Input,
+  Separator,
   Text,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -21,6 +22,7 @@ import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { emailPattern, handleError } from "@/utils"
 import { Field } from "../ui/field"
+import ManageAddresses from "./ManageAddresses"
 
 const UserInformation = () => {
   const queryClient = useQueryClient()
@@ -90,7 +92,7 @@ const UserInformation = () => {
             <Text
               fontSize="md"
               py={2}
-              color={!currentUser?.full_name ? "gray" : "inherit"}
+              color={currentUser?.full_name ? "inherit" : "gray"}
               truncate
               maxW="sm"
             >
@@ -141,6 +143,8 @@ const UserInformation = () => {
           )}
         </Flex>
       </Box>
+      <Separator my={10} />
+      <ManageAddresses />
     </Container>
   )
 }
