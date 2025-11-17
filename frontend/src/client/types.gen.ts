@@ -50,6 +50,15 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type OTPCreate = {
+    email: string;
+};
+
+export type OTPVerify = {
+    email: string;
+    code: string;
+};
+
 /**
  * Request to add a role to user.
  */
@@ -103,6 +112,15 @@ export type UserPublic = {
     active_role?: (RoleEnum | null);
     created_at: string;
     updated_at: string;
+};
+
+/**
+ * User public info with access token for signup flow.
+ */
+export type UserPublicWithToken = {
+    user: UserPublic;
+    access_token: string;
+    token_type?: string;
 };
 
 export type UserRegister = {
@@ -189,6 +207,18 @@ export type LoginLoginWithGoogleResponse = (unknown);
 
 export type LoginLoginWithGoogleCallbackResponse = (unknown);
 
+export type LoginRequestLoginOtpData = {
+    requestBody: OTPCreate;
+};
+
+export type LoginRequestLoginOtpResponse = (Message);
+
+export type LoginVerifyLoginOtpData = {
+    requestBody: OTPVerify;
+};
+
+export type LoginVerifyLoginOtpResponse = (Token);
+
 export type UsersReadUsersData = {
     limit?: number;
     skip?: number;
@@ -217,12 +247,6 @@ export type UsersUpdatePasswordMeData = {
 };
 
 export type UsersUpdatePasswordMeResponse = (Message);
-
-export type UsersRegisterUserData = {
-    requestBody: UserRegister;
-};
-
-export type UsersRegisterUserResponse = (UserPublic);
 
 export type UsersReadUserByIdData = {
     userId: string;
@@ -262,5 +286,19 @@ export type UsersSwitchUserRoleData = {
 };
 
 export type UsersSwitchUserRoleResponse = (UserPublic);
+
+export type UsersSignupRegisterUserData = {
+    requestBody: UserRegister;
+};
+
+export type UsersSignupRegisterUserResponse = (UserPublicWithToken);
+
+export type UsersSignupVerifyEmailData = {
+    requestBody: OTPVerify;
+};
+
+export type UsersSignupVerifyEmailResponse = (Message);
+
+export type UsersSignupResendVerificationOtpResponse = (Message);
 
 export type UtilsHealthResponse = (boolean);

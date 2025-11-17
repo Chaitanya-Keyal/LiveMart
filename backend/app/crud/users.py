@@ -1,18 +1,10 @@
-import uuid
 from typing import Any
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import (
-    Item,
-    ItemCreate,
-    RoleEnum,
-    User,
-    UserCreate,
-    UserRole,
-    UserUpdate,
-)
+from app.models.role import RoleEnum, UserRole
+from app.models.user import User, UserCreate, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -105,19 +97,3 @@ def switch_active_role(*, session: Session, user: User, role: RoleEnum) -> User:
     session.commit()
     session.refresh(user)
     return user
-
-
-def create_item(
-    *,
-    session: Session,
-    item_in: ItemCreate,
-    owner_id: uuid.UUID,
-    role_context: RoleEnum,
-) -> Item:
-    db_item = Item.model_validate(
-        item_in, update={"owner_id": owner_id, "role_context": role_context}
-    )
-    session.add(db_item)
-    session.commit()
-    session.refresh(db_item)
-    return db_item

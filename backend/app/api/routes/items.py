@@ -6,9 +6,9 @@ from sqlmodel import func, select
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep
-from app.models import RoleEnum
 from app.models.common import Message
 from app.models.item import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
+from app.models.role import RoleEnum
 
 router = APIRouter(prefix="/items", tags=["items"])
 
