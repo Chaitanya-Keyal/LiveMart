@@ -114,9 +114,6 @@ export type UserPublic = {
     updated_at: string;
 };
 
-/**
- * User public info with access token for signup flow.
- */
 export type UserPublicWithToken = {
     user: UserPublic;
     access_token: string;

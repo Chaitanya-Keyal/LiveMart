@@ -28,4 +28,6 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+RUN chmod +x /app/scripts/start-with-prestart.sh
+
+CMD ["/app/scripts/start-with-prestart.sh"]

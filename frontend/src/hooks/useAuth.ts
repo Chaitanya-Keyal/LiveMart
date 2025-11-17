@@ -33,7 +33,7 @@ const useAuth = () => {
   const { data: user } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
     queryFn: UsersService.readUserMe,
-    enabled: isLoggedIn() && localStorage.getItem("email_verified") === "true",
+    enabled: isLoggedIn(),
     retry: false,
   })
 

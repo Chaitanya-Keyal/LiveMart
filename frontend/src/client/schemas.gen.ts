@@ -463,8 +463,7 @@ export const UserPublicWithTokenSchema = {
     },
     type: 'object',
     required: ['user', 'access_token'],
-    title: 'UserPublicWithToken',
-    description: 'User public info with access token for signup flow.'
+    title: 'UserPublicWithToken'
 } as const;
 
 export const UserRegisterSchema = {
