@@ -26,8 +26,7 @@ def get_address_for_user(
 def create_address(
     *, session: Session, user: User, address_in: AddressCreate
 ) -> Address:
-    db_address = Address.model_validate(address_in)
-    db_address.user_id = user.id
+    db_address = Address.model_validate(address_in, update={"user_id": user.id})
     session.add(db_address)
     session.flush()
 
