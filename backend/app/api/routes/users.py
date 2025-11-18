@@ -132,22 +132,6 @@ def read_user_me(current_user: CurrentUser) -> Any:
     return user_public
 
 
-@router.delete("/me", response_model=Message)
-def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
-    """
-    Deactivate own user account.
-    """
-    if current_user.has_role(RoleEnum.ADMIN):
-        raise HTTPException(
-            status_code=403,
-            detail="Admin users are not allowed to deactivate themselves",
-        )
-    current_user.is_active = False
-    session.add(current_user)
-    session.commit()
-    return Message(message="User account deactivated successfully")
-
-
 @router.get("/{user_id}", response_model=UserPublic)
 def read_user_by_id(
     user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser

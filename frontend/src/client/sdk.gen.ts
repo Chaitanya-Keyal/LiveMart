@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
 
 export class AddressesService {
     /**
@@ -395,19 +395,6 @@ export class UsersService {
     public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/users/me'
-        });
-    }
-    
-    /**
-     * Delete User Me
-     * Deactivate own user account.
-     * @returns Message Successful Response
-     * @throws ApiError
-     */
-    public static deleteUserMe(): CancelablePromise<UsersDeleteUserMeResponse> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
             url: '/api/v1/users/me'
         });
     }

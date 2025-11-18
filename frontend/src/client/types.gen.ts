@@ -307,8 +307,6 @@ export type UsersCreateUserResponse = (UserPublic);
 
 export type UsersReadUserMeResponse = (UserPublic);
 
-export type UsersDeleteUserMeResponse = (Message);
-
 export type UsersUpdateUserMeData = {
     requestBody: UserUpdateMe;
 };
