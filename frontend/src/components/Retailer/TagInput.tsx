@@ -126,12 +126,12 @@ export const TagInput = ({ value, onChange }: TagInputProps) => {
             right={0}
             zIndex={10}
             mt={1}
-            bg="white"
-            borderWidth={1}
-            borderRadius="md"
-            boxShadow="lg"
-            maxH="200px"
-            overflowY="auto"
+            bg="bg"
+            borderWidth="1px"
+            borderColor="border"
+            borderRadius="l2"
+            shadow="sm"
+            overflow="hidden"
           >
             <VStack align="stretch" p={2} gap={1}>
               {filteredSuggestions.slice(0, 8).map((tag) => (
@@ -140,8 +140,8 @@ export const TagInput = ({ value, onChange }: TagInputProps) => {
                   px={3}
                   py={2}
                   cursor="pointer"
-                  borderRadius="md"
-                  _hover={{ bg: "gray.100" }}
+                  borderRadius="none"
+                  _hover={{ bg: "bg.subtle" }}
                   onClick={() => handleSuggestionClick(tag)}
                 >
                   {tag}

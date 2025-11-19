@@ -32,31 +32,57 @@ interface UseProductsOptions {
   isActive?: boolean
   skip?: number
   limit?: number
+  // New filters
+  search?: string | null
+  brands?: string[] | null
+  inStockOnly?: boolean | null
+  minPrice?: number | null
+  maxPrice?: number | null
+  latitude?: number | null
+  longitude?: number | null
+  radiusKm?: number | null
+  sortBy?: "newest" | "price_asc" | "price_desc" | "distance_asc" | null
 }
 
 export const useProducts = (options: UseProductsOptions = {}) => {
-  const { data, isPending, isFetching } = useQuery<ProductsPublic, ApiError>({
+  const { data, isPending } = useQuery<ProductsPublic, ApiError>({
     queryKey: ["products", options],
-    queryFn: () =>
-      ProductsService.listProducts({
+    queryFn: () => {
+      const request = {
         category: options.category ?? null,
         sellerType: options.sellerType ?? null,
         sellerId: options.sellerId ?? null,
-        tags: options.tags
-          ? Array.isArray(options.tags)
+        tags:
+          options.tags && options.tags.length > 0
             ? options.tags.join(",")
-            : options.tags
-          : null,
+            : null,
         isActive: options.isActive,
         skip: options.skip,
         limit: options.limit,
-      }),
+        search: options.search ?? null,
+        brands:
+          options.brands && options.brands.length > 0
+            ? options.brands.join(",")
+            : null,
+        inStockOnly: options.inStockOnly ?? null,
+        minPrice: options.minPrice ?? null,
+        maxPrice: options.maxPrice ?? null,
+        latitude: options.latitude ?? null,
+        longitude: options.longitude ?? null,
+        radiusKm: options.radiusKm ?? null,
+        sortBy: options.sortBy ?? null,
+      } satisfies Parameters<typeof ProductsService.listProducts>[0]
+      return ProductsService.listProducts(request)
+    },
+    placeholderData: (prev) => prev,
+    staleTime: 10_000,
   })
 
   return {
     products: data?.data ?? [],
     count: data?.count ?? 0,
-    isLoading: isPending || isFetching,
+    // Avoid flashing skeletons on refetch; keep previous data rendering
+    isLoading: isPending,
   }
 }
 

@@ -8,8 +8,10 @@ from .addresses import (
 )
 from .otp import create_otp, verify_otp
 from .products import (
+    autocomplete_products,
     create_product,
     delete_product,
+    get_address_coords,
     get_product_by_id,
     get_product_by_seller_and_sku,
     get_products,
@@ -53,4 +55,6 @@ __all__ = [
     "delete_product",
     "update_product_images",
     "update_pricing_tier",
+    "get_address_coords",
+    "autocomplete_products",
 ]

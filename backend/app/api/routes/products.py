@@ -1,5 +1,6 @@
 import uuid
-from typing import Annotated, Any
+from decimal import Decimal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
@@ -20,6 +21,7 @@ from app.models.product import (
 )
 from app.models.role import RoleEnum
 from app.utils import images as image_utils
+from app.utils.location import annotate_distances
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -53,11 +55,26 @@ def list_products(
     seller_id: uuid.UUID | None = None,
     tags: str | None = None,  # Comma-separated tags
     is_active: bool = True,
+    search: str | None = None,
+    brands: str | None = None,  # comma separated
+    in_stock_only: bool | None = None,
+    min_price: Decimal | None = None,
+    max_price: Decimal | None = None,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    radius_km: float | None = None,
+    sort_by: Literal["newest", "price_asc", "price_desc", "distance_asc"] | None = None,
 ) -> Any:
     """
     List products with filters.
     """
     tag_list = [tag.strip() for tag in tags.split(",")] if tags else None
+
+    buyer_type = (
+        BuyerType.RETAILER
+        if (current_user and current_user.active_role == RoleEnum.RETAILER)
+        else BuyerType.CUSTOMER
+    )
 
     products, count = crud.get_products(
         session=session,
@@ -68,11 +85,77 @@ def list_products(
         seller_id=seller_id,
         tags=tag_list,
         is_active=is_active,
+        search=search,
+        brands=[b.strip() for b in brands.split(",")] if brands else None,
+        in_stock_only=in_stock_only,
+        min_price=min_price,
+        max_price=max_price,
+        buyer_type=buyer_type,
+        latitude=latitude,
+        longitude=longitude,
+        radius_km=radius_km,
+        sort_by=sort_by,
     )
 
-    products_public = [ProductPublic.from_product(p) for p in products]
+    products_public: list[ProductPublic] = []
+    if latitude is not None and longitude is not None:
+        addr_map: dict[uuid.UUID, tuple[float | None, float | None]] = {}
+        address_ids = [p.address_id for p in products if p.address_id]
+        if address_ids:
+            addr_map = crud.get_address_coords(session=session, address_ids=address_ids)
+
+        # For products without an address, fallback to seller's active address
+        seller_ids_missing = [p.seller_id for p in products if not p.address_id]
+        user_active_map: dict[uuid.UUID, tuple[float | None, float | None]] = {}
+        if seller_ids_missing:
+            user_active_map = crud.get_users_active_address_coords(
+                session=session, user_ids=seller_ids_missing
+            )
+
+        items_with_coords = []
+        for p in products:
+            if p.address_id:
+                lat, lon = addr_map.get(p.address_id, (None, None))
+            else:
+                lat, lon = user_active_map.get(p.seller_id, (None, None))
+            items_with_coords.append((p, lat, lon))
+        with_dist = annotate_distances(items_with_coords, latitude, longitude)
+        if sort_by == "distance_asc":
+            with_dist.sort(key=lambda t: (t[1] is None, t[1] or 0.0))
+
+        for prod, dist in with_dist:
+            products_public.append(
+                ProductPublic.from_product(
+                    prod,
+                    buyer_type=buyer_type,
+                    distance_km=(round(dist, 2) if dist is not None else None),
+                )
+            )
+    else:
+        products_public = [
+            ProductPublic.from_product(p, buyer_type=buyer_type) for p in products
+        ]
 
     return ProductsPublic(data=products_public, count=count)
+
+
+@router.get("/search/autocomplete", response_model=list[str])
+def autocomplete_products(
+    session: SessionDep,
+    q: str,
+    limit: int = 10,
+    seller_type: SellerType | None = None,
+    category: CategoryEnum | None = None,
+    is_active: bool = True,
+) -> list[str]:
+    return crud.autocomplete_products(
+        session=session,
+        q=q,
+        limit=limit,
+        seller_type=seller_type,
+        category=category,
+        is_active=is_active,
+    )
 
 
 @router.get("/{product_id}", response_model=ProductPublic)
@@ -125,6 +208,17 @@ def create_product(
                 status_code=400,
                 detail=f"Product with SKU '{product_in.sku}' already exists for this seller",
             )
+
+    chosen_address_id = product_in.address_id or current_seller.active_address_id
+    if chosen_address_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Seller must have an active address or provide address_id",
+        )
+    if not current_seller.has_address(chosen_address_id):
+        raise HTTPException(status_code=400, detail="Invalid address_id for seller")
+
+    product_in.address_id = chosen_address_id
 
     try:
         product = crud.create_product(

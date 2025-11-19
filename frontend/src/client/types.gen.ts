@@ -96,10 +96,12 @@ export type ProductCreate = {
     description?: (string | null);
     category: CategoryEnum;
     tags?: Array<(string)>;
+    brand?: (string | null);
     sku?: (string | null);
     images?: Array<ProductImageSchema>;
     pricing_tiers: Array<ProductPricingCreate>;
     initial_stock?: number;
+    address_id?: (string | null);
 };
 
 export type ProductImageSchema = {
@@ -155,6 +157,7 @@ export type ProductPublic = {
     description?: (string | null);
     category: CategoryEnum;
     tags?: Array<(string)>;
+    brand?: (string | null);
     id: string;
     seller_id: string;
     seller_type: SellerType;
@@ -164,6 +167,8 @@ export type ProductPublic = {
     pricing_tiers?: Array<ProductPricingPublic>;
     inventory?: (ProductInventoryPublic | null);
     primary_image?: (string | null);
+    address_id?: (string | null);
+    distance_km?: (number | null);
     created_at: string;
     updated_at: string;
 };
@@ -181,6 +186,8 @@ export type ProductUpdate = {
     is_active?: (boolean | null);
     sku?: (string | null);
     pricing_tier?: (ProductPricingUpdate | null);
+    brand?: (string | null);
+    address_id?: (string | null);
 };
 
 /**
@@ -339,12 +346,21 @@ export type LoginVerifyLoginOtpData = {
 export type LoginVerifyLoginOtpResponse = (Token);
 
 export type ProductsListProductsData = {
+    brands?: (string | null);
     category?: (CategoryEnum | null);
+    inStockOnly?: (boolean | null);
     isActive?: boolean;
+    latitude?: (number | null);
     limit?: number;
+    longitude?: (number | null);
+    maxPrice?: (number | string | null);
+    minPrice?: (number | string | null);
+    radiusKm?: (number | null);
+    search?: (string | null);
     sellerId?: (string | null);
     sellerType?: (SellerType | null);
     skip?: number;
+    sortBy?: ('newest' | 'price_asc' | 'price_desc' | 'distance_asc' | null);
     tags?: (string | null);
 };
 
@@ -355,6 +371,16 @@ export type ProductsCreateProductData = {
 };
 
 export type ProductsCreateProductResponse = (ProductPublic);
+
+export type ProductsAutocompleteProductsData = {
+    category?: (CategoryEnum | null);
+    isActive?: boolean;
+    limit?: number;
+    q: string;
+    sellerType?: (SellerType | null);
+};
+
+export type ProductsAutocompleteProductsResponse = (Array<(string)>);
 
 export type ProductsGetProductData = {
     productId: string;

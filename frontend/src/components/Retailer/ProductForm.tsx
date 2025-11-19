@@ -4,6 +4,7 @@ import {
   Button,
   createListCollection,
   Flex,
+  HStack,
   IconButton,
   Image,
   Input,
@@ -16,12 +17,13 @@ import {
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { FiUpload, FiX } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiUpload, FiX } from "react-icons/fi"
 import type {
   BuyerType,
   CategoryEnum,
   ProductCreate,
   ProductPublic,
+  ProductUpdate,
 } from "@/client"
 import { ProductsService } from "@/client"
 import { Field } from "@/components/ui/field"
@@ -32,6 +34,7 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "@/components/ui/select"
+import useAddresses from "@/hooks/useAddresses"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import {
@@ -56,6 +59,8 @@ type ProductFormValues = {
   description?: string
   category: CategoryEnum
   tags: string[]
+  brand?: string
+  address_id?: string
   sku?: string
   price: number | string
   min_quantity?: number
@@ -99,6 +104,7 @@ export const ProductForm = ({
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { activeRole } = useAuth()
   const createProductMutation = useCreateProduct()
+  const { addresses } = useAddresses()
   const updateProductMutation = useUpdateProduct()
   const uploadImageMutation = useUploadImage()
   const deleteImageMutation = useDeleteImage()
@@ -142,6 +148,8 @@ export const ProductForm = ({
       description: product?.description || "",
       category: product?.category || "electronics",
       tags: product?.tags || [],
+      brand: (product as any)?.brand || "",
+      address_id: (product as any)?.address_id || "",
       sku: product?.sku || "",
       price: existingPricingTier
         ? parseFloat(existingPricingTier.price) || 0
@@ -315,6 +323,44 @@ export const ProductForm = ({
     fileInputRef.current?.click()
   }
 
+  const moveExistingImage = (index: number, direction: "left" | "right") => {
+    setExistingImages((prev) => {
+      const visible = prev.filter((img) => !deletedImagePaths.has(img.path))
+      const all = [...prev]
+      // Map visible index to actual index in all
+      const actualIndex = prev.findIndex(
+        (img) => img.path === visible[index]?.path,
+      )
+      if (actualIndex === -1) return prev
+      const targetIndex =
+        direction === "left" ? actualIndex - 1 : actualIndex + 1
+      if (
+        targetIndex < 0 ||
+        targetIndex >= prev.length ||
+        deletedImagePaths.has(prev[targetIndex].path)
+      ) {
+        return prev
+      }
+      const swapped = [...all]
+      const tmp = swapped[actualIndex]
+      swapped[actualIndex] = swapped[targetIndex]
+      swapped[targetIndex] = tmp
+
+      // Maintain primary selection relative to movement
+      if (primaryImageIndex !== null) {
+        const visBefore = prev.filter((i) => !deletedImagePaths.has(i.path))
+        const oldPrimaryPath = visBefore[primaryImageIndex]?.path
+        const visAfter = swapped.filter((i) => !deletedImagePaths.has(i.path))
+        const newPrimaryIdx = visAfter.findIndex(
+          (i) => i.path === oldPrimaryPath,
+        )
+        if (newPrimaryIdx !== -1) setPrimaryImageIndex(newPrimaryIdx)
+      }
+
+      return swapped
+    })
+  }
+
   const removeImage = (index: number) => {
     const currentFiles = watch("imageFiles")
     const newFiles = currentFiles.filter((_, i) => i !== index)
@@ -389,12 +435,15 @@ export const ProductForm = ({
       if (isEditMode && product) {
         // Update product - Note: ProductUpdate doesn't support pricing_tiers
         // We'll need to handle pricing updates separately if needed
-        const updateData = {
+        const updateData: ProductUpdate = {
           name: data.name,
           description: data.description || null,
           category: data.category,
           tags: data.tags,
           sku: data.sku || null,
+          brand: data.brand || null,
+          // Prefer user's selection; backend fallback to active address if empty
+          address_id: data.address_id || undefined,
           pricing_tier: {
             price: priceValue,
             min_quantity: data.min_quantity ?? null,
@@ -442,6 +491,8 @@ export const ProductForm = ({
           category: data.category,
           tags: data.tags,
           sku: data.sku || null,
+          brand: data.brand || null,
+          address_id: data.address_id || undefined,
           pricing_tiers: [
             {
               buyer_type: buyerType,
@@ -553,6 +604,51 @@ export const ProductForm = ({
                 {...register("sku")}
                 placeholder="Leave empty for auto-generated SKU"
               />
+            </Field>
+
+            <Field label="Brand (optional)">
+              <Input {...register("brand")} placeholder="e.g., Nike" />
+            </Field>
+
+            <Field required label="Product Address">
+              {(() => {
+                const addressItems = (addresses || []).map((addr: any) => ({
+                  value: addr.id as string,
+                  label: `${String(addr.label).toUpperCase()} - ${addr.city}, ${addr.state}${
+                    addr.is_active ? " (Active)" : ""
+                  }`,
+                }))
+                const addressCollection = createListCollection({
+                  items: addressItems,
+                })
+                const current = watch("address_id") || ""
+                const hasAddresses = (addresses?.length ?? 0) > 0
+                return (
+                  <SelectRoot
+                    collection={addressCollection}
+                    value={current ? [current] : []}
+                    onValueChange={(e) => setValue("address_id", e.value[0])}
+                    disabled={!hasAddresses}
+                  >
+                    <SelectTrigger>
+                      <SelectValueText
+                        placeholder={
+                          hasAddresses
+                            ? "Select address (defaults to active)"
+                            : "Add an address first in Settings"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {addressItems.map((item) => (
+                        <SelectItem key={item.value} item={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectRoot>
+                )
+              })()}
             </Field>
 
             <Field label="Tags">
@@ -734,6 +830,39 @@ export const ProductForm = ({
                         >
                           <FiX />
                         </IconButton>
+                        <HStack
+                          position="absolute"
+                          bottom={1}
+                          right={1}
+                          gap={1}
+                        >
+                          <IconButton
+                            type="button"
+                            size="xs"
+                            variant="subtle"
+                            aria-label="Move left"
+                            onClick={() => moveExistingImage(index, "left")}
+                            disabled={index === 0}
+                          >
+                            <FiChevronLeft />
+                          </IconButton>
+                          <IconButton
+                            type="button"
+                            size="xs"
+                            variant="subtle"
+                            aria-label="Move right"
+                            onClick={() => moveExistingImage(index, "right")}
+                            disabled={
+                              index ===
+                              existingImages.filter(
+                                (i) => !deletedImagePaths.has(i.path),
+                              ).length -
+                                1
+                            }
+                          >
+                            <FiChevronRight />
+                          </IconButton>
+                        </HStack>
                         {isPrimary && (
                           <Badge
                             position="absolute"
@@ -824,6 +953,15 @@ export const ProductForm = ({
           </VStack>
         </Box>
 
+        {/* Address Requirement Notice */}
+        {(addresses?.length ?? 0) === 0 && (
+          <Box>
+            <Text color="red.600" fontSize="sm">
+              You need to add an address in Settings before creating a product.
+            </Text>
+          </Box>
+        )}
+
         {/* Form Actions */}
         <Flex justify="flex-end" gap={4} pt={4}>
           {onCancel && (
@@ -831,7 +969,11 @@ export const ProductForm = ({
               Cancel
             </Button>
           )}
-          <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
+          <Button
+            type="submit"
+            loading={isSubmitting}
+            disabled={isSubmitting || (addresses?.length ?? 0) === 0}
+          >
             {isEditMode ? "Update Product" : "Create Product"}
           </Button>
         </Flex>

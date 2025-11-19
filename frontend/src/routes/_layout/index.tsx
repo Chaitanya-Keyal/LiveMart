@@ -23,6 +23,7 @@ function Dashboard() {
   // Show featured products for customers
   const { products, isLoading } = useProducts({
     tags: ["featured"],
+    sellerType: "retailer",
     limit: 6,
     isActive: true,
   })

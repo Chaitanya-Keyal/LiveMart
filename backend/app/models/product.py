@@ -139,6 +139,7 @@ class ProductBase(BaseModel):
     description: str | None = Field(default=None)
     category: CategoryEnum
     tags: list[str] = Field(default_factory=list)
+    brand: str | None = Field(default=None, max_length=255)
 
 
 class ProductCreate(ProductBase):
@@ -146,6 +147,7 @@ class ProductCreate(ProductBase):
     images: list[ProductImageSchema] = Field(default_factory=list)
     pricing_tiers: list[ProductPricingCreate] = Field(min_length=1)
     initial_stock: int = Field(default=0, ge=0)
+    address_id: uuid.UUID | None = None
 
     @model_validator(mode="after")
     def validate_pricing_and_stock(self) -> "ProductCreate":
@@ -187,6 +189,8 @@ class ProductUpdate(BaseModel):
     is_active: bool | None = None
     sku: str | None = Field(default=None, max_length=100)
     pricing_tier: ProductPricingUpdate | None = None
+    brand: str | None = Field(default=None, max_length=255)
+    address_id: uuid.UUID | None = None
 
 
 class Product(TimestampModel, table=True):
@@ -200,6 +204,14 @@ class Product(TimestampModel, table=True):
     )
     seller_type: SellerType = SQLField(nullable=False)
     sku: str = SQLField(max_length=100, nullable=False)
+    brand: str | None = SQLField(default=None, max_length=255, index=True)
+    address_id: uuid.UUID | None = SQLField(
+        default=None,
+        foreign_key="address.id",
+        ondelete="SET NULL",
+        nullable=True,
+        index=True,
+    )
     images: list[dict[str, Any]] = SQLField(
         default_factory=list, sa_column=Column(postgresql.JSONB)
     )
@@ -241,12 +253,18 @@ class ProductPublic(ProductBase):
     pricing_tiers: list[ProductPricingPublic] = []
     inventory: ProductInventoryPublic | None = None
     primary_image: str | None = None
+    address_id: uuid.UUID | None = None
+    distance_km: float | None = None
     created_at: datetime
     updated_at: datetime
 
     @classmethod
     def from_product(
-        cls, product: Product, buyer_type: BuyerType | None = None
+        cls,
+        product: Product,
+        buyer_type: BuyerType | None = None,
+        *,
+        distance_km: float | None = None,
     ) -> "ProductPublic":
         data = {
             "id": product.id,
@@ -259,9 +277,12 @@ class ProductPublic(ProductBase):
             "images": [ProductImageSchema(**img) for img in product.images],
             "is_active": product.is_active,
             "tags": product.tags,
+            "brand": product.brand,
             "pricing_tiers": [],
             "inventory": None,
             "primary_image": product.get_primary_image(),
+            "address_id": product.address_id,
+            "distance_km": distance_km,
             "created_at": product.created_at,
             "updated_at": product.updated_at,
         }

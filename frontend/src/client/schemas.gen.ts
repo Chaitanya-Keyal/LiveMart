@@ -524,6 +524,18 @@ export const ProductCreateSchema = {
             type: 'array',
             title: 'Tags'
         },
+        brand: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brand'
+        },
         sku: {
             anyOf: [
                 {
@@ -556,6 +568,18 @@ export const ProductCreateSchema = {
             minimum: 0,
             title: 'Initial Stock',
             default: 0
+        },
+        address_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Address Id'
         }
     },
     type: 'object',
@@ -860,6 +884,18 @@ export const ProductPublicSchema = {
             type: 'array',
             title: 'Tags'
         },
+        brand: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brand'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -916,6 +952,29 @@ export const ProductPublicSchema = {
                 }
             ],
             title: 'Primary Image'
+        },
+        address_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Address Id'
+        },
+        distance_km: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Distance Km'
         },
         created_at: {
             type: 'string',
@@ -1015,6 +1074,30 @@ export const ProductUpdateSchema = {
                     type: 'null'
                 }
             ]
+        },
+        brand: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brand'
+        },
+        address_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Address Id'
         }
     },
     type: 'object',

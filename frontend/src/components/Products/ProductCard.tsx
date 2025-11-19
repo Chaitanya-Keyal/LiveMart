@@ -1,5 +1,16 @@
-import { Badge, Box, Card, Flex, Image, Text, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Card,
+  Flex,
+  HStack,
+  Icon,
+  Image,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { Link as RouterLink } from "@tanstack/react-router"
+import { FiMapPin } from "react-icons/fi"
 import type { ProductPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import { formatPrice } from "@/utils"
@@ -52,6 +63,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   )
 
   const isLocal = product.tags?.includes("local") || false
+  const distanceKm = (product as any).distance_km as number | undefined
 
   return (
     <Card.Root
@@ -118,6 +130,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               >
                 {product.name}
               </Text>
+              {distanceKm != null && (
+                <HStack gap={1} color="gray.600" fontSize="sm">
+                  <Icon as={FiMapPin} />
+                  <Text>{distanceKm.toFixed(1)} km away</Text>
+                </HStack>
+              )}
               {product.description && (
                 <Text
                   fontSize="sm"
