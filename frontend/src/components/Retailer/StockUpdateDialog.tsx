@@ -1,11 +1,13 @@
 import {
   Button,
   DialogActionTrigger,
+  DialogBackdrop,
   DialogBody,
   DialogCloseTrigger,
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogPositioner,
   DialogRoot,
   DialogTitle,
   DialogTrigger,
@@ -76,73 +78,76 @@ export const StockUpdateDialog = ({ product }: StockUpdateDialogProps) => {
           <FiPackage />
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Update Stock - {product.name}</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <VStack gap={4}>
-              <Field
-                required
-                invalid={!!errors.stock_quantity}
-                errorText={errors.stock_quantity?.message}
-                label="Stock Quantity"
-              >
-                <Input
-                  type="number"
-                  min="0"
-                  {...register("stock_quantity", {
-                    required: "Stock quantity is required",
-                    valueAsNumber: true,
-                    min: {
-                      value: 0,
-                      message: "Stock quantity must be 0 or greater",
-                    },
-                  })}
-                />
-              </Field>
+      <DialogBackdrop />
+      <DialogPositioner>
+        <DialogContent>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Update Stock - {product.name}</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <VStack gap={4}>
+                <Field
+                  required
+                  invalid={!!errors.stock_quantity}
+                  errorText={errors.stock_quantity?.message}
+                  label="Stock Quantity"
+                >
+                  <Input
+                    type="number"
+                    min="0"
+                    {...register("stock_quantity", {
+                      required: "Stock quantity is required",
+                      valueAsNumber: true,
+                      min: {
+                        value: 0,
+                        message: "Stock quantity must be 0 or greater",
+                      },
+                    })}
+                  />
+                </Field>
 
-              <Field
-                invalid={!!errors.low_stock_threshold}
-                errorText={errors.low_stock_threshold?.message}
-                label="Low Stock Threshold"
-              >
-                <Input
-                  type="number"
-                  min="0"
-                  {...register("low_stock_threshold", {
-                    valueAsNumber: true,
-                    min: {
-                      value: 0,
-                      message: "Threshold must be 0 or greater",
-                    },
-                  })}
-                />
-              </Field>
-            </VStack>
-          </DialogBody>
-          <DialogFooter gap={2}>
-            <DialogActionTrigger asChild>
+                <Field
+                  invalid={!!errors.low_stock_threshold}
+                  errorText={errors.low_stock_threshold?.message}
+                  label="Low Stock Threshold"
+                >
+                  <Input
+                    type="number"
+                    min="0"
+                    {...register("low_stock_threshold", {
+                      valueAsNumber: true,
+                      min: {
+                        value: 0,
+                        message: "Threshold must be 0 or greater",
+                      },
+                    })}
+                  />
+                </Field>
+              </VStack>
+            </DialogBody>
+            <DialogFooter gap={2}>
+              <DialogActionTrigger asChild>
+                <Button
+                  variant="subtle"
+                  colorPalette="gray"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+              </DialogActionTrigger>
               <Button
-                variant="subtle"
-                colorPalette="gray"
+                type="submit"
+                loading={isSubmitting}
                 disabled={isSubmitting}
               >
-                Cancel
+                Update Stock
               </Button>
-            </DialogActionTrigger>
-            <Button
-              type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
-            >
-              Update Stock
-            </Button>
-          </DialogFooter>
-        </form>
-        <DialogCloseTrigger />
-      </DialogContent>
+            </DialogFooter>
+          </form>
+          <DialogCloseTrigger />
+        </DialogContent>
+      </DialogPositioner>
     </DialogRoot>
   )
 }

@@ -361,6 +361,43 @@ export const ProductForm = ({
     })
   }
 
+  // Reorder newly added (not yet uploaded) images among themselves
+  const moveNewImage = (index: number, direction: "left" | "right") => {
+    const files = [...watch("imageFiles")]
+    const previews = [...imagePreviews]
+    const targetIndex = direction === "left" ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= previews.length) return
+
+    // Swap previews
+    const tmpPreview = previews[index]
+    previews[index] = previews[targetIndex]
+    previews[targetIndex] = tmpPreview
+
+    // Swap files to preserve upload order
+    const tmpFile = files[index]
+    files[index] = files[targetIndex]
+    files[targetIndex] = tmpFile
+
+    setImagePreviews(previews)
+    setValue("imageFiles", files)
+
+    // Adjust primary image index if primary is one of the swapped new images
+    if (primaryImageIndex !== null) {
+      const offset = existingImages.filter(
+        (img) => !deletedImagePaths.has(img.path),
+      ).length
+      const primaryIsNew = primaryImageIndex >= offset
+      if (primaryIsNew) {
+        const primaryLocalIndex = primaryImageIndex - offset
+        if (primaryLocalIndex === index) {
+          setPrimaryImageIndex(offset + targetIndex)
+        } else if (primaryLocalIndex === targetIndex) {
+          setPrimaryImageIndex(offset + index)
+        }
+      }
+    }
+  }
+
   const removeImage = (index: number) => {
     const currentFiles = watch("imageFiles")
     const newFiles = currentFiles.filter((_, i) => i !== index)
@@ -924,6 +961,28 @@ export const ProductForm = ({
                       >
                         <FiX />
                       </IconButton>
+                      <HStack position="absolute" bottom={1} right={1} gap={1}>
+                        <IconButton
+                          type="button"
+                          size="xs"
+                          variant="subtle"
+                          aria-label="Move left"
+                          onClick={() => moveNewImage(index, "left")}
+                          disabled={index === 0}
+                        >
+                          <FiChevronLeft />
+                        </IconButton>
+                        <IconButton
+                          type="button"
+                          size="xs"
+                          variant="subtle"
+                          aria-label="Move right"
+                          onClick={() => moveNewImage(index, "right")}
+                          disabled={index === imagePreviews.length - 1}
+                        >
+                          <FiChevronRight />
+                        </IconButton>
+                      </HStack>
                       {isPrimary && (
                         <Badge
                           position="absolute"
