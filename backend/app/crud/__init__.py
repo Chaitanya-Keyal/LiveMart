@@ -6,8 +6,18 @@ from .addresses import (
     set_active_address,
     update_address,
 )
-from .items import create_item
 from .otp import create_otp, verify_otp
+from .products import (
+    create_product,
+    delete_product,
+    get_product_by_id,
+    get_product_by_seller_and_sku,
+    get_products,
+    update_inventory,
+    update_pricing_tier,
+    update_product,
+    update_product_images,
+)
 from .users import (
     add_role_to_user,
     authenticate,
@@ -32,7 +42,15 @@ __all__ = [
     "get_addresses_for_user",
     "get_address_for_user",
     "set_active_address",
-    "create_item",
     "create_otp",
     "verify_otp",
+    "create_product",
+    "get_products",
+    "get_product_by_id",
+    "get_product_by_seller_and_sku",
+    "update_product",
+    "update_inventory",
+    "delete_product",
+    "update_product_images",
+    "update_pricing_tier",
 ]

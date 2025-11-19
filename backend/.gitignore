@@ -4,3 +4,5 @@ app.egg-info
 .mypy_cache
 .cache
 .venv
+
+app/static/

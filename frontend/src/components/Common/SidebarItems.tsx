@@ -24,23 +24,19 @@ const roleItems: Record<
   RoleEnum,
   { icon: IconType; title: string; path: string }[]
 > = {
-  admin: [
-    { icon: FiUsers, title: "Admin Panel", path: "/admin" },
-    { icon: FiBriefcase, title: "All Items", path: "/items" },
-  ],
+  admin: [{ icon: FiUsers, title: "Admin Panel", path: "/admin" }],
   customer: [
-    { icon: FiShoppingCart, title: "Browse Items", path: "/items" },
+    { icon: FiShoppingCart, title: "Browse Products", path: "/buy" },
     { icon: FiBriefcase, title: "My Orders", path: "/orders" },
   ],
   retailer: [
-    { icon: FiShoppingBag, title: "My Products", path: "/items" },
+    { icon: FiShoppingCart, title: "Buy", path: "/buy" },
+    { icon: FiShoppingBag, title: "Sell", path: "/sell" },
     { icon: FiBriefcase, title: "Orders", path: "/orders" },
-    { icon: FiPackage, title: "Inventory", path: "/inventory" },
   ],
   wholesaler: [
-    { icon: FiPackage, title: "Wholesale Catalog", path: "/items" },
+    { icon: FiPackage, title: "Sell", path: "/sell" },
     { icon: FiBriefcase, title: "Retailer Orders", path: "/orders" },
-    { icon: FiUsers, title: "My Retailers", path: "/retailers" },
   ],
   delivery_partner: [
     { icon: FiTruck, title: "Deliveries", path: "/deliveries" },

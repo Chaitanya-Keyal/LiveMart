@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from sqlalchemy import ForeignKey
 from sqlmodel import Field as SQLField
 from sqlmodel import Relationship
 
@@ -11,7 +12,6 @@ from app.models.role import RoleEnum
 
 if TYPE_CHECKING:
     from app.models.address import Address
-    from app.models.item import Item
     from app.models.role import UserRole
 
 
@@ -58,11 +58,17 @@ class User(TimestampModel, table=True):
     full_name: str | None = SQLField(default=None, max_length=255)
     active_role: RoleEnum | None = SQLField(default=None)
     active_address_id: uuid.UUID | None = SQLField(
-        default=None, foreign_key="address.id", nullable=True
+        default=None,
+        sa_column=ForeignKey(
+            "address.id",
+            use_alter=True,
+            name="fk_user_active_address_id",
+            nullable=True,
+            ondelete="SET NULL",
+        ),
     )
     email_verified: bool = SQLField(default=False)
 
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
     user_roles: list["UserRole"] = Relationship(
         back_populates="user", cascade_delete=True
     )
