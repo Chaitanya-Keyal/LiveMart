@@ -15,6 +15,7 @@ from .products import (
     get_product_by_id,
     get_product_by_seller_and_sku,
     get_products,
+    get_users_active_address_coords,
     update_inventory,
     update_pricing_tier,
     update_product,
@@ -57,4 +58,5 @@ __all__ = [
     "update_pricing_tier",
     "get_address_coords",
     "autocomplete_products",
+    "get_users_active_address_coords",
 ]
