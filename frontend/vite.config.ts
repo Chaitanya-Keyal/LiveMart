@@ -10,6 +10,23 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom"],
+          chakra: ["@chakra-ui/react"],
+          tanstack: [
+            "@tanstack/react-query",
+            "@tanstack/react-router",
+            "@tanstack/react-query-devtools",
+          ],
+          icons: ["react-icons"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
   plugins: [
     tanstackRouter({
       target: "react",

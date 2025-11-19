@@ -1,11 +1,16 @@
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal
+from typing import Literal
 
-from sqlalchemy import bindparam, cast
+from sqlalchemy import cast, or_
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Session, func, select
 
+from app.models.address import Address
 from app.models.product import (
+    BuyerType,
+    CategoryEnum,
     Product,
     ProductCreate,
     ProductInventory,
@@ -15,6 +20,44 @@ from app.models.product import (
     ProductUpdate,
     SellerType,
 )
+from app.models.user import User
+from app.utils.location import latlon_bounding_box
+
+
+def autocomplete_products(
+    *,
+    session: Session,
+    q: str,
+    limit: int = 10,
+    seller_type: SellerType | None = None,
+    category: CategoryEnum | None = None,
+    is_active: bool = True,
+) -> list[str]:
+    """Return distinct product name suggestions for the given query."""
+    q = (q or "").strip()
+    if len(q) < 2:
+        return []
+
+    like = f"%{q}%"
+
+    stmt = (
+        select(Product.name, Product.created_at)
+        .where(Product.deleted_at.is_(None))
+        .where((Product.name.ilike(like)) | (Product.description.ilike(like)))
+    )
+    if is_active:
+        stmt = stmt.where(Product.is_active.is_(True))
+    if seller_type:
+        stmt = stmt.where(Product.seller_type == seller_type)
+    if category:
+        stmt = stmt.where(Product.category == category)
+
+    # Also match on brand if present
+    stmt = stmt.where((Product.brand.is_(None)) | (Product.brand.ilike(like)))
+
+    stmt = stmt.distinct().order_by(Product.created_at.desc()).limit(limit)
+    rows = session.exec(stmt).all()
+    return [str(r[0]) for r in rows if r]
 
 
 def create_product(
@@ -73,6 +116,16 @@ def get_products(
     seller_id: uuid.UUID | None = None,
     tags: list[str] | None = None,
     is_active: bool | None = None,
+    search: str | None = None,
+    brands: list[str] | None = None,
+    in_stock_only: bool | None = None,
+    min_price: Decimal | None = None,
+    max_price: Decimal | None = None,
+    buyer_type: BuyerType | None = None,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    radius_km: float | None = None,
+    sort_by: Literal["newest", "price_asc", "price_desc", "distance_asc"] | None = None,
 ) -> tuple[list[Product], int]:
     """
     Get products with filters and pagination.
@@ -88,20 +141,179 @@ def get_products(
         statement = statement.where(Product.seller_id == seller_id)
     if is_active is not None:
         statement = statement.where(Product.is_active == is_active)
+    if brands:
+        brand_clauses = [Product.brand.ilike(f"%{b}%") for b in brands if b]
+        if brand_clauses:
+            statement = statement.where(or_(*brand_clauses))
+    if search:
+        like = f"%{search}%"
+        statement = statement.where(
+            (Product.name.ilike(like)) | (Product.description.ilike(like))
+        )
     if tags:
-        for i, tag in enumerate(tags):
-            param = bindparam(f"tag_{i}", value=[tag], type_=postgresql.JSONB)
+        # For each provided tag term, require product to have at least one tag matching ILIKE '%term%'
+        for term in tags:
+            if not term:
+                continue
+            like = f"%{term}%"
+            # Build a subquery over jsonb_array_elements_text(tags) and ensure at least one element matches ILIKE
+            tag_elements_subq = select(
+                func.jsonb_array_elements_text(
+                    cast(Product.tags, postgresql.JSONB)
+                ).label("tag")
+            ).subquery()
             statement = statement.where(
-                cast(Product.tags, postgresql.JSONB).op("@>")(param)
+                select(func.count())
+                .select_from(tag_elements_subq)
+                .where(tag_elements_subq.c.tag.ilike(like))
+                .scalar_subquery()
+                > 0
             )
 
-    count_statement = select(func.count()).select_from(statement.subquery())
+    if in_stock_only:
+        inv = select(ProductInventory.product_id).where(
+            ProductInventory.stock_quantity > 0
+        )
+        statement = statement.where(Product.id.in_(inv))
+
+    if (min_price is not None or max_price is not None) and buyer_type is not None:
+        price_subq = (
+            select(
+                ProductPricing.product_id, func.min(ProductPricing.price).label("minp")
+            )
+            .where(
+                (ProductPricing.is_active.is_(True))
+                & (ProductPricing.buyer_type == buyer_type)
+            )
+            .group_by(ProductPricing.product_id)
+            .subquery()
+        )
+        statement = statement.join(price_subq, price_subq.c.product_id == Product.id)
+        if min_price is not None:
+            statement = statement.where(price_subq.c.minp >= min_price)
+        if max_price is not None:
+            statement = statement.where(price_subq.c.minp <= max_price)
+
+    if (
+        latitude is not None
+        and longitude is not None
+        and radius_km is not None
+        and radius_km > 0
+    ):
+        min_lat, max_lat, min_lon, max_lon = latlon_bounding_box(
+            latitude, longitude, radius_km
+        )
+        from sqlalchemy import func as safunc
+        from sqlalchemy.orm import aliased
+
+        ProdAddr = aliased(Address)
+        ActAddr = aliased(Address)
+
+        statement = (
+            statement.join(User, User.id == Product.seller_id)
+            .join(ProdAddr, ProdAddr.id == Product.address_id, isouter=True)
+            .join(ActAddr, ActAddr.id == User.active_address_id, isouter=True)
+        )
+
+        lat_expr = safunc.coalesce(ProdAddr.latitude, ActAddr.latitude)
+        lon_expr = safunc.coalesce(ProdAddr.longitude, ActAddr.longitude)
+
+        statement = statement.where(
+            (lat_expr >= min_lat)
+            & (lat_expr <= max_lat)
+            & (lon_expr >= min_lon)
+            & (lon_expr <= max_lon)
+        )
+
+    count_subq = statement.with_only_columns(Product.id).distinct().subquery()
+    count_statement = select(func.count()).select_from(count_subq)
     count = session.exec(count_statement).one()
 
-    statement = statement.offset(skip).limit(limit).order_by(Product.created_at.desc())
+    if sort_by == "price_asc" and buyer_type is not None:
+        price_min_subq = (
+            select(
+                ProductPricing.product_id, func.min(ProductPricing.price).label("minp")
+            )
+            .where(
+                (ProductPricing.is_active.is_(True))
+                & (ProductPricing.buyer_type == buyer_type)
+            )
+            .group_by(ProductPricing.product_id)
+            .subquery()
+        )
+        statement = statement.join(
+            price_min_subq, price_min_subq.c.product_id == Product.id
+        )
+        statement = statement.order_by(
+            price_min_subq.c.minp.asc(), Product.created_at.desc()
+        )
+    elif sort_by == "price_desc" and buyer_type is not None:
+        price_min_subq = (
+            select(
+                ProductPricing.product_id, func.min(ProductPricing.price).label("minp")
+            )
+            .where(
+                (ProductPricing.is_active.is_(True))
+                & (ProductPricing.buyer_type == buyer_type)
+            )
+            .group_by(ProductPricing.product_id)
+            .subquery()
+        )
+        statement = statement.join(
+            price_min_subq, price_min_subq.c.product_id == Product.id
+        )
+        statement = statement.order_by(
+            price_min_subq.c.minp.desc(), Product.created_at.desc()
+        )
+    elif sort_by == "distance_asc" and latitude is not None and longitude is not None:
+        statement = statement.order_by(Product.created_at.desc())
+    else:
+        statement = statement.order_by(Product.created_at.desc())
+
+    statement = statement.offset(skip).limit(limit)
     products = session.exec(statement).all()
 
     return list(products), count
+
+
+def get_address_coords(
+    *, session: Session, address_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, tuple[float | None, float | None]]:
+    """Fetch latitude/longitude for given address IDs."""
+    if not address_ids:
+        return {}
+    rows = session.exec(
+        select(Address.id, Address.latitude, Address.longitude).where(
+            Address.id.in_(address_ids)
+        )
+    ).all()
+    result: dict[uuid.UUID, tuple[float | None, float | None]] = {}
+    for aid, lat, lon in rows:
+        result[aid] = (float(lat), float(lon))
+    return result
+
+
+def get_users_active_address_coords(
+    *, session: Session, user_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, tuple[float | None, float | None]]:
+    """Fetch active address latitude/longitude for given user IDs.
+
+    Returns a mapping of user_id -> (lat, lon). If a user has no active address,
+    the coordinates will not be present in the result (caller should handle None).
+    """
+    if not user_ids:
+        return {}
+    rows = session.exec(
+        select(User.id, Address.latitude, Address.longitude)
+        .join(Address, Address.id == User.active_address_id, isouter=True)
+        .where(User.id.in_(user_ids))
+    ).all()
+    result: dict[uuid.UUID, tuple[float | None, float | None]] = {}
+    for uid, lat, lon in rows:
+        lat_f = float(lat) if lat is not None else None
+        lon_f = float(lon) if lon is not None else None
+        result[uid] = (lat_f, lon_f)
+    return result
 
 
 def get_product_by_id(*, session: Session, product_id: uuid.UUID) -> Product | None:

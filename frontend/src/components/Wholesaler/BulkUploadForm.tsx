@@ -1,17 +1,18 @@
 import {
+  Alert,
   Box,
   Button,
   Container,
+  FileUpload,
   Heading,
-  Input,
+  HStack,
+  Icon,
   Table,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import type React from "react"
 import { useState } from "react"
 import { FiUpload } from "react-icons/fi"
-import { Field } from "@/components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
 import { getCSVTemplate, type ParsedProduct, parseCSV } from "@/utils/csvParser"
 
@@ -21,12 +22,11 @@ export const BulkUploadForm = () => {
   const [errors, setErrors] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleFileAccepted = async (files: File[]) => {
+    const file = files?.[0]
     if (!file) return
-
-    if (!file.name.endsWith(".csv")) {
-      showErrorToast("Please select a CSV file")
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      showErrorToast("Please select a .csv file")
       return
     }
 
@@ -50,9 +50,6 @@ export const BulkUploadForm = () => {
     } finally {
       setIsProcessing(false)
     }
-
-    // Reset input
-    e.target.value = ""
   }
 
   const handleImport = async () => {
@@ -96,26 +93,65 @@ export const BulkUploadForm = () => {
           </Text>
         </Box>
 
-        <Box p={4} borderWidth={1} borderRadius="md" bg="blue.50">
-          <VStack align="stretch" gap={2}>
-            <Text fontWeight="semibold">CSV Format:</Text>
-            <Text fontSize="sm">
-              Columns: name, description, category, price, stock, sku, tags
-            </Text>
-            <Button size="sm" onClick={handleDownloadTemplate}>
-              Download Template
-            </Button>
-          </VStack>
-        </Box>
+        <Alert.Root status="info" variant="surface" borderRadius="md">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>CSV Format</Alert.Title>
+            <Alert.Description>
+              <Text fontSize="sm">
+                Columns: name, description, category, price, stock, sku, tags
+              </Text>
+            </Alert.Description>
+            <HStack mt={3}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDownloadTemplate}
+              >
+                Download Template
+              </Button>
+            </HStack>
+          </Alert.Content>
+        </Alert.Root>
 
-        <Field label="Select CSV File">
-          <Input
-            type="file"
-            accept=".csv"
-            onChange={handleFileSelect}
-            disabled={isProcessing}
-          />
-        </Field>
+        <VStack align="stretch" gap={3}>
+          <Text fontWeight="semibold">Select CSV File</Text>
+          <FileUpload.Root
+            accept={[".csv", "text/csv"]}
+            maxFiles={1}
+            onFileAccept={(accepted) =>
+              handleFileAccepted(accepted.files ?? [])
+            }
+            alignItems="stretch"
+          >
+            <FileUpload.HiddenInput />
+
+            <FileUpload.Dropzone>
+              <Icon color="fg.muted">
+                <FiUpload />
+              </Icon>
+              <FileUpload.DropzoneContent>
+                <Box>Drag and drop your CSV here</Box>
+                <Box color="fg.muted">.csv up to 5MB</Box>
+              </FileUpload.DropzoneContent>
+            </FileUpload.Dropzone>
+
+            <HStack>
+              <FileUpload.Trigger asChild>
+                <Button size="sm" variant="outline" disabled={isProcessing}>
+                  Browse CSV
+                </Button>
+              </FileUpload.Trigger>
+              <FileUpload.ClearTrigger asChild>
+                <Button size="sm" variant="plain">
+                  Clear
+                </Button>
+              </FileUpload.ClearTrigger>
+            </HStack>
+
+            <FileUpload.List />
+          </FileUpload.Root>
+        </VStack>
 
         {errors.length > 0 && (
           <Box
