@@ -57,36 +57,20 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type Body_products_upload_product_image = {
+    file: (Blob | File);
+};
+
+export type BuyerType = 'customer' | 'retailer';
+
+export type CategoryEnum = 'electronics' | 'clothing' | 'food_beverage' | 'home_garden' | 'health_beauty' | 'sports' | 'toys' | 'books' | 'automotive' | 'office_supplies' | 'pet_supplies' | 'jewellery' | 'furniture';
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
-/**
- * Payload used when creating a new item.
- */
-export type ItemCreate = {
-    title: string;
-    description?: (string | null);
-};
-
-export type ItemPublic = {
-    title: string;
-    description?: (string | null);
-    id: string;
-    owner_id: string;
-    role_context: RoleEnum;
-    created_at: string;
-    updated_at: string;
-};
-
-export type ItemsPublic = {
-    data: Array<ItemPublic>;
-    count: number;
-};
-
-export type ItemUpdate = {
-    title?: (string | null);
-    description?: (string | null);
+export type ImageReorderSchema = {
+    images: Array<ProductImageSchema>;
 };
 
 export type Message = {
@@ -105,6 +89,98 @@ export type OTPCreate = {
 export type OTPVerify = {
     email: string;
     code: string;
+};
+
+export type ProductCreate = {
+    name: string;
+    description?: (string | null);
+    category: CategoryEnum;
+    tags?: Array<(string)>;
+    sku?: (string | null);
+    images?: Array<ProductImageSchema>;
+    pricing_tiers: Array<ProductPricingCreate>;
+    initial_stock?: number;
+};
+
+export type ProductImageSchema = {
+    path: string;
+    order: number;
+    is_primary?: boolean;
+};
+
+export type ProductInventoryPublic = {
+    stock_quantity?: number;
+    low_stock_threshold?: number;
+    id: string;
+    product_id: string;
+    last_restocked_at: (string | null);
+    created_at: string;
+    updated_at: string;
+};
+
+export type ProductInventoryUpdate = {
+    stock_quantity?: (number | null);
+    low_stock_threshold?: (number | null);
+};
+
+export type ProductPricingCreate = {
+    buyer_type: BuyerType;
+    price: (number | string);
+    min_quantity?: number;
+    max_quantity?: (number | null);
+    is_active?: boolean;
+};
+
+export type ProductPricingPublic = {
+    buyer_type: BuyerType;
+    price: string;
+    min_quantity?: number;
+    max_quantity?: (number | null);
+    is_active?: boolean;
+    id: string;
+    product_id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type ProductPricingUpdate = {
+    price?: (number | string | null);
+    min_quantity?: (number | null);
+    max_quantity?: (number | null);
+    is_active?: (boolean | null);
+};
+
+export type ProductPublic = {
+    name: string;
+    description?: (string | null);
+    category: CategoryEnum;
+    tags?: Array<(string)>;
+    id: string;
+    seller_id: string;
+    seller_type: SellerType;
+    sku: string;
+    images: Array<ProductImageSchema>;
+    is_active: boolean;
+    pricing_tiers?: Array<ProductPricingPublic>;
+    inventory?: (ProductInventoryPublic | null);
+    primary_image?: (string | null);
+    created_at: string;
+    updated_at: string;
+};
+
+export type ProductsPublic = {
+    data: Array<ProductPublic>;
+    count: number;
+};
+
+export type ProductUpdate = {
+    name?: (string | null);
+    description?: (string | null);
+    category?: (CategoryEnum | null);
+    tags?: (Array<(string)> | null);
+    is_active?: (boolean | null);
+    sku?: (string | null);
+    pricing_tier?: (ProductPricingUpdate | null);
 };
 
 /**
@@ -132,6 +208,8 @@ export type RoleRemove = {
 export type RoleSwitch = {
     role: RoleEnum;
 };
+
+export type SellerType = 'retailer' | 'wholesaler';
 
 export type Token = {
     access_token: string;
@@ -226,38 +304,6 @@ export type AddressesSetActiveAddressData = {
 
 export type AddressesSetActiveAddressResponse = (AddressPublic);
 
-export type ItemsReadItemsData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type ItemsReadItemsResponse = (ItemsPublic);
-
-export type ItemsCreateItemData = {
-    requestBody: ItemCreate;
-};
-
-export type ItemsCreateItemResponse = (ItemPublic);
-
-export type ItemsReadItemData = {
-    id: string;
-};
-
-export type ItemsReadItemResponse = (ItemPublic);
-
-export type ItemsUpdateItemData = {
-    id: string;
-    requestBody: ItemUpdate;
-};
-
-export type ItemsUpdateItemResponse = (ItemPublic);
-
-export type ItemsDeleteItemData = {
-    id: string;
-};
-
-export type ItemsDeleteItemResponse = (Message);
-
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };
@@ -291,6 +337,71 @@ export type LoginVerifyLoginOtpData = {
 };
 
 export type LoginVerifyLoginOtpResponse = (Token);
+
+export type ProductsListProductsData = {
+    category?: (CategoryEnum | null);
+    isActive?: boolean;
+    limit?: number;
+    sellerId?: (string | null);
+    sellerType?: (SellerType | null);
+    skip?: number;
+    tags?: (string | null);
+};
+
+export type ProductsListProductsResponse = (ProductsPublic);
+
+export type ProductsCreateProductData = {
+    requestBody: ProductCreate;
+};
+
+export type ProductsCreateProductResponse = (ProductPublic);
+
+export type ProductsGetProductData = {
+    productId: string;
+};
+
+export type ProductsGetProductResponse = (ProductPublic);
+
+export type ProductsUpdateProductData = {
+    productId: string;
+    requestBody: ProductUpdate;
+};
+
+export type ProductsUpdateProductResponse = (ProductPublic);
+
+export type ProductsDeleteProductData = {
+    productId: string;
+};
+
+export type ProductsDeleteProductResponse = (Message);
+
+export type ProductsUpdateProductInventoryData = {
+    productId: string;
+    requestBody: ProductInventoryUpdate;
+};
+
+export type ProductsUpdateProductInventoryResponse = (ProductInventoryPublic);
+
+export type ProductsUploadProductImageData = {
+    formData: Body_products_upload_product_image;
+    productId: string;
+};
+
+export type ProductsUploadProductImageResponse = (ProductPublic);
+
+export type ProductsDeleteProductImageData = {
+    imagePath: string;
+    productId: string;
+};
+
+export type ProductsDeleteProductImageResponse = (ProductPublic);
+
+export type ProductsReorderProductImagesData = {
+    productId: string;
+    requestBody: ImageReorderSchema;
+};
+
+export type ProductsReorderProductImagesResponse = (ProductPublic);
 
 export type UsersReadUsersData = {
     limit?: number;

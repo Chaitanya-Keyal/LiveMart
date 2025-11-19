@@ -55,10 +55,34 @@ export const confirmPasswordRules = (
 
 export const handleError = (err: ApiError) => {
   const { showErrorToast } = useCustomToast()
-  const errDetail = (err.body as any)?.detail
-  let errorMessage = errDetail || "Something went wrong."
-  if (Array.isArray(errDetail) && errDetail.length > 0) {
-    errorMessage = errDetail[0].msg
+  const errDetail = (err.body as { detail?: unknown })?.detail
+  let errorMessage: string = "Something went wrong."
+
+  if (typeof errDetail === "string") {
+    errorMessage = errDetail
+  } else if (Array.isArray(errDetail) && errDetail.length > 0) {
+    const first = errDetail[0] as unknown
+    const maybeMsg =
+      typeof first === "object" &&
+      first !== null &&
+      "msg" in (first as { msg?: unknown })
+        ? (first as { msg?: unknown }).msg
+        : undefined
+    if (typeof maybeMsg === "string") {
+      errorMessage = maybeMsg
+    }
+  } else if (typeof (err as { message?: unknown })?.message === "string") {
+    errorMessage = (err as { message?: string }).message ?? errorMessage
   }
+
   showErrorToast(errorMessage)
+}
+
+export const formatPrice = (price: string | number): string => {
+  const numPrice = typeof price === "string" ? parseFloat(price) : price
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(numPrice)
 }

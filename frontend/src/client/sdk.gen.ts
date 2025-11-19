@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
 
 export class AddressesService {
     /**
@@ -93,118 +93,6 @@ export class AddressesService {
             url: '/api/v1/users/me/addresses/{address_id}/set-active',
             path: {
                 address_id: data.addressId
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-}
-
-export class ItemsService {
-    /**
-     * Read Items
-     * Retrieve items for current user's active role.
-     * Admins can see all items.
-     * @param data The data for the request.
-     * @param data.skip
-     * @param data.limit
-     * @returns ItemsPublic Successful Response
-     * @throws ApiError
-     */
-    public static readItems(data: ItemsReadItemsData = {}): CancelablePromise<ItemsReadItemsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/items/',
-            query: {
-                skip: data.skip,
-                limit: data.limit
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Create Item
-     * Create new item in the context of the user's active role.
-     * @param data The data for the request.
-     * @param data.requestBody
-     * @returns ItemPublic Successful Response
-     * @throws ApiError
-     */
-    public static createItem(data: ItemsCreateItemData): CancelablePromise<ItemsCreateItemResponse> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/items/',
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Read Item
-     * Get item by ID.
-     * @param data The data for the request.
-     * @param data.id
-     * @returns ItemPublic Successful Response
-     * @throws ApiError
-     */
-    public static readItem(data: ItemsReadItemData): CancelablePromise<ItemsReadItemResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/items/{id}',
-            path: {
-                id: data.id
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Update Item
-     * Update an item.
-     * @param data The data for the request.
-     * @param data.id
-     * @param data.requestBody
-     * @returns ItemPublic Successful Response
-     * @throws ApiError
-     */
-    public static updateItem(data: ItemsUpdateItemData): CancelablePromise<ItemsUpdateItemResponse> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/api/v1/items/{id}',
-            path: {
-                id: data.id
-            },
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Delete Item
-     * Delete an item.
-     * @param data The data for the request.
-     * @param data.id
-     * @returns Message Successful Response
-     * @throws ApiError
-     */
-    public static deleteItem(data: ItemsDeleteItemData): CancelablePromise<ItemsDeleteItemResponse> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/api/v1/items/{id}',
-            path: {
-                id: data.id
             },
             errors: {
                 422: 'Validation Error'
@@ -333,6 +221,234 @@ export class LoginService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/login/otp/verify',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ProductsService {
+    /**
+     * List Products
+     * List products with filters.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.sellerType
+     * @param data.category
+     * @param data.sellerId
+     * @param data.tags
+     * @param data.isActive
+     * @returns ProductsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listProducts(data: ProductsListProductsData = {}): CancelablePromise<ProductsListProductsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                seller_type: data.sellerType,
+                category: data.category,
+                seller_id: data.sellerId,
+                tags: data.tags,
+                is_active: data.isActive
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Product
+     * Create new product.
+     * Requires RETAILER or WHOLESALER role.
+     * Seller type is automatically set based on active role.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static createProduct(data: ProductsCreateProductData): CancelablePromise<ProductsCreateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Product
+     * Get product by ID.
+     * Returns pricing based on current user's active role (or CUSTOMER if not authenticated).
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static getProduct(data: ProductsGetProductData): CancelablePromise<ProductsGetProductResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product
+     * Update product.
+     * Only product owner or admin can update.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProduct(data: ProductsUpdateProductData): CancelablePromise<ProductsUpdateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product
+     * Delete product (soft delete).
+     * Only product owner or admin can delete.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteProduct(data: ProductsDeleteProductData): CancelablePromise<ProductsDeleteProductResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product Inventory
+     * Update product inventory.
+     * Only product owner can update inventory.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns ProductInventoryPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProductInventory(data: ProductsUpdateProductInventoryData): CancelablePromise<ProductsUpdateProductInventoryResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/products/{product_id}/inventory',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Upload Product Image
+     * Upload product image.
+     * Only product owner can upload images.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.formData
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadProductImage(data: ProductsUploadProductImageData): CancelablePromise<ProductsUploadProductImageResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/{product_id}/images',
+            path: {
+                product_id: data.productId
+            },
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product Image
+     * Delete product image.
+     * Only product owner can delete images.
+     * Query parameter: image_path (e.g., /static/products/{id}/{filename})
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.imagePath
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static deleteProductImage(data: ProductsDeleteProductImageData): CancelablePromise<ProductsDeleteProductImageResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/products/{product_id}/images',
+            path: {
+                product_id: data.productId
+            },
+            query: {
+                image_path: data.imagePath
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Reorder Product Images
+     * Reorder product images.
+     * Only product owner can reorder images.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static reorderProductImages(data: ProductsReorderProductImagesData): CancelablePromise<ProductsReorderProductImagesResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/products/{product_id}/images/reorder',
+            path: {
+                product_id: data.productId
+            },
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {

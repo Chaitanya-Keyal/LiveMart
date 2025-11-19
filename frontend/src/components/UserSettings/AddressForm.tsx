@@ -114,7 +114,7 @@ const AddressForm = ({
     if (country) setValue("country", country)
 
     // If place has geometry, populate latitude & longitude too (helps when place select happens before onChange)
-    const loc = (place as any)?.geometry?.location
+    const loc = place.geometry?.location
     if (loc && typeof loc.lat === "function" && typeof loc.lng === "function") {
       setValue("latitude", roundCoordinate(loc.lat()), { shouldValidate: true })
       setValue("longitude", roundCoordinate(loc.lng()), {

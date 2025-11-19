@@ -83,6 +83,9 @@ services:
       timeout: 5s
       retries: 5
 
+    volumes:
+      - ./backend/app/static:/app/app/static
+
     build:
       context: ./backend
     labels:

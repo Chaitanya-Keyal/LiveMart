@@ -18,9 +18,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
-import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutSellIndexRouteImport } from './routes/_layout/sell/index'
+import { Route as LayoutBuyIndexRouteImport } from './routes/_layout/buy/index'
 import { Route as OauthGoogleCallbackRouteImport } from './routes/oauth.google.callback'
+import { Route as LayoutSellNewRouteImport } from './routes/_layout/sell/new'
+import { Route as LayoutSellBulkRouteImport } from './routes/_layout/sell/bulk'
+import { Route as LayoutSellProductIdRouteImport } from './routes/_layout/sell/$productId'
+import { Route as LayoutBuyProductIdRouteImport } from './routes/_layout/buy/$productId'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -66,20 +71,45 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutItemsRoute = LayoutItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSellIndexRoute = LayoutSellIndexRouteImport.update({
+  id: '/sell/',
+  path: '/sell/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutBuyIndexRoute = LayoutBuyIndexRouteImport.update({
+  id: '/buy/',
+  path: '/buy/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const OauthGoogleCallbackRoute = OauthGoogleCallbackRouteImport.update({
   id: '/oauth/google/callback',
   path: '/oauth/google/callback',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LayoutSellNewRoute = LayoutSellNewRouteImport.update({
+  id: '/sell/new',
+  path: '/sell/new',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSellBulkRoute = LayoutSellBulkRouteImport.update({
+  id: '/sell/bulk',
+  path: '/sell/bulk',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSellProductIdRoute = LayoutSellProductIdRouteImport.update({
+  id: '/sell/$productId',
+  path: '/sell/$productId',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutBuyProductIdRoute = LayoutBuyProductIdRouteImport.update({
+  id: '/buy/$productId',
+  path: '/buy/$productId',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -90,10 +120,15 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/admin': typeof LayoutAdminRoute
-  '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/buy/$productId': typeof LayoutBuyProductIdRoute
+  '/sell/$productId': typeof LayoutSellProductIdRoute
+  '/sell/bulk': typeof LayoutSellBulkRoute
+  '/sell/new': typeof LayoutSellNewRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
+  '/buy': typeof LayoutBuyIndexRoute
+  '/sell': typeof LayoutSellIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -103,10 +138,15 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/admin': typeof LayoutAdminRoute
-  '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/buy/$productId': typeof LayoutBuyProductIdRoute
+  '/sell/$productId': typeof LayoutSellProductIdRoute
+  '/sell/bulk': typeof LayoutSellBulkRoute
+  '/sell/new': typeof LayoutSellNewRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
+  '/buy': typeof LayoutBuyIndexRoute
+  '/sell': typeof LayoutSellIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -118,10 +158,15 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_layout/admin': typeof LayoutAdminRoute
-  '/_layout/items': typeof LayoutItemsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/buy/$productId': typeof LayoutBuyProductIdRoute
+  '/_layout/sell/$productId': typeof LayoutSellProductIdRoute
+  '/_layout/sell/bulk': typeof LayoutSellBulkRoute
+  '/_layout/sell/new': typeof LayoutSellNewRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
+  '/_layout/buy/': typeof LayoutBuyIndexRoute
+  '/_layout/sell/': typeof LayoutSellIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -133,10 +178,15 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/admin'
-    | '/items'
     | '/settings'
     | '/'
+    | '/buy/$productId'
+    | '/sell/$productId'
+    | '/sell/bulk'
+    | '/sell/new'
     | '/oauth/google/callback'
+    | '/buy'
+    | '/sell'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -146,10 +196,15 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/admin'
-    | '/items'
     | '/settings'
     | '/'
+    | '/buy/$productId'
+    | '/sell/$productId'
+    | '/sell/bulk'
+    | '/sell/new'
     | '/oauth/google/callback'
+    | '/buy'
+    | '/sell'
   id:
     | '__root__'
     | '/_layout'
@@ -160,10 +215,15 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/_layout/admin'
-    | '/_layout/items'
     | '/_layout/settings'
     | '/_layout/'
+    | '/_layout/buy/$productId'
+    | '/_layout/sell/$productId'
+    | '/_layout/sell/bulk'
+    | '/_layout/sell/new'
     | '/oauth/google/callback'
+    | '/_layout/buy/'
+    | '/_layout/sell/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -242,18 +302,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/items': {
-      id: '/_layout/items'
-      path: '/items'
-      fullPath: '/items'
-      preLoaderRoute: typeof LayoutItemsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/admin': {
       id: '/_layout/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof LayoutAdminRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/sell/': {
+      id: '/_layout/sell/'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof LayoutSellIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/buy/': {
+      id: '/_layout/buy/'
+      path: '/buy'
+      fullPath: '/buy'
+      preLoaderRoute: typeof LayoutBuyIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/oauth/google/callback': {
@@ -263,21 +330,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthGoogleCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_layout/sell/new': {
+      id: '/_layout/sell/new'
+      path: '/sell/new'
+      fullPath: '/sell/new'
+      preLoaderRoute: typeof LayoutSellNewRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/sell/bulk': {
+      id: '/_layout/sell/bulk'
+      path: '/sell/bulk'
+      fullPath: '/sell/bulk'
+      preLoaderRoute: typeof LayoutSellBulkRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/sell/$productId': {
+      id: '/_layout/sell/$productId'
+      path: '/sell/$productId'
+      fullPath: '/sell/$productId'
+      preLoaderRoute: typeof LayoutSellProductIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/buy/$productId': {
+      id: '/_layout/buy/$productId'
+      path: '/buy/$productId'
+      fullPath: '/buy/$productId'
+      preLoaderRoute: typeof LayoutBuyProductIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
-  LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutBuyProductIdRoute: typeof LayoutBuyProductIdRoute
+  LayoutSellProductIdRoute: typeof LayoutSellProductIdRoute
+  LayoutSellBulkRoute: typeof LayoutSellBulkRoute
+  LayoutSellNewRoute: typeof LayoutSellNewRoute
+  LayoutBuyIndexRoute: typeof LayoutBuyIndexRoute
+  LayoutSellIndexRoute: typeof LayoutSellIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
-  LayoutItemsRoute: LayoutItemsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutBuyProductIdRoute: LayoutBuyProductIdRoute,
+  LayoutSellProductIdRoute: LayoutSellProductIdRoute,
+  LayoutSellBulkRoute: LayoutSellBulkRoute,
+  LayoutSellNewRoute: LayoutSellNewRoute,
+  LayoutBuyIndexRoute: LayoutBuyIndexRoute,
+  LayoutSellIndexRoute: LayoutSellIndexRoute,
 }
 
 const LayoutRouteWithChildren =

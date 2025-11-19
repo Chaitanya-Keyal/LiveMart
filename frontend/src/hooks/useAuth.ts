@@ -100,8 +100,8 @@ const useAuth = () => {
       UsersService.switchUserRole({ requestBody: { role } as RoleSwitch }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] })
-      // Refresh the page to update the UI based on new role
-      globalThis.location.reload()
+      // Redirect to dashboard after role switch
+      navigate({ to: "/" })
     },
     onError: (err: ApiError) => {
       handleError(err)

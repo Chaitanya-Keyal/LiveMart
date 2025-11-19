@@ -381,6 +381,31 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const Body_products_upload_product_imageSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_products-upload_product_image'
+} as const;
+
+export const BuyerTypeSchema = {
+    type: 'string',
+    enum: ['customer', 'retailer'],
+    title: 'BuyerType'
+} as const;
+
+export const CategoryEnumSchema = {
+    type: 'string',
+    enum: ['electronics', 'clothing', 'food_beverage', 'home_garden', 'health_beauty', 'sports', 'toys', 'books', 'automotive', 'office_supplies', 'pet_supplies', 'jewellery', 'furniture'],
+    title: 'CategoryEnum'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -395,131 +420,19 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
-export const ItemCreateSchema = {
+export const ImageReorderSchemaSchema = {
     properties: {
-        title: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        }
-    },
-    type: 'object',
-    required: ['title'],
-    title: 'ItemCreate',
-    description: 'Payload used when creating a new item.'
-} as const;
-
-export const ItemPublicSchema = {
-    properties: {
-        title: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        },
-        owner_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Owner Id'
-        },
-        role_context: {
-            '$ref': '#/components/schemas/RoleEnum'
-        },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        },
-        updated_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Updated At'
-        }
-    },
-    type: 'object',
-    required: ['title', 'id', 'owner_id', 'role_context', 'created_at', 'updated_at'],
-    title: 'ItemPublic'
-} as const;
-
-export const ItemUpdateSchema = {
-    properties: {
-        title: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255,
-                    minLength: 1
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Title'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        }
-    },
-    type: 'object',
-    title: 'ItemUpdate'
-} as const;
-
-export const ItemsPublicSchema = {
-    properties: {
-        data: {
+        images: {
             items: {
-                '$ref': '#/components/schemas/ItemPublic'
+                '$ref': '#/components/schemas/ProductImageSchema'
             },
             type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
+            title: 'Images'
         }
     },
     type: 'object',
-    required: ['data', 'count'],
-    title: 'ItemsPublic'
+    required: ['images'],
+    title: 'ImageReorderSchema'
 } as const;
 
 export const MessageSchema = {
@@ -582,6 +495,551 @@ export const OTPVerifySchema = {
     title: 'OTPVerify'
 } as const;
 
+export const ProductCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        category: {
+            '$ref': '#/components/schemas/CategoryEnum'
+        },
+        tags: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Tags'
+        },
+        sku: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Sku'
+        },
+        images: {
+            items: {
+                '$ref': '#/components/schemas/ProductImageSchema'
+            },
+            type: 'array',
+            title: 'Images'
+        },
+        pricing_tiers: {
+            items: {
+                '$ref': '#/components/schemas/ProductPricingCreate'
+            },
+            type: 'array',
+            minItems: 1,
+            title: 'Pricing Tiers'
+        },
+        initial_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Initial Stock',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['name', 'category', 'pricing_tiers'],
+    title: 'ProductCreate'
+} as const;
+
+export const ProductImageSchemaSchema = {
+    properties: {
+        path: {
+            type: 'string',
+            title: 'Path'
+        },
+        order: {
+            type: 'integer',
+            title: 'Order'
+        },
+        is_primary: {
+            type: 'boolean',
+            title: 'Is Primary',
+            default: false
+        }
+    },
+    type: 'object',
+    required: ['path', 'order'],
+    title: 'ProductImageSchema'
+} as const;
+
+export const ProductInventoryPublicSchema = {
+    properties: {
+        stock_quantity: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Stock Quantity',
+            default: 0
+        },
+        low_stock_threshold: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Low Stock Threshold',
+            default: 10
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        last_restocked_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Restocked At'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'product_id', 'last_restocked_at', 'created_at', 'updated_at'],
+    title: 'ProductInventoryPublic'
+} as const;
+
+export const ProductInventoryUpdateSchema = {
+    properties: {
+        stock_quantity: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Stock Quantity'
+        },
+        low_stock_threshold: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Low Stock Threshold'
+        }
+    },
+    type: 'object',
+    title: 'ProductInventoryUpdate'
+} as const;
+
+export const ProductPricingCreateSchema = {
+    properties: {
+        buyer_type: {
+            '$ref': '#/components/schemas/BuyerType'
+        },
+        price: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Price'
+        },
+        min_quantity: {
+            type: 'integer',
+            minimum: 1,
+            title: 'Min Quantity',
+            default: 1
+        },
+        max_quantity: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Max Quantity'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        }
+    },
+    type: 'object',
+    required: ['buyer_type', 'price'],
+    title: 'ProductPricingCreate'
+} as const;
+
+export const ProductPricingPublicSchema = {
+    properties: {
+        buyer_type: {
+            '$ref': '#/components/schemas/BuyerType'
+        },
+        price: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Price'
+        },
+        min_quantity: {
+            type: 'integer',
+            minimum: 1,
+            title: 'Min Quantity',
+            default: 1
+        },
+        max_quantity: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Max Quantity'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['buyer_type', 'price', 'id', 'product_id', 'created_at', 'updated_at'],
+    title: 'ProductPricingPublic'
+} as const;
+
+export const ProductPricingUpdateSchema = {
+    properties: {
+        price: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Price'
+        },
+        min_quantity: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Min Quantity'
+        },
+        max_quantity: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Max Quantity'
+        },
+        is_active: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Active'
+        }
+    },
+    type: 'object',
+    title: 'ProductPricingUpdate'
+} as const;
+
+export const ProductPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        category: {
+            '$ref': '#/components/schemas/CategoryEnum'
+        },
+        tags: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Tags'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        seller_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Seller Id'
+        },
+        seller_type: {
+            '$ref': '#/components/schemas/SellerType'
+        },
+        sku: {
+            type: 'string',
+            title: 'Sku'
+        },
+        images: {
+            items: {
+                '$ref': '#/components/schemas/ProductImageSchema'
+            },
+            type: 'array',
+            title: 'Images'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active'
+        },
+        pricing_tiers: {
+            items: {
+                '$ref': '#/components/schemas/ProductPricingPublic'
+            },
+            type: 'array',
+            title: 'Pricing Tiers',
+            default: []
+        },
+        inventory: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProductInventoryPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        primary_image: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Primary Image'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'category', 'id', 'seller_id', 'seller_type', 'sku', 'images', 'is_active', 'created_at', 'updated_at'],
+    title: 'ProductPublic'
+} as const;
+
+export const ProductUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        category: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/CategoryEnum'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        tags: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tags'
+        },
+        is_active: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Active'
+        },
+        sku: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Sku'
+        },
+        pricing_tier: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProductPricingUpdate'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    title: 'ProductUpdate'
+} as const;
+
+export const ProductsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ProductPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ProductsPublic'
+} as const;
+
 export const RoleAddSchema = {
     properties: {
         role: {
@@ -623,6 +1081,12 @@ export const RoleSwitchSchema = {
     required: ['role'],
     title: 'RoleSwitch',
     description: 'Request to switch active role.'
+} as const;
+
+export const SellerTypeSchema = {
+    type: 'string',
+    enum: ['retailer', 'wholesaler'],
+    title: 'SellerType'
 } as const;
 
 export const TokenSchema = {

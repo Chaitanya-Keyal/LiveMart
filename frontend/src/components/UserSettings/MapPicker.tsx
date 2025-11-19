@@ -110,7 +110,7 @@ const MapPicker = ({
     // Reverse geocode the coordinates and call onPlaceSelect so parent can autofill
     if (
       typeof globalThis !== "undefined" &&
-      (globalThis as any)?.google?.maps?.Geocoder
+      (globalThis as { google?: typeof google })?.google?.maps?.Geocoder
     ) {
       const geocoder = new google.maps.Geocoder()
       geocoder.geocode({ location: coords }, (results, status) => {
