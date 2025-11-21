@@ -5,7 +5,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from sqlalchemy import func
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlmodel import Session, select
 
 from app.models.address import Address
@@ -264,6 +264,8 @@ def get_orders_for_buyer(
             joinedload(Order.buyer),
             joinedload(Order.seller),
             joinedload(Order.delivery_partner),
+            selectinload(Order.items),
+            selectinload(Order.history),
         )
     )
     if buyer_type is not None:
@@ -290,6 +292,8 @@ def get_orders_for_seller(
             joinedload(Order.buyer),
             joinedload(Order.seller),
             joinedload(Order.delivery_partner),
+            selectinload(Order.items),
+            selectinload(Order.history),
         )
     )
     if buyer_type is not None:
@@ -311,6 +315,8 @@ def get_orders_for_delivery_partner(
             joinedload(Order.buyer),
             joinedload(Order.seller),
             joinedload(Order.delivery_partner),
+            selectinload(Order.items),
+            selectinload(Order.history),
         )
         .order_by(Order.created_at.desc())
         .offset(skip)
@@ -322,11 +328,18 @@ def get_orders_for_delivery_partner(
 
 
 def get_order_by_id(*, session: Session, order_id: uuid.UUID) -> Order | None:
-    order = session.get(Order, order_id)
-    if order:
-        # Eager load history for frontend timeline
-        session.refresh(order)
-    return order
+    stmt = (
+        select(Order)
+        .where(Order.id == order_id)
+        .options(
+            joinedload(Order.buyer),
+            joinedload(Order.seller),
+            joinedload(Order.delivery_partner),
+            selectinload(Order.items),
+            selectinload(Order.history),
+        )
+    )
+    return session.exec(stmt).first()
 
 
 def update_order_status(
@@ -367,6 +380,8 @@ def get_available_delivery_orders(
             joinedload(Order.buyer),
             joinedload(Order.seller),
             # delivery_partner is None here, so no need to join
+            selectinload(Order.items),
+            selectinload(Order.history),
         )
         .order_by(Order.created_at.desc())
         .offset(skip)

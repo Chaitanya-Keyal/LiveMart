@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import object_session
 
 from app import crud
@@ -254,6 +254,7 @@ def update_status(
     current_user: CurrentUser,
     order_id: uuid.UUID,
     status: OrderStatus,
+    background_tasks: BackgroundTasks,
     notes: str | None = None,
 ) -> Any:
     order = crud.get_order_by_id(session=session, order_id=order_id)
@@ -301,7 +302,8 @@ def update_status(
                 new_status=order.order_status.value,
                 notes=notes,
             )
-            send_email(
+            background_tasks.add_task(
+                send_email,
                 email_to=buyer.email,
                 subject=email_obj.subject,
                 html_content=email_obj.html_content,
@@ -324,7 +326,8 @@ def update_status(
                     new_status=order.order_status.value,
                     notes=notes,
                 )
-                send_email(
+                background_tasks.add_task(
+                    send_email,
                     email_to=seller.email,
                     subject=email_obj2.subject,
                     html_content=email_obj2.html_content,
@@ -341,7 +344,11 @@ def update_status(
     dependencies=[Depends(require_role(RoleEnum.DELIVERY_PARTNER))],
 )
 def claim_delivery(
-    *, session: SessionDep, current_user: CurrentUser, order_id: uuid.UUID
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    order_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     order = crud.get_order_by_id(session=session, order_id=order_id)
     if not order:
@@ -373,7 +380,8 @@ def claim_delivery(
             e1 = generate_delivery_claimed_email(
                 order=payload, delivery_partner_name=dp_name
             )
-            send_email(
+            background_tasks.add_task(
+                send_email,
                 email_to=buyer.email,
                 subject=e1.subject,
                 html_content=e1.html_content,
@@ -382,7 +390,8 @@ def claim_delivery(
             e2 = generate_delivery_claimed_email(
                 order=payload, delivery_partner_name=dp_name
             )
-            send_email(
+            background_tasks.add_task(
+                send_email,
                 email_to=seller.email,
                 subject=e2.subject,
                 html_content=e2.html_content,
