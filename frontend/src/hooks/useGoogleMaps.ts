@@ -5,7 +5,12 @@ const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = [
 ]
 
 export const useGoogleMaps = () => {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  const rawKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
+  // Sanitize key to remove potential trailing backslashes or quotes
+  const apiKey = (rawKey || "")
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/\\$/g, "")
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: "livemart-google-maps",
