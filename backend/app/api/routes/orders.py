@@ -64,9 +64,13 @@ def get_order_action_hints(order, user) -> OrderActionHints | None:
     if order.order_status in {OrderStatus.CANCELLED, OrderStatus.DELIVERED}:
         return None
 
-    is_seller = user.id == order.seller_id
+    is_seller = (user.id == order.seller_id) and (
+        user.active_role in [RoleEnum.RETAILER, RoleEnum.WHOLESALER]
+    )
     delivery_partner_id = order.delivery_partner_id or uuid.UUID(int=0)
-    is_dp = user.id == delivery_partner_id
+    is_dp = (user.id == delivery_partner_id) and (
+        user.active_role == RoleEnum.DELIVERY_PARTNER
+    )
 
     if not (is_seller or is_dp):
         return None
