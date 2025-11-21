@@ -12,6 +12,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { OrderPublic, PaymentPublic } from "@/client/types.gen"
 import { RazorpayPayButton } from "@/components/Payments/RazorpayPayButton"
+import useAddresses from "@/hooks/useAddresses"
 import { useCheckout } from "@/hooks/useCheckout"
 import useCustomToast from "@/hooks/useCustomToast"
 
@@ -24,6 +25,7 @@ function CheckoutPage() {
   const [orders, setOrders] = useState<OrderPublic[]>([])
   const { mutateAsync: checkoutMutateAsync, isError, error } = useCheckout()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { addresses, isLoading: addressesLoading } = useAddresses()
   const navigate = useNavigate()
   const hasPrepared = useRef(false)
 
@@ -36,14 +38,34 @@ function CheckoutPage() {
       setOrders(data.orders as OrderPublic[])
       showSuccessToast("Orders prepared. Proceed to pay.")
     } catch (e: any) {
-      hasPrepared.current = false // Allow retry
       showErrorToast(e?.message || "Checkout failed")
     }
   }, [checkoutMutateAsync, showSuccessToast, showErrorToast])
 
   useEffect(() => {
-    void prepare()
-  }, [prepare])
+    if (!addressesLoading && addresses.length > 0) {
+      void prepare()
+    }
+  }, [prepare, addressesLoading, addresses.length])
+
+  if (!addressesLoading && addresses.length === 0) {
+    return (
+      <Stack mt={6} gap={6} align="center">
+        <Heading size="md" color="orange.500">
+          No Delivery Address
+        </Heading>
+        <Text textAlign="center">
+          Please add a delivery address before checking out.
+        </Text>
+        <Button
+          onClick={() => navigate({ to: "/settings" })}
+          colorScheme="teal"
+        >
+          Add Address
+        </Button>
+      </Stack>
+    )
+  }
 
   if (!payment) {
     if (isError) {
@@ -53,14 +75,8 @@ function CheckoutPage() {
             Checkout Failed
           </Heading>
           <Text>{(error as any)?.message || "Something went wrong"}</Text>
-          <Button
-            onClick={() => {
-              hasPrepared.current = false
-              void prepare()
-            }}
-            colorScheme="teal"
-          >
-            Retry
+          <Button onClick={() => navigate({ to: "/cart" })} colorScheme="teal">
+            Back to Cart
           </Button>
         </Stack>
       )
