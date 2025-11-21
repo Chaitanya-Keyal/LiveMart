@@ -27,20 +27,20 @@ const roleItems: Record<
   admin: [{ icon: FiUsers, title: "Admin Panel", path: "/admin" }],
   customer: [
     { icon: FiShoppingCart, title: "Browse Products", path: "/buy" },
-    { icon: FiBriefcase, title: "My Orders", path: "/orders" },
+    { icon: FiBriefcase, title: "My Orders", path: "/orders/me" },
   ],
   retailer: [
     { icon: FiShoppingCart, title: "Buy", path: "/buy" },
     { icon: FiShoppingBag, title: "Sell", path: "/sell" },
-    { icon: FiBriefcase, title: "Orders", path: "/orders" },
+    { icon: FiBriefcase, title: "Orders", path: "/orders/me" },
   ],
   wholesaler: [
     { icon: FiPackage, title: "Sell", path: "/sell" },
-    { icon: FiBriefcase, title: "Retailer Orders", path: "/orders" },
+    { icon: FiBriefcase, title: "Retailer Orders", path: "/orders/me" },
   ],
   delivery_partner: [
-    { icon: FiTruck, title: "Deliveries", path: "/deliveries" },
-    { icon: FiBriefcase, title: "My Routes", path: "/routes" },
+    { icon: FiTruck, title: "Look for Orders", path: "/delivery/available" },
+    { icon: FiBriefcase, title: "My Deliveries", path: "/delivery/mine" },
   ],
 }
 

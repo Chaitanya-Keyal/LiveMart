@@ -1,6 +1,7 @@
 import logging
 import secrets
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,12 @@ logger = logging.getLogger(__name__)
 class EmailData:
     html_content: str
     subject: str
+
+
+def _humanize_status(value: str | None) -> str:
+    if not value:
+        return ""
+    return str(value).replace("_", " ").title()
 
 
 def _templates_build_dir() -> Path:
@@ -113,6 +120,80 @@ def generate_otp_email(
             "email": email_to,
             "valid_minutes": valid_minutes,
             "message": message,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def generate_order_confirmation_email(
+    buyer_name: str | None, orders: list[dict], payment: dict
+) -> EmailData:
+    subject = f"{settings.PROJECT_NAME} - Order Confirmation"
+    html_content = render_email_template(
+        template_name="order_confirmation.html",
+        context={
+            "buyer_name": buyer_name,
+            "orders": orders,
+            "payment": payment,
+            "year": datetime.utcnow().year,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def generate_new_order_notification_email(
+    seller_name: str | None, order: dict
+) -> EmailData:
+    subject = f"{settings.PROJECT_NAME} - New Order {order['order_number']}"
+    html_content = render_email_template(
+        template_name="new_order.html",
+        context={
+            "seller_name": seller_name,
+            "order": order,
+            "year": datetime.utcnow().year,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def generate_order_status_update_email(
+    order: dict,
+    old_status: str,
+    new_status: str,
+    notes: str | None,
+) -> EmailData:
+    old_status_label = _humanize_status(old_status)
+    new_status_label = _humanize_status(new_status)
+    subject = f"{settings.PROJECT_NAME} - Order {order['order_number']} Status Updated"
+    html_content = render_email_template(
+        template_name="order_status_update.html",
+        context={
+            "order": order,
+            "old_status": old_status,
+            "new_status": new_status,
+            "old_status_label": old_status_label,
+            "new_status_label": new_status_label,
+            "notes": notes,
+            "year": datetime.utcnow().year,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def generate_delivery_claimed_email(
+    order: dict, delivery_partner_name: str | None
+) -> EmailData:
+    order_payload = dict(order)
+    order_payload["order_status_label"] = _humanize_status(order.get("order_status"))
+    subject = (
+        f"{settings.PROJECT_NAME} - Delivery Claimed for Order {order['order_number']}"
+    )
+    html_content = render_email_template(
+        template_name="delivery_claimed.html",
+        context={
+            "order": order_payload,
+            "delivery_partner_name": delivery_partner_name,
+            "year": datetime.utcnow().year,
         },
     )
     return EmailData(html_content=html_content, subject=subject)

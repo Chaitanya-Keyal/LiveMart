@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
 
 export class AddressesService {
     /**
@@ -93,6 +93,94 @@ export class AddressesService {
             url: '/api/v1/users/me/addresses/{address_id}/set-active',
             path: {
                 address_id: data.addressId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class CartService {
+    /**
+     * Get Cart
+     * @returns CartPublic Successful Response
+     * @throws ApiError
+     */
+    public static getCart(): CancelablePromise<CartGetCartResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/cart/'
+        });
+    }
+    
+    /**
+     * Clear Cart
+     * @returns CartPublic Successful Response
+     * @throws ApiError
+     */
+    public static clearCart(): CancelablePromise<CartClearCartResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/cart/'
+        });
+    }
+    
+    /**
+     * Add Item
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CartPublic Successful Response
+     * @throws ApiError
+     */
+    public static addItem(data: CartAddItemData): CancelablePromise<CartAddItemResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/cart/items',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Item
+     * @param data The data for the request.
+     * @param data.cartItemId
+     * @param data.requestBody
+     * @returns CartPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateItem(data: CartUpdateItemData): CancelablePromise<CartUpdateItemResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/cart/items/{cart_item_id}',
+            path: {
+                cart_item_id: data.cartItemId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Remove Item
+     * @param data The data for the request.
+     * @param data.cartItemId
+     * @returns CartPublic Successful Response
+     * @throws ApiError
+     */
+    public static removeItem(data: CartRemoveItemData): CancelablePromise<CartRemoveItemResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/cart/items/{cart_item_id}',
+            path: {
+                cart_item_id: data.cartItemId
             },
             errors: {
                 422: 'Validation Error'
@@ -223,6 +311,207 @@ export class LoginService {
             url: '/api/v1/login/otp/verify',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class OrdersService {
+    /**
+     * Checkout
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CheckoutResponse Successful Response
+     * @throws ApiError
+     */
+    public static checkout(data: OrdersCheckoutData): CancelablePromise<OrdersCheckoutResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/orders/checkout',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * My Orders
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns OrdersPublic Successful Response
+     * @throws ApiError
+     */
+    public static myOrders(data: OrdersMyOrdersData = {}): CancelablePromise<OrdersMyOrdersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/orders/me',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Seller Orders
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns OrdersPublic Successful Response
+     * @throws ApiError
+     */
+    public static sellerOrders(data: OrdersSellerOrdersData = {}): CancelablePromise<OrdersSellerOrdersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/orders/seller',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * My Delivery Orders
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns OrdersPublic Successful Response
+     * @throws ApiError
+     */
+    public static myDeliveryOrders(data: OrdersMyDeliveryOrdersData = {}): CancelablePromise<OrdersMyDeliveryOrdersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/orders/delivery/mine',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Order
+     * @param data The data for the request.
+     * @param data.orderId
+     * @returns OrderPublic Successful Response
+     * @throws ApiError
+     */
+    public static getOrder(data: OrdersGetOrderData): CancelablePromise<OrdersGetOrderResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/orders/{order_id}',
+            path: {
+                order_id: data.orderId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Status
+     * @param data The data for the request.
+     * @param data.orderId
+     * @param data.status
+     * @param data.notes
+     * @returns OrderPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateStatus(data: OrdersUpdateStatusData): CancelablePromise<OrdersUpdateStatusResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/orders/{order_id}/status',
+            path: {
+                order_id: data.orderId
+            },
+            query: {
+                status: data.status,
+                notes: data.notes
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Claim Delivery
+     * @param data The data for the request.
+     * @param data.orderId
+     * @returns OrderPublic Successful Response
+     * @throws ApiError
+     */
+    public static claimDelivery(data: OrdersClaimDeliveryData): CancelablePromise<OrdersClaimDeliveryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/orders/{order_id}/claim',
+            path: {
+                order_id: data.orderId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Available Deliveries
+     * @param data The data for the request.
+     * @param data.latitude
+     * @param data.longitude
+     * @param data.skip
+     * @param data.limit
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static availableDeliveries(data: OrdersAvailableDeliveriesData): CancelablePromise<OrdersAvailableDeliveriesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/orders/delivery/available',
+            query: {
+                latitude: data.latitude,
+                longitude: data.longitude,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class PaymentsService {
+    /**
+     * Razorpay Webhook
+     * @param data The data for the request.
+     * @param data.xRazorpaySignature
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static razorpayWebhook(data: PaymentsRazorpayWebhookData = {}): CancelablePromise<PaymentsRazorpayWebhookResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/payments/razorpay/webhook',
+            headers: {
+                'x-razorpay-signature': data.xRazorpaySignature
+            },
             errors: {
                 422: 'Validation Error'
             }

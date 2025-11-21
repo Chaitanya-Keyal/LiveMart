@@ -1,0 +1,37 @@
+<mjml>
+  <mj-head>
+    <mj-title>New Order Received</mj-title>
+    <mj-preview>A new order is confirmed</mj-preview>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600" />
+  </mj-head>
+  <mj-body background-color="#f7f7f9">
+    <mj-section background-color="#ffffff" padding="24px">
+      <mj-column>
+        <mj-text font-family="Inter" font-size="20px" font-weight="600">New Order #{{ order.order_number }}</mj-text>
+        <mj-text font-family="Inter" font-size="14px">Total: ₹{{ order.order_total }} (Delivery ₹{{ order.delivery_fee }})</mj-text>
+        <mj-text font-family="Inter" font-size="14px" font-weight="600">Items</mj-text>
+        <mj-table font-family="Inter" font-size="13px" color="#333">
+          <tr style="background:#fafafa;font-weight:600;">
+            <th align="left">Product</th>
+            <th align="left">Qty</th>
+            <th align="left">Unit Price (₹)</th>
+          </tr>
+          {% for it in order['items'] %}
+          <tr>
+            <td>{{ it.product_name }}</td>
+            <td>{{ it.quantity }}</td>
+            <td>{{ it.price_paid }}</td>
+          </tr>
+          {% endfor %}
+        </mj-table>
+        <mj-divider border-color="#e0e0e0" />
+        <mj-text font-family="Inter" font-size="12px" color="#666">Please begin processing this order.</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="0 24px">
+      <mj-column>
+        <mj-text font-family="Inter" font-size="11px" color="#999">© {{ year }} LiveMart</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

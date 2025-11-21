@@ -400,10 +400,176 @@ export const BuyerTypeSchema = {
     title: 'BuyerType'
 } as const;
 
+export const CartItemCreateSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        quantity: {
+            type: 'integer',
+            minimum: 1,
+            title: 'Quantity'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'quantity'],
+    title: 'CartItemCreate'
+} as const;
+
+export const CartItemPublicSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        quantity: {
+            type: 'integer',
+            minimum: 1,
+            title: 'Quantity'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'quantity', 'id', 'created_at', 'updated_at'],
+    title: 'CartItemPublic'
+} as const;
+
+export const CartItemUpdateSchema = {
+    properties: {
+        quantity: {
+            type: 'integer',
+            minimum: 1,
+            title: 'Quantity'
+        }
+    },
+    type: 'object',
+    required: ['quantity'],
+    title: 'CartItemUpdate'
+} as const;
+
+export const CartPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        items: {
+            items: {
+                '$ref': '#/components/schemas/CartItemPublic'
+            },
+            type: 'array',
+            title: 'Items',
+            default: []
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'user_id', 'created_at', 'updated_at'],
+    title: 'CartPublic'
+} as const;
+
 export const CategoryEnumSchema = {
     type: 'string',
     enum: ['electronics', 'clothing', 'food_beverage', 'home_garden', 'health_beauty', 'sports', 'toys', 'books', 'automotive', 'office_supplies', 'pet_supplies', 'jewellery', 'furniture'],
     title: 'CategoryEnum'
+} as const;
+
+export const CheckoutRequestSchema = {
+    properties: {
+        delivery_address_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Address Id'
+        }
+    },
+    type: 'object',
+    title: 'CheckoutRequest'
+} as const;
+
+export const CheckoutResponseSchema = {
+    properties: {
+        payment: {
+            '$ref': '#/components/schemas/PaymentPublic'
+        },
+        orders: {
+            items: {
+                '$ref': '#/components/schemas/OrderPublic'
+            },
+            type: 'array',
+            title: 'Orders'
+        }
+    },
+    type: 'object',
+    required: ['payment', 'orders'],
+    title: 'CheckoutResponse'
+} as const;
+
+export const ContactInfoSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        full_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Full Name'
+        },
+        email: {
+            type: 'string',
+            title: 'Email'
+        }
+    },
+    type: 'object',
+    required: ['id', 'email'],
+    title: 'ContactInfo',
+    description: 'Contact information for buyer/seller/delivery partner'
 } as const;
 
 export const HTTPValidationErrorSchema = {
@@ -493,6 +659,440 @@ export const OTPVerifySchema = {
     type: 'object',
     required: ['email', 'code'],
     title: 'OTPVerify'
+} as const;
+
+export const OrderActionHintsSchema = {
+    properties: {
+        next_status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/OrderStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        next_status_label: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Next Status Label'
+        },
+        can_cancel: {
+            type: 'boolean',
+            title: 'Can Cancel',
+            default: false
+        },
+        cancel_disabled_reason: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cancel Disabled Reason'
+        }
+    },
+    type: 'object',
+    title: 'OrderActionHints'
+} as const;
+
+export const OrderItemPublicSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        product_name: {
+            type: 'string',
+            title: 'Product Name'
+        },
+        sku: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Sku'
+        },
+        price_paid: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Price Paid'
+        },
+        quantity: {
+            type: 'integer',
+            minimum: 1,
+            title: 'Quantity'
+        },
+        image_path: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Image Path'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'product_name', 'price_paid', 'quantity', 'id', 'created_at', 'updated_at'],
+    title: 'OrderItemPublic'
+} as const;
+
+export const OrderPublicSchema = {
+    properties: {
+        order_number: {
+            type: 'string',
+            title: 'Order Number'
+        },
+        buyer_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Buyer Id'
+        },
+        seller_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Seller Id'
+        },
+        pickup_address_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Pickup Address Id'
+        },
+        order_status: {
+            '$ref': '#/components/schemas/OrderStatus'
+        },
+        buyer_type: {
+            '$ref': '#/components/schemas/BuyerType'
+        },
+        delivery_partner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Partner Id'
+        },
+        delivery_fee: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Delivery Fee'
+        },
+        order_subtotal: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Order Subtotal'
+        },
+        order_total: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Order Total'
+        },
+        payment_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payment Id'
+        },
+        payment_amount: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payment Amount'
+        },
+        pickup_address_snapshot: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Pickup Address Snapshot'
+        },
+        delivery_address_snapshot: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Address Snapshot'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        items: {
+            items: {
+                '$ref': '#/components/schemas/OrderItemPublic'
+            },
+            type: 'array',
+            title: 'Items',
+            default: []
+        },
+        history: {
+            items: {
+                '$ref': '#/components/schemas/OrderStatusHistoryPublic'
+            },
+            type: 'array',
+            title: 'History',
+            default: []
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        action_hints: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/OrderActionHints'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        buyer_contact: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ContactInfo'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        seller_contact: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ContactInfo'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        delivery_partner_contact: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ContactInfo'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: ['order_number', 'buyer_id', 'seller_id', 'order_status', 'buyer_type', 'delivery_fee', 'order_subtotal', 'order_total', 'id', 'created_at', 'updated_at'],
+    title: 'OrderPublic'
+} as const;
+
+export const OrderStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'confirmed', 'preparing', 'ready_to_ship', 'delivery_partner_assigned', 'picked_up', 'out_for_delivery', 'delivered', 'cancelled', 'returned', 'refunded'],
+    title: 'OrderStatus'
+} as const;
+
+export const OrderStatusHistoryPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        status: {
+            '$ref': '#/components/schemas/OrderStatus'
+        },
+        updated_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated By Id'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'status', 'created_at'],
+    title: 'OrderStatusHistoryPublic'
+} as const;
+
+export const OrdersPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/OrderPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'OrdersPublic'
+} as const;
+
+export const PaymentPublicSchema = {
+    properties: {
+        buyer_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Buyer Id'
+        },
+        status: {
+            '$ref': '#/components/schemas/PaymentStatus'
+        },
+        total_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Amount'
+        },
+        currency: {
+            type: 'string',
+            maxLength: 8,
+            minLength: 1,
+            title: 'Currency',
+            default: 'INR'
+        },
+        razorpay_order_id: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Razorpay Order Id'
+        },
+        razorpay_payment_id: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Razorpay Payment Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['buyer_id', 'status', 'total_amount', 'id', 'created_at', 'updated_at'],
+    title: 'PaymentPublic'
+} as const;
+
+export const PaymentStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'completed', 'failed'],
+    title: 'PaymentStatus'
 } as const;
 
 export const ProductCreateSchema = {

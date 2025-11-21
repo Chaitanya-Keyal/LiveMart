@@ -142,6 +142,7 @@ def list_products(
 @router.get("/search/autocomplete", response_model=list[str])
 def autocomplete_products(
     session: SessionDep,
+    current_user: CurrentUser,  # noqa: ARG001
     q: str,
     limit: int = 10,
     seller_type: SellerType | None = None,

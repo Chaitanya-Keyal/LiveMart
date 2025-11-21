@@ -63,7 +63,50 @@ export type Body_products_upload_product_image = {
 
 export type BuyerType = 'customer' | 'retailer';
 
+export type CartItemCreate = {
+    product_id: string;
+    quantity: number;
+};
+
+export type CartItemPublic = {
+    product_id: string;
+    quantity: number;
+    id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type CartItemUpdate = {
+    quantity: number;
+};
+
+export type CartPublic = {
+    id: string;
+    user_id: string;
+    items?: Array<CartItemPublic>;
+    created_at: string;
+    updated_at: string;
+};
+
 export type CategoryEnum = 'electronics' | 'clothing' | 'food_beverage' | 'home_garden' | 'health_beauty' | 'sports' | 'toys' | 'books' | 'automotive' | 'office_supplies' | 'pet_supplies' | 'jewellery' | 'furniture';
+
+export type CheckoutRequest = {
+    delivery_address_id?: (string | null);
+};
+
+export type CheckoutResponse = {
+    payment: PaymentPublic;
+    orders: Array<OrderPublic>;
+};
+
+/**
+ * Contact information for buyer/seller/delivery partner
+ */
+export type ContactInfo = {
+    id: string;
+    full_name?: (string | null);
+    email: string;
+};
 
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
@@ -82,6 +125,70 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type OrderActionHints = {
+    next_status?: (OrderStatus | null);
+    next_status_label?: (string | null);
+    can_cancel?: boolean;
+    cancel_disabled_reason?: (string | null);
+};
+
+export type OrderItemPublic = {
+    product_id: string;
+    product_name: string;
+    sku?: (string | null);
+    price_paid: string;
+    quantity: number;
+    image_path?: (string | null);
+    id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type OrderPublic = {
+    order_number: string;
+    buyer_id: string;
+    seller_id: string;
+    pickup_address_id?: (string | null);
+    order_status: OrderStatus;
+    buyer_type: BuyerType;
+    delivery_partner_id?: (string | null);
+    delivery_fee: string;
+    order_subtotal: string;
+    order_total: string;
+    payment_id?: (string | null);
+    payment_amount?: (string | null);
+    pickup_address_snapshot?: ({
+    [key: string]: unknown;
+} | null);
+    delivery_address_snapshot?: ({
+    [key: string]: unknown;
+} | null);
+    id: string;
+    items?: Array<OrderItemPublic>;
+    history?: Array<OrderStatusHistoryPublic>;
+    created_at: string;
+    updated_at: string;
+    action_hints?: (OrderActionHints | null);
+    buyer_contact?: (ContactInfo | null);
+    seller_contact?: (ContactInfo | null);
+    delivery_partner_contact?: (ContactInfo | null);
+};
+
+export type OrdersPublic = {
+    data: Array<OrderPublic>;
+    count: number;
+};
+
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready_to_ship' | 'delivery_partner_assigned' | 'picked_up' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned' | 'refunded';
+
+export type OrderStatusHistoryPublic = {
+    id: string;
+    status: OrderStatus;
+    updated_by_id?: (string | null);
+    notes?: (string | null);
+    created_at: string;
+};
+
 export type OTPCreate = {
     email: string;
 };
@@ -90,6 +197,20 @@ export type OTPVerify = {
     email: string;
     code: string;
 };
+
+export type PaymentPublic = {
+    buyer_id: string;
+    status: PaymentStatus;
+    total_amount: string;
+    currency?: string;
+    razorpay_order_id?: (string | null);
+    razorpay_payment_id?: (string | null);
+    id: string;
+    created_at: string;
+    updated_at: string;
+};
+
+export type PaymentStatus = 'pending' | 'completed' | 'failed';
 
 export type ProductCreate = {
     name: string;
@@ -311,6 +432,29 @@ export type AddressesSetActiveAddressData = {
 
 export type AddressesSetActiveAddressResponse = (AddressPublic);
 
+export type CartGetCartResponse = (CartPublic);
+
+export type CartClearCartResponse = (CartPublic);
+
+export type CartAddItemData = {
+    requestBody: CartItemCreate;
+};
+
+export type CartAddItemResponse = (CartPublic);
+
+export type CartUpdateItemData = {
+    cartItemId: string;
+    requestBody: CartItemUpdate;
+};
+
+export type CartUpdateItemResponse = (CartPublic);
+
+export type CartRemoveItemData = {
+    cartItemId: string;
+};
+
+export type CartRemoveItemResponse = (CartPublic);
+
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };
@@ -344,6 +488,68 @@ export type LoginVerifyLoginOtpData = {
 };
 
 export type LoginVerifyLoginOtpResponse = (Token);
+
+export type OrdersCheckoutData = {
+    requestBody: CheckoutRequest;
+};
+
+export type OrdersCheckoutResponse = (CheckoutResponse);
+
+export type OrdersMyOrdersData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type OrdersMyOrdersResponse = (OrdersPublic);
+
+export type OrdersSellerOrdersData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type OrdersSellerOrdersResponse = (OrdersPublic);
+
+export type OrdersMyDeliveryOrdersData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type OrdersMyDeliveryOrdersResponse = (OrdersPublic);
+
+export type OrdersGetOrderData = {
+    orderId: string;
+};
+
+export type OrdersGetOrderResponse = (OrderPublic);
+
+export type OrdersUpdateStatusData = {
+    notes?: (string | null);
+    orderId: string;
+    status: OrderStatus;
+};
+
+export type OrdersUpdateStatusResponse = (OrderPublic);
+
+export type OrdersClaimDeliveryData = {
+    orderId: string;
+};
+
+export type OrdersClaimDeliveryResponse = (OrderPublic);
+
+export type OrdersAvailableDeliveriesData = {
+    latitude: number;
+    limit?: number;
+    longitude: number;
+    skip?: number;
+};
+
+export type OrdersAvailableDeliveriesResponse = (unknown);
+
+export type PaymentsRazorpayWebhookData = {
+    xRazorpaySignature?: (string | null);
+};
+
+export type PaymentsRazorpayWebhookResponse = (unknown);
 
 export type ProductsListProductsData = {
     brands?: (string | null);
