@@ -1,0 +1,30 @@
+<mjml>
+  <mj-head>
+    <mj-title>Order Status Updated</mj-title>
+    <mj-preview>Status changed</mj-preview>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600" />
+  </mj-head>
+  <mj-body background-color="#f7f7f9">
+    <mj-section background-color="#ffffff" padding="24px">
+      <mj-column>
+        <mj-text font-family="Inter" font-size="18px" font-weight="600">Order #{{ order.order_number }}</mj-text>
+        <mj-text font-family="Inter" font-size="14px">
+          Status changed from
+          <strong>{{ old_status_label or old_status }}</strong>
+          to
+          <strong>{{ new_status_label or new_status }}</strong>.
+        </mj-text>
+        {% if notes %}
+        <mj-text font-family="Inter" font-size="13px" color="#555"><strong>Notes:</strong> {{ notes }}</mj-text>
+        {% endif %}
+        <mj-divider border-color="#e0e0e0" />
+        <mj-text font-family="Inter" font-size="13px">Total: ₹{{ order.order_total }} (Delivery ₹{{ order.delivery_fee }})</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="0 24px">
+      <mj-column>
+        <mj-text font-family="Inter" font-size="11px" color="#999">© {{ year }} LiveMart</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
