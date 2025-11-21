@@ -40,6 +40,16 @@ from .products import (
     update_product,
     update_product_images,
 )
+from .reviews import (
+    create_review,
+    delete_review,
+    get_product_rating_stats,
+    get_review_by_id,
+    get_reviews_for_product,
+    get_user_review_for_product,
+    has_purchased_product,
+    update_review,
+)
 from .users import (
     add_role_to_user,
     authenticate,
@@ -93,4 +103,12 @@ __all__ = [
     "get_available_delivery_orders",
     "get_orders_for_delivery_partner",
     "clone_product_from_order_item",
+    "create_review",
+    "update_review",
+    "delete_review",
+    "get_reviews_for_product",
+    "get_review_by_id",
+    "get_user_review_for_product",
+    "has_purchased_product",
+    "get_product_rating_stats",
 ]

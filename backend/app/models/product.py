@@ -255,6 +255,8 @@ class ProductPublic(ProductBase):
     primary_image: str | None = None
     address_id: uuid.UUID | None = None
     distance_km: float | None = None
+    average_rating: float | None = None
+    review_count: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -265,6 +267,8 @@ class ProductPublic(ProductBase):
         buyer_type: BuyerType | None = None,
         *,
         distance_km: float | None = None,
+        average_rating: float | None = None,
+        review_count: int = 0,
     ) -> "ProductPublic":
         data = {
             "id": product.id,
@@ -283,6 +287,8 @@ class ProductPublic(ProductBase):
             "primary_image": product.get_primary_image(),
             "address_id": product.address_id,
             "distance_km": distance_km,
+            "average_rating": average_rating,
+            "review_count": review_count,
             "created_at": product.created_at,
             "updated_at": product.updated_at,
         }

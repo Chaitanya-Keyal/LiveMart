@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, ProductsCloneProductData, ProductsCloneProductResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, ProductsCloneProductData, ProductsCloneProductResponse, ReviewsGetProductReviewsData, ReviewsGetProductReviewsResponse, ReviewsCreateProductReviewData, ReviewsCreateProductReviewResponse, ReviewsUpdateProductReviewData, ReviewsUpdateProductReviewResponse, ReviewsDeleteProductReviewData, ReviewsDeleteProductReviewResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
 
 export class AddressesService {
     /**
@@ -812,6 +812,106 @@ export class ProductsService {
             url: '/api/v1/products/clone/{order_item_id}',
             path: {
                 order_item_id: data.orderItemId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ReviewsService {
+    /**
+     * Get Product Reviews
+     * Get all reviews for a product with optional sorting
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.skip
+     * @param data.limit
+     * @param data.sort
+     * @returns ReviewsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getProductReviews(data: ReviewsGetProductReviewsData): CancelablePromise<ReviewsGetProductReviewsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/{product_id}/reviews',
+            path: {
+                product_id: data.productId
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                sort: data.sort
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Product Review
+     * Create a review for a product (purchasers only)
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns ReviewPublic Successful Response
+     * @throws ApiError
+     */
+    public static createProductReview(data: ReviewsCreateProductReviewData): CancelablePromise<ReviewsCreateProductReviewResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/{product_id}/reviews',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product Review
+     * Update a review (author only)
+     * @param data The data for the request.
+     * @param data.reviewId
+     * @param data.requestBody
+     * @returns ReviewPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProductReview(data: ReviewsUpdateProductReviewData): CancelablePromise<ReviewsUpdateProductReviewResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/products/reviews/{review_id}',
+            path: {
+                review_id: data.reviewId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product Review
+     * Delete a review (author only)
+     * @param data The data for the request.
+     * @param data.reviewId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static deleteProductReview(data: ReviewsDeleteProductReviewData): CancelablePromise<ReviewsDeleteProductReviewResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/products/reviews/{review_id}',
+            path: {
+                review_id: data.reviewId
             },
             errors: {
                 422: 'Validation Error'

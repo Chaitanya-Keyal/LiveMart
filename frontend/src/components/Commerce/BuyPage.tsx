@@ -24,7 +24,12 @@ export const BuyPage = () => {
   const [longitude, setLongitude] = useState<number | null>(null)
   const [radiusKm, setRadiusKm] = useState<number | null>(25)
   const [sortBy, setSortBy] = useState<
-    "newest" | "price_asc" | "price_desc" | "distance_asc"
+    | "newest"
+    | "price_asc"
+    | "price_desc"
+    | "distance_asc"
+    | "rating_desc"
+    | "rating_asc"
   >("newest")
   const [page, setPage] = useState(1)
 

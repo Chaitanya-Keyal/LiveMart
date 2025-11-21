@@ -21,6 +21,8 @@ import { useCart } from "@/hooks/useCart"
 import useCustomToast from "@/hooks/useCustomToast"
 import { formatPrice } from "@/utils"
 import { getAllProductImageUrls, getPrimaryImageUrl } from "@/utils/images"
+import { ProductReviewsSection } from "./ProductReviewsSection"
+import { StarRating } from "./StarRating"
 
 interface ProductDetailProps {
   product: ProductPublic
@@ -196,6 +198,17 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
             <Heading size="xl" mb={2}>
               {product.name}
             </Heading>
+            {product.average_rating !== null &&
+              product.average_rating !== undefined && (
+                <Box mb={2}>
+                  <StarRating
+                    value={product.average_rating}
+                    count={product.review_count}
+                    size="md"
+                    showCount
+                  />
+                </Box>
+              )}
             {product.description && (
               <Text color="gray.600" fontSize="md">
                 {product.description}
@@ -336,6 +349,9 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
           </VStack>
         </VStack>
       </SimpleGrid>
+
+      {/* Reviews Section */}
+      <ProductReviewsSection productId={product.id} />
     </Container>
   )
 }

@@ -290,6 +290,8 @@ export type ProductPublic = {
     primary_image?: (string | null);
     address_id?: (string | null);
     distance_km?: (number | null);
+    average_rating?: (number | null);
+    review_count?: number;
     created_at: string;
     updated_at: string;
 };
@@ -309,6 +311,35 @@ export type ProductUpdate = {
     pricing_tier?: (ProductPricingUpdate | null);
     brand?: (string | null);
     address_id?: (string | null);
+};
+
+export type ReviewCreate = {
+    rating: number;
+    title: string;
+    content: string;
+};
+
+export type ReviewPublic = {
+    rating: number;
+    title: string;
+    content: string;
+    id: string;
+    product_id: string;
+    author_user_id: string;
+    author_name?: (string | null);
+    created_at: string;
+    updated_at: string;
+};
+
+export type ReviewsPublic = {
+    data: Array<ReviewPublic>;
+    count: number;
+};
+
+export type ReviewUpdate = {
+    rating?: (number | null);
+    title?: (string | null);
+    content?: (string | null);
 };
 
 /**
@@ -566,7 +597,7 @@ export type ProductsListProductsData = {
     sellerId?: (string | null);
     sellerType?: (SellerType | null);
     skip?: number;
-    sortBy?: ('newest' | 'price_asc' | 'price_desc' | 'distance_asc' | null);
+    sortBy?: ('newest' | 'price_asc' | 'price_desc' | 'distance_asc' | 'rating_desc' | 'rating_asc' | null);
     tags?: (string | null);
 };
 
@@ -640,6 +671,35 @@ export type ProductsCloneProductData = {
 };
 
 export type ProductsCloneProductResponse = (ProductPublic);
+
+export type ReviewsGetProductReviewsData = {
+    limit?: number;
+    productId: string;
+    skip?: number;
+    sort?: 'newest' | 'rating_desc' | 'rating_asc';
+};
+
+export type ReviewsGetProductReviewsResponse = (ReviewsPublic);
+
+export type ReviewsCreateProductReviewData = {
+    productId: string;
+    requestBody: ReviewCreate;
+};
+
+export type ReviewsCreateProductReviewResponse = (ReviewPublic);
+
+export type ReviewsUpdateProductReviewData = {
+    requestBody: ReviewUpdate;
+    reviewId: string;
+};
+
+export type ReviewsUpdateProductReviewResponse = (ReviewPublic);
+
+export type ReviewsDeleteProductReviewData = {
+    reviewId: string;
+};
+
+export type ReviewsDeleteProductReviewResponse = (unknown);
 
 export type UsersReadUsersData = {
     limit?: number;

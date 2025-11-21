@@ -22,6 +22,7 @@ from app.models.product import (
     ProductUpdate,
     SellerType,
 )
+from app.models.review import ProductReview
 from app.models.role import RoleEnum
 from app.models.user import User
 from app.utils.images import copy_product_images, ensure_primary_image
@@ -129,7 +130,10 @@ def get_products(
     latitude: float | None = None,
     longitude: float | None = None,
     radius_km: float | None = None,
-    sort_by: Literal["newest", "price_asc", "price_desc", "distance_asc"] | None = None,
+    sort_by: Literal[
+        "newest", "price_asc", "price_desc", "distance_asc", "rating_desc", "rating_asc"
+    ]
+    | None = None,
 ) -> tuple[list[Product], int]:
     """
     Get products with filters and pagination.
@@ -233,7 +237,45 @@ def get_products(
     count_statement = select(func.count()).select_from(count_subq)
     count = session.exec(count_statement).one()
 
-    if sort_by == "price_asc" and buyer_type is not None:
+    if sort_by == "rating_desc":
+        rating_subq = (
+            select(
+                ProductReview.product_id,
+                func.avg(ProductReview.rating).label("avg_rating"),
+                func.count(ProductReview.id).label("review_count"),
+            )
+            .where(ProductReview.deleted_at.is_(None))
+            .group_by(ProductReview.product_id)
+            .subquery()
+        )
+        statement = statement.join(
+            rating_subq, rating_subq.c.product_id == Product.id, isouter=True
+        )
+        statement = statement.order_by(
+            rating_subq.c.avg_rating.desc().nulls_last(),
+            rating_subq.c.review_count.desc().nulls_last(),
+            Product.created_at.desc(),
+        )
+    elif sort_by == "rating_asc":
+        rating_subq = (
+            select(
+                ProductReview.product_id,
+                func.avg(ProductReview.rating).label("avg_rating"),
+                func.count(ProductReview.id).label("review_count"),
+            )
+            .where(ProductReview.deleted_at.is_(None))
+            .group_by(ProductReview.product_id)
+            .subquery()
+        )
+        statement = statement.join(
+            rating_subq, rating_subq.c.product_id == Product.id, isouter=True
+        )
+        statement = statement.order_by(
+            rating_subq.c.avg_rating.asc().nulls_last(),
+            rating_subq.c.review_count.asc().nulls_last(),
+            Product.created_at.desc(),
+        )
+    elif sort_by == "price_asc" and buyer_type is not None:
         price_min_subq = (
             select(
                 ProductPricing.product_id, func.min(ProductPricing.price).label("minp")

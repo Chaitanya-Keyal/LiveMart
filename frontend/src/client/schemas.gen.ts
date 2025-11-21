@@ -1576,6 +1576,22 @@ export const ProductPublicSchema = {
             ],
             title: 'Distance Km'
         },
+        average_rating: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Average Rating'
+        },
+        review_count: {
+            type: 'integer',
+            title: 'Review Count',
+            default: 0
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -1721,6 +1737,159 @@ export const ProductsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'ProductsPublic'
+} as const;
+
+export const ReviewCreateSchema = {
+    properties: {
+        rating: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Rating'
+        },
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        content: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1,
+            title: 'Content'
+        }
+    },
+    type: 'object',
+    required: ['rating', 'title', 'content'],
+    title: 'ReviewCreate'
+} as const;
+
+export const ReviewPublicSchema = {
+    properties: {
+        rating: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Rating'
+        },
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title'
+        },
+        content: {
+            type: 'string',
+            maxLength: 2000,
+            minLength: 1,
+            title: 'Content'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        author_user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Author User Id'
+        },
+        author_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Author Name'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['rating', 'title', 'content', 'id', 'product_id', 'author_user_id', 'created_at', 'updated_at'],
+    title: 'ReviewPublic'
+} as const;
+
+export const ReviewUpdateSchema = {
+    properties: {
+        rating: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    maximum: 5,
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating'
+        },
+        title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Title'
+        },
+        content: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Content'
+        }
+    },
+    type: 'object',
+    title: 'ReviewUpdate'
+} as const;
+
+export const ReviewsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ReviewPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ReviewsPublic'
 } as const;
 
 export const RoleAddSchema = {

@@ -15,6 +15,7 @@ import type { ProductPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import { formatPrice } from "@/utils"
 import { getPrimaryImageUrl } from "@/utils/images"
+import { StarRating } from "./StarRating"
 
 interface ProductCardProps {
   product: ProductPublic
@@ -130,6 +131,17 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               >
                 {product.name}
               </Text>
+              {product.average_rating !== null &&
+                product.average_rating !== undefined &&
+                product.review_count !== undefined &&
+                product.review_count > 0 && (
+                  <StarRating
+                    value={product.average_rating}
+                    count={product.review_count}
+                    size="xs"
+                    showCount
+                  />
+                )}
               {distanceKm != null && (
                 <HStack gap={1} color="gray.600" fontSize="sm">
                   <Icon as={FiMapPin} />

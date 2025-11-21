@@ -4,6 +4,7 @@ from .address import Address
 from .order import Cart, CartItem, Order, OrderItem, OrderStatusHistory, Payment
 from .otp import OTP
 from .product import Product, ProductInventory, ProductPricing
+from .review import ProductReview
 from .role import UserRole
 from .user import User
 
@@ -22,4 +23,5 @@ __all__ = [
     "OrderItem",
     "OrderStatusHistory",
     "Payment",
+    "ProductReview",
 ]

@@ -26,9 +26,21 @@ interface FilterSidebarProps {
   longitude: number | null
   radiusKm: number | null
   onRadiusChange: (v: number | null) => void
-  sortBy: "newest" | "price_asc" | "price_desc" | "distance_asc"
+  sortBy:
+    | "newest"
+    | "price_asc"
+    | "price_desc"
+    | "distance_asc"
+    | "rating_desc"
+    | "rating_asc"
   onSortByChange: (
-    v: "newest" | "price_asc" | "price_desc" | "distance_asc",
+    v:
+      | "newest"
+      | "price_asc"
+      | "price_desc"
+      | "distance_asc"
+      | "rating_desc"
+      | "rating_asc",
   ) => void
   onClearFilters: () => void
 }
@@ -186,6 +198,8 @@ export const FilterSidebar = (props: FilterSidebarProps) => {
             <option value="newest">Newest</option>
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
+            <option value="rating_desc">Rating: High to Low</option>
+            <option value="rating_asc">Rating: Low to High</option>
             <option value="distance_asc">Nearest</option>
           </NativeSelect.Field>
         </NativeSelect.Root>

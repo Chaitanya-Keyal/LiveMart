@@ -11,6 +11,7 @@ from app.models.product import (
     BuyerType,
     CategoryEnum,
     ImageReorderSchema,
+    Product,
     ProductCreate,
     ProductInventoryPublic,
     ProductInventoryUpdate,
@@ -29,6 +30,25 @@ PRODUCT_NOT_FOUND = "Product not found"
 NOT_ENOUGH_PERMISSIONS = "Not enough permissions"
 INVALID_SELLER_ROLE = "User must have RETAILER or WHOLESALER role to create products"
 CLONE_ERROR_PREFIX = "Cannot clone product:"
+
+
+def enrich_product_with_ratings(
+    session: SessionDep,
+    product: Product,
+    buyer_type: BuyerType,
+    distance_km: float | None = None,
+) -> ProductPublic:
+    """Helper to create ProductPublic with rating stats"""
+    avg_rating, review_count = crud.get_product_rating_stats(
+        session=session, product_id=product.id
+    )
+    return ProductPublic.from_product(
+        product,
+        buyer_type=buyer_type,
+        distance_km=distance_km,
+        average_rating=avg_rating,
+        review_count=review_count,
+    )
 
 
 def get_current_seller(current_user: CurrentUser) -> CurrentUser:
@@ -64,7 +84,17 @@ def list_products(
     latitude: float | None = None,
     longitude: float | None = None,
     radius_km: float | None = None,
-    sort_by: Literal["newest", "price_asc", "price_desc", "distance_asc"] | None = None,
+    sort_by: (
+        Literal[
+            "newest",
+            "price_asc",
+            "price_desc",
+            "distance_asc",
+            "rating_desc",
+            "rating_asc",
+        ]
+        | None
+    ) = None,
 ) -> Any:
     """
     List products with filters.
@@ -126,7 +156,8 @@ def list_products(
 
         for prod, dist in with_dist:
             products_public.append(
-                ProductPublic.from_product(
+                enrich_product_with_ratings(
+                    session,
                     prod,
                     buyer_type=buyer_type,
                     distance_km=(round(dist, 2) if dist is not None else None),
@@ -134,7 +165,8 @@ def list_products(
             )
     else:
         products_public = [
-            ProductPublic.from_product(p, buyer_type=buyer_type) for p in products
+            enrich_product_with_ratings(session, p, buyer_type=buyer_type)
+            for p in products
         ]
 
     return ProductsPublic(data=products_public, count=count)
@@ -180,7 +212,7 @@ def get_product(
         else BuyerType.CUSTOMER
     )
 
-    return ProductPublic.from_product(product, buyer_type=buyer_type)
+    return enrich_product_with_ratings(session, product, buyer_type=buyer_type)
 
 
 @router.post("/", response_model=ProductPublic)
@@ -232,7 +264,12 @@ def create_product(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return ProductPublic.from_product(product)
+    buyer_type = (
+        BuyerType.RETAILER
+        if seller_type == SellerType.WHOLESALER
+        else BuyerType.CUSTOMER
+    )
+    return enrich_product_with_ratings(session, product, buyer_type=buyer_type)
 
 
 @router.put("/{product_id}", response_model=ProductPublic)
@@ -292,7 +329,12 @@ def update_product(
     product = crud.update_product(
         session=session, product=product, product_in=product_in
     )
-    return ProductPublic.from_product(product)
+    buyer_type = (
+        BuyerType.RETAILER
+        if product.seller_type == SellerType.WHOLESALER
+        else BuyerType.CUSTOMER
+    )
+    return enrich_product_with_ratings(session, product, buyer_type=buyer_type)
 
 
 @router.delete("/{product_id}")
@@ -382,7 +424,12 @@ async def upload_product_image(
             session=session, product=product, images=images
         )
 
-        return ProductPublic.from_product(product)
+        buyer_type = (
+            BuyerType.RETAILER
+            if product.seller_type == SellerType.WHOLESALER
+            else BuyerType.CUSTOMER
+        )
+        return enrich_product_with_ratings(session, product, buyer_type=buyer_type)
 
     except HTTPException:
         raise
@@ -426,7 +473,12 @@ def delete_product_image(
         session=session, product=product, images=images
     )
 
-    return ProductPublic.from_product(product)
+    buyer_type = (
+        BuyerType.RETAILER
+        if product.seller_type == SellerType.WHOLESALER
+        else BuyerType.CUSTOMER
+    )
+    return enrich_product_with_ratings(session, product, buyer_type=buyer_type)
 
 
 @router.put("/{product_id}/images/reorder", response_model=ProductPublic)
@@ -457,7 +509,12 @@ def reorder_product_images(
             session=session, product=product, images=images
         )
 
-        return ProductPublic.from_product(product)
+        buyer_type = (
+            BuyerType.RETAILER
+            if product.seller_type == SellerType.WHOLESALER
+            else BuyerType.CUSTOMER
+        )
+        return enrich_product_with_ratings(session, product, buyer_type=buyer_type)
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -481,9 +538,12 @@ def clone_product(
     if current_seller.active_role != RoleEnum.RETAILER:
         raise HTTPException(status_code=403, detail="Only retailers can clone products")
     try:
-        product = crud.clone_product_from_order_item(
+        cloned_product = crud.clone_product_from_order_item(
             session=session, order_item_id=order_item_id, new_seller=current_seller
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"{CLONE_ERROR_PREFIX} {str(e)}")
-    return ProductPublic.from_product(product, buyer_type=BuyerType.CUSTOMER)
+
+    return enrich_product_with_ratings(
+        session, cloned_product, buyer_type=BuyerType.CUSTOMER
+    )

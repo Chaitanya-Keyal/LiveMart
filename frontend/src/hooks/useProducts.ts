@@ -41,7 +41,14 @@ interface UseProductsOptions {
   latitude?: number | null
   longitude?: number | null
   radiusKm?: number | null
-  sortBy?: "newest" | "price_asc" | "price_desc" | "distance_asc" | null
+  sortBy?:
+    | "newest"
+    | "price_asc"
+    | "price_desc"
+    | "distance_asc"
+    | "rating_desc"
+    | "rating_asc"
+    | null
 }
 
 export const useProducts = (options: UseProductsOptions = {}) => {
