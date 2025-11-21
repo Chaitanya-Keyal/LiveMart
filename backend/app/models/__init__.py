@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel
 
 from .address import Address
+from .order import Cart, CartItem, Order, OrderItem, OrderStatusHistory, Payment
 from .otp import OTP
 from .product import Product, ProductInventory, ProductPricing
 from .role import UserRole
@@ -15,4 +16,10 @@ __all__ = [
     "Product",
     "ProductPricing",
     "ProductInventory",
+    "Cart",
+    "CartItem",
+    "Order",
+    "OrderItem",
+    "OrderStatusHistory",
+    "Payment",
 ]
