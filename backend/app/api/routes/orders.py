@@ -27,19 +27,19 @@ from app.utils.email import (
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
-SELLER_FLOW = [
-    OrderStatus.PENDING,
-    OrderStatus.CONFIRMED,
-    OrderStatus.PREPARING,
-    OrderStatus.READY_TO_SHIP,
-]
+SELLER_TRANSITIONS = {
+    OrderStatus.PENDING: OrderStatus.CONFIRMED,
+    OrderStatus.CONFIRMED: OrderStatus.PREPARING,
+    OrderStatus.PREPARING: OrderStatus.READY_TO_SHIP,
+}
 
-DELIVERY_FLOW = [
-    OrderStatus.DELIVERY_PARTNER_ASSIGNED,
-    OrderStatus.PICKED_UP,
-    OrderStatus.OUT_FOR_DELIVERY,
-    OrderStatus.DELIVERED,
-]
+DELIVERY_TRANSITIONS = {
+    OrderStatus.DELIVERY_PARTNER_ASSIGNED: OrderStatus.PICKED_UP,
+    OrderStatus.PICKED_UP: OrderStatus.OUT_FOR_DELIVERY,
+    OrderStatus.OUT_FOR_DELIVERY: OrderStatus.DELIVERED,
+}
+
+SELLER_ROLES = {RoleEnum.RETAILER, RoleEnum.WHOLESALER}
 
 CANCEL_ALLOWED_STATUSES = {
     OrderStatus.PENDING,
@@ -50,53 +50,56 @@ CANCEL_ALLOWED_STATUSES = {
 FORBIDDEN_TARGETS = {OrderStatus.RETURNED, OrderStatus.REFUNDED}
 
 
-def _next_in_flow(current: OrderStatus, flow: list[OrderStatus]) -> OrderStatus | None:
-    try:
-        idx = flow.index(current)
-    except ValueError:
-        return None
-    if idx == len(flow) - 1:
-        return None
-    return flow[idx + 1]
-
-
 def get_order_action_hints(order, user) -> OrderActionHints | None:
-    if order.order_status in {OrderStatus.CANCELLED, OrderStatus.DELIVERED}:
+    order_status = order.order_status
+    if order_status in {
+        OrderStatus.CANCELLED,
+        OrderStatus.DELIVERED,
+        OrderStatus.RETURNED,
+        OrderStatus.REFUNDED,
+    }:
         return None
 
-    is_seller = (user.id == order.seller_id) and (
-        user.active_role in [RoleEnum.RETAILER, RoleEnum.WHOLESALER]
-    )
-    delivery_partner_id = order.delivery_partner_id or uuid.UUID(int=0)
-    is_dp = (user.id == delivery_partner_id) and (
-        user.active_role == RoleEnum.DELIVERY_PARTNER
+    active_role = user.active_role
+    user_id = user.id
+    seller_id = order.seller_id
+    dp_id = order.delivery_partner_id
+
+    is_seller = (user_id == seller_id) and (active_role in SELLER_ROLES)
+
+    is_dp = (
+        dp_id is not None
+        and user_id == dp_id
+        and active_role == RoleEnum.DELIVERY_PARTNER
     )
 
     if not (is_seller or is_dp):
         return None
 
     hints = OrderActionHints()
-    seller_flow_status = order.order_status in SELLER_FLOW
-    delivery_flow_status = order.order_status in DELIVERY_FLOW
-    applied = False
 
-    if is_seller and seller_flow_status:
-        hints.next_status = _next_in_flow(order.order_status, SELLER_FLOW)
-        hints.can_cancel = order.order_status in CANCEL_ALLOWED_STATUSES
-        applied = True
+    if is_seller:
+        next_status = SELLER_TRANSITIONS.get(order_status)
+        can_cancel = order_status in CANCEL_ALLOWED_STATUSES
 
-    if not applied and is_dp and delivery_flow_status:
-        hints.next_status = _next_in_flow(order.order_status, DELIVERY_FLOW)
-        hints.can_cancel = False
-        applied = True
+        if next_status or can_cancel:
+            hints.next_status = next_status
+            hints.can_cancel = can_cancel
+            if hints.next_status:
+                hints.next_status_label = hints.next_status.value.replace(
+                    "_", " "
+                ).title()
+            return hints
 
-    if not applied or (not hints.next_status and not hints.can_cancel):
-        return None
+    if is_dp:
+        next_status = DELIVERY_TRANSITIONS.get(order_status)
+        if next_status:
+            hints.next_status = next_status
+            hints.can_cancel = False
+            hints.next_status_label = next_status.value.replace("_", " ").title()
+            return hints
 
-    if hints.next_status:
-        hints.next_status_label = hints.next_status.value.replace("_", " ").title()
-
-    return hints
+    return None
 
 
 def serialize_order(order, current_user: CurrentUser | None = None) -> OrderPublic:
