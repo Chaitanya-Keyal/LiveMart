@@ -83,4 +83,12 @@ __all__ = [
     "get_address_coords",
     "autocomplete_products",
     "get_users_active_address_coords",
+    "create_orders_from_cart",
+    "create_unified_payment_for_orders",
+    "get_orders_for_buyer",
+    "get_orders_for_seller",
+    "get_order_by_id",
+    "update_order_status",
+    "get_available_delivery_orders",
+    "get_orders_for_delivery_partner",
 ]
