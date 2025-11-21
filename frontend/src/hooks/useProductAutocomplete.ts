@@ -1,29 +1,24 @@
 import { useQuery } from "@tanstack/react-query"
-
-const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "")
+import { ProductsService } from "@/client"
 
 export const fetchProductAutocomplete = async (
   query: string,
   limit = 8,
-  extraParams?: Record<string, string | number | boolean | null | undefined>,
+  extraParams?: Record<string, any>,
 ): Promise<string[]> => {
-  if (!apiUrl) throw new Error("VITE_API_URL not configured")
-  const params = new URLSearchParams()
-  params.set("q", query)
-  params.set("limit", String(limit))
-  if (extraParams) {
-    for (const [k, v] of Object.entries(extraParams)) {
-      if (v !== undefined && v !== null && v !== "") params.set(k, String(v))
-    }
+  const params: any = {
+    q: query,
+    limit,
   }
-  const url = `${apiUrl}/api/v1/products/search/autocomplete?${params.toString()}`
-  const headers: Record<string, string> = {}
-  const token = localStorage.getItem("access_token")
-  if (token) headers.Authorization = `Bearer ${token}`
 
-  const res = await fetch(url, { headers })
-  if (!res.ok) throw new Error(`Autocomplete failed: ${res.status}`)
-  return (await res.json()) as string[]
+  if (extraParams) {
+    if (extraParams.seller_type) params.sellerType = extraParams.seller_type
+    if (extraParams.category) params.category = extraParams.category
+    if (extraParams.is_active !== undefined)
+      params.isActive = extraParams.is_active
+  }
+
+  return ProductsService.autocompleteProducts(params)
 }
 
 export const useProductAutocomplete = (

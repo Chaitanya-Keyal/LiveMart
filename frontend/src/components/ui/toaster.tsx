@@ -10,14 +10,14 @@ import {
 } from "@chakra-ui/react"
 
 export const toaster = createToaster({
-  placement: "top-end",
+  placement: "bottom-end",
   pauseOnPageIdle: true,
 })
 
 export const Toaster = () => {
   return (
     <Portal>
-      <ChakraToaster toaster={toaster} insetInline={{ mdDown: "4" }}>
+      <ChakraToaster toaster={toaster} insetInline={{ mdDown: "4" }} insetBlock={{ mdDown: "4" }}>
         {(toast) => (
           <Toast.Root width={{ md: "sm" }} color={toast.meta?.color}>
             {toast.type === "loading" ? (
@@ -34,7 +34,7 @@ export const Toaster = () => {
             {toast.action && (
               <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>
             )}
-            {toast.meta?.closable && <Toast.CloseTrigger />}
+            <Toast.CloseTrigger aria-label="Close notification" />
           </Toast.Root>
         )}
       </ChakraToaster>
