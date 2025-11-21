@@ -6,6 +6,24 @@ from .addresses import (
     set_active_address,
     update_address,
 )
+from .cart import (
+    add_to_cart,
+    clear_cart,
+    get_cart_with_items,
+    get_or_create_cart,
+    remove_from_cart,
+    update_cart_item_quantity,
+)
+from .orders import (
+    create_orders_from_cart,
+    create_unified_payment_for_orders,
+    get_available_delivery_orders,
+    get_order_by_id,
+    get_orders_for_buyer,
+    get_orders_for_delivery_partner,
+    get_orders_for_seller,
+    update_order_status,
+)
 from .otp import create_otp, verify_otp
 from .products import (
     autocomplete_products,
@@ -45,6 +63,12 @@ __all__ = [
     "get_addresses_for_user",
     "get_address_for_user",
     "set_active_address",
+    "get_or_create_cart",
+    "get_cart_with_items",
+    "add_to_cart",
+    "update_cart_item_quantity",
+    "remove_from_cart",
+    "clear_cart",
     "create_otp",
     "verify_otp",
     "create_product",
