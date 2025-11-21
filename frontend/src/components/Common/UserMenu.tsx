@@ -1,7 +1,6 @@
-import { Badge, Box, Button, Flex, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Text } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
-import { FaUserAstronaut } from "react-icons/fa"
-import { FiBriefcase, FiLogOut, FiRefreshCw, FiUser } from "react-icons/fi"
+import { FiLogOut, FiRefreshCw, FiUser } from "react-icons/fi"
 
 import type { RoleEnum } from "@/client"
 import useAuth from "@/hooks/useAuth"
@@ -38,92 +37,78 @@ const UserMenu = () => {
   }
 
   return (
-    <>
-      {/* Desktop */}
-      <Flex>
-        <MenuRoot>
-          <MenuTrigger asChild p={2}>
-            <Button data-testid="user-menu" variant="solid" maxW="sm" truncate>
-              <FaUserAstronaut fontSize="18" />
-              <Text>{user?.full_name || "User"}</Text>
-            </Button>
-          </MenuTrigger>
+    <Flex>
+      <MenuRoot>
+        <MenuTrigger asChild p={2}>
+          <Button data-testid="user-menu" variant="solid" maxW="sm" truncate>
+            <Flex direction="column" align="flex-start" lineHeight="1.1">
+              <Text fontSize="sm" fontWeight="semibold">
+                {user?.full_name || "User"}
+              </Text>
+              {activeRole && (
+                <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                  {roleLabels[activeRole]}
+                </Text>
+              )}
+            </Flex>
+          </Button>
+        </MenuTrigger>
 
-          <MenuContent>
-            {/* Current Role */}
-            {activeRole && (
-              <>
-                <Box px={3} py={2}>
-                  <Text fontSize="xs" color="gray.500" fontWeight="bold" mb={1}>
-                    ACTIVE ROLE
-                  </Text>
-                  <Stack direction="row" align="center" gap={2}>
-                    <FiBriefcase />
-                    <Text fontWeight="semibold">{roleLabels[activeRole]}</Text>
-                    <Badge colorScheme="teal" size="sm">
-                      Active
-                    </Badge>
-                  </Stack>
-                </Box>
-                <MenuSeparator />
-              </>
-            )}
+        <MenuContent>
+          {/* Switch Role */}
+          {availableRoles.length > 1 && (
+            <>
+              <Box px={3} py={2}>
+                <Text fontSize="xs" color="gray.500" fontWeight="bold" mb={1}>
+                  SWITCH ROLE
+                </Text>
+              </Box>
+              {availableRoles
+                .filter((role) => role !== activeRole)
+                .map((role) => (
+                  <MenuItem
+                    key={role}
+                    value={`switch-${role}`}
+                    gap={2}
+                    py={2}
+                    onClick={() => handleSwitchRole(role)}
+                    style={{ cursor: "pointer" }}
+                    disabled={switchRoleMutation.isPending}
+                  >
+                    <FiRefreshCw />
+                    <Box flex="1">{roleLabels[role]}</Box>
+                  </MenuItem>
+                ))}
+              <MenuSeparator />
+            </>
+          )}
 
-            {/* Switch Role */}
-            {availableRoles.length > 1 && (
-              <>
-                <Box px={3} py={2}>
-                  <Text fontSize="xs" color="gray.500" fontWeight="bold" mb={1}>
-                    SWITCH ROLE
-                  </Text>
-                </Box>
-                {availableRoles
-                  .filter((role) => role !== activeRole)
-                  .map((role) => (
-                    <MenuItem
-                      key={role}
-                      value={`switch-${role}`}
-                      gap={2}
-                      py={2}
-                      onClick={() => handleSwitchRole(role)}
-                      style={{ cursor: "pointer" }}
-                      disabled={switchRoleMutation.isPending}
-                    >
-                      <FiRefreshCw />
-                      <Box flex="1">{roleLabels[role]}</Box>
-                    </MenuItem>
-                  ))}
-                <MenuSeparator />
-              </>
-            )}
-
-            <Link to="/settings">
-              <MenuItem
-                closeOnSelect
-                value="user-settings"
-                gap={2}
-                py={2}
-                style={{ cursor: "pointer" }}
-              >
-                <FiUser fontSize="18px" />
-                <Box flex="1">My Profile</Box>
-              </MenuItem>
-            </Link>
-
+          <Link to="/settings">
             <MenuItem
-              value="logout"
+              closeOnSelect
+              value="user-settings"
               gap={2}
               py={2}
-              onClick={handleLogout}
               style={{ cursor: "pointer" }}
             >
-              <FiLogOut />
-              Log Out
+              <FiUser fontSize="18px" />
+              <Box flex="1">My Profile</Box>
             </MenuItem>
-          </MenuContent>
-        </MenuRoot>
-      </Flex>
-    </>
+          </Link>
+
+          <MenuItem
+            value="logout"
+            gap={2}
+            py={2}
+            onClick={handleLogout}
+            style={{ cursor: "pointer" }}
+          >
+            <FiLogOut />
+            Log Out
+          </MenuItem>
+        </MenuContent>
+      </MenuRoot>
+    </Flex>
   )
 }
 
