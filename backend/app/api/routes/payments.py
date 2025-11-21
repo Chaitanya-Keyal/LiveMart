@@ -56,6 +56,10 @@ async def razorpay_webhook(
         return Message(message="payment not found; ignored")
 
     if event == "payment.captured":
+        # Idempotency guard: skip if we've already completed this payment
+        if payment.status == PaymentStatus.COMPLETED:
+            return Message(message="ok")
+
         payment.status = PaymentStatus.COMPLETED
         payment.razorpay_payment_id = payment_id
         session.add(payment)
