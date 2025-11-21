@@ -5,15 +5,20 @@ import {
   Container,
   Flex,
   Heading,
+  HStack,
   Image,
+  NumberInput,
   Separator,
   SimpleGrid,
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import React from "react"
-import type { ProductPublic } from "@/client"
+import { CartService, type ProductPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
+import { useCart } from "@/hooks/useCart"
+import useCustomToast from "@/hooks/useCustomToast"
 import { formatPrice } from "@/utils"
 import { getAllProductImageUrls, getPrimaryImageUrl } from "@/utils/images"
 
@@ -30,9 +35,50 @@ const getCategoryLabel = (category: string): string => {
 
 export const ProductDetail = ({ product }: ProductDetailProps) => {
   const { activeRole } = useAuth()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const queryClient = useQueryClient()
 
   // Determine buyer type based on active role
   const buyerType = activeRole === "retailer" ? "retailer" : "customer"
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId, qty }: { productId: string; qty: number }) =>
+      CartService.addItem({
+        requestBody: { product_id: productId, quantity: qty },
+      }),
+    onSuccess: () => {
+      showSuccessToast("Added to cart")
+      queryClient.invalidateQueries({ queryKey: ["cart"] })
+      // Recalculate existing and reset quantity to next required min
+      const newExisting = existingInCart + quantity
+      const nextRequired =
+        newExisting >= minQuantity ? 1 : Math.max(minQuantity - newExisting, 1)
+      setQuantity(nextRequired)
+    },
+    onError: (err: any) => {
+      const message =
+        err?.body?.detail || err?.message || "Failed to add to cart"
+      showErrorToast(message)
+    },
+  })
+
+  const handleAddToCart = () => {
+    const resultingTotal = existingInCart + quantity
+    if (resultingTotal < minQuantity) {
+      showErrorToast(
+        `You need at least total ${minQuantity}. Add ${minQuantity - existingInCart} or more.`,
+      )
+      return
+    }
+    if (maxQuantity && resultingTotal > maxQuantity) {
+      showErrorToast(`Max total ${maxQuantity}. Reduce added amount.`)
+      return
+    }
+    if (quantity > stockQuantity - existingInCart) {
+      showErrorToast("Exceeds available stock")
+      return
+    }
+    addToCartMutation.mutate({ productId: product.id, qty: quantity })
+  }
 
   // Get pricing tier for current buyer type
   const pricingTier = product.pricing_tiers?.find(
@@ -49,6 +95,18 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
   const price = displayPricing?.price || "0"
   const minQuantity = displayPricing?.min_quantity || 1
   const maxQuantity = displayPricing?.max_quantity
+  const { cartQuery } = useCart()
+  const existingInCart =
+    (cartQuery.data?.items || []).find((i) => i.product_id === product.id)
+      ?.quantity || 0
+  const requiredMinForAdd =
+    existingInCart >= minQuantity
+      ? 1
+      : Math.max(minQuantity - existingInCart, 1)
+  const remainingMax = maxQuantity
+    ? Math.max(0, maxQuantity - existingInCart)
+    : undefined
+  const [quantity, setQuantity] = React.useState(requiredMinForAdd)
 
   const imageUrls = getAllProductImageUrls(product)
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0)
@@ -208,11 +266,59 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
 
           <Separator />
 
-          <Box>
+          <VStack align="stretch" gap={3}>
+            <Box>
+              <Text fontWeight="semibold" mb={2}>
+                Quantity:
+              </Text>
+              <HStack gap={2}>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setQuantity(Math.max(requiredMinForAdd, quantity - 1))
+                  }
+                  disabled={quantity <= requiredMinForAdd}
+                >
+                  -
+                </Button>
+                <NumberInput.Root
+                  value={String(quantity)}
+                  min={minQuantity}
+                  max={maxQuantity || stockQuantity}
+                  onValueChange={(e) => setQuantity(Number(e.value))}
+                  w="100px"
+                >
+                  <NumberInput.Input />
+                </NumberInput.Root>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const stockRemaining = stockQuantity - existingInCart
+                    const cap =
+                      remainingMax !== undefined
+                        ? Math.min(remainingMax, stockRemaining)
+                        : stockRemaining
+                    setQuantity((prev) => Math.min(prev + 1, cap))
+                  }}
+                  disabled={(() => {
+                    const stockRemaining = stockQuantity - existingInCart
+                    const cap =
+                      remainingMax !== undefined
+                        ? Math.min(remainingMax, stockRemaining)
+                        : stockRemaining
+                    return quantity >= cap
+                  })()}
+                >
+                  +
+                </Button>
+              </HStack>
+            </Box>
             <Button
               size="lg"
               colorPalette="blue"
               disabled={!isInStock || !product.is_active}
+              loading={addToCartMutation.isPending}
+              onClick={handleAddToCart}
               w="100%"
             >
               {!isInStock
@@ -221,10 +327,13 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
                   ? "Unavailable"
                   : "Add to Cart"}
             </Button>
-            <Text fontSize="xs" color="gray.500" mt={2} textAlign="center">
-              Cart functionality coming soon
+            <Text fontSize="xs" color="gray.600" textAlign="center">
+              In cart: {existingInCart}{" "}
+              {maxQuantity
+                ? `(remaining max: ${Math.max(0, maxQuantity - existingInCart)})`
+                : ""}
             </Text>
-          </Box>
+          </VStack>
         </VStack>
       </SimpleGrid>
     </Container>
