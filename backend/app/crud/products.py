@@ -5,9 +5,11 @@ from typing import Literal
 
 from sqlalchemy import cast, or_
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.orm import joinedload
 from sqlmodel import Session, func, select
 
 from app.models.address import Address
+from app.models.order import OrderItem
 from app.models.product import (
     BuyerType,
     CategoryEnum,
@@ -20,7 +22,9 @@ from app.models.product import (
     ProductUpdate,
     SellerType,
 )
+from app.models.role import RoleEnum
 from app.models.user import User
+from app.utils.images import copy_product_images, ensure_primary_image
 from app.utils.location import latlon_bounding_box
 
 
@@ -439,3 +443,110 @@ def update_product_images(
     session.commit()
     session.refresh(product)
     return product
+
+
+def clone_product_from_order_item(
+    *, session: Session, order_item_id: uuid.UUID, new_seller: User
+) -> Product:
+    """Clone a wholesaler product from an order item into a new retailer-owned product.
+
+    Validations:
+    - new_seller.active_role must be RETAILER.
+    - OrderItem must exist and belong to an Order where buyer_id == new_seller.id and buyer_type == BuyerType.RETAILER.
+    - The source product must exist, not deleted, and have seller_type == WHOLESALER.
+    - new_seller must have an active address (used if none provided later by user).
+
+    Cloning rules:
+    - Copy name, description, category, tags, brand.
+    - Pricing: take wholesaler's retailer tier and convert to a single CUSTOMER tier for the retailer product.
+    - Inventory: initial stock = 0.
+    - Images: physically copy files and preserve order and primary flag.
+    - SKU: generate new UUID slice.
+    - Address: set to new_seller.active_address_id (if present) else None (route layer may enforce address requirement later).
+    """
+    if new_seller.active_role != RoleEnum.RETAILER:
+        raise ValueError("Only retailers can clone wholesaler products")
+
+    # Load order item with its order and product
+    oi_stmt = (
+        select(OrderItem)
+        .where(OrderItem.id == order_item_id)
+        .options(joinedload(OrderItem.product), joinedload(OrderItem.order))
+    )
+    order_item = session.exec(oi_stmt).first()
+    if not order_item:
+        raise ValueError("Order item not found")
+
+    order = order_item.order
+    if (
+        not order
+        or order.buyer_id != new_seller.id
+        or order.buyer_type != BuyerType.RETAILER
+    ):
+        raise ValueError(
+            "Order item does not belong to a retailer purchase by current user"
+        )
+
+    product = order_item.product
+    if not product or product.deleted_at is not None:
+        raise ValueError("Source product unavailable for cloning")
+    if product.seller_type != SellerType.WHOLESALER:
+        raise ValueError("Only wholesaler products can be cloned")
+
+    # Find wholesaler pricing tier for retailers
+    source_tier = None
+    for tier in product.pricing_tiers:
+        if tier.buyer_type == BuyerType.RETAILER and tier.is_active:
+            source_tier = tier
+            break
+    if not source_tier:
+        raise ValueError("Source product lacks active retailer pricing tier")
+
+    # Prepare new product data (initial creation without images/pricing handled after flush)
+    new_sku = str(uuid.uuid4())[:8].upper()
+    clone = Product(
+        name=product.name,
+        description=product.description,
+        category=product.category,
+        seller_id=new_seller.id,
+        seller_type=SellerType.RETAILER,
+        sku=new_sku,
+        brand=product.brand,
+        address_id=new_seller.active_address_id,  # may be validated at route layer
+        images=[],  # will populate after copying
+        is_active=True,
+        tags=list(product.tags) if product.tags else [],
+    )
+    session.add(clone)
+    session.flush()  # obtain product.id
+
+    # Copy images
+    copied_images = copy_product_images(
+        source_product=product, target_product_id=clone.id
+    )
+    copied_images = ensure_primary_image(copied_images)
+    clone.images = copied_images
+    session.add(clone)
+
+    # Create pricing tier for CUSTOMER using wholesaler's retailer tier
+    cust_pricing = ProductPricing(
+        product_id=clone.id,
+        buyer_type=BuyerType.CUSTOMER,
+        price=source_tier.price,
+        min_quantity=1,
+        max_quantity=source_tier.max_quantity,
+        is_active=True,
+    )
+    session.add(cust_pricing)
+
+    purchased_qty = getattr(order_item, "quantity", 0) or 0
+    inv = ProductInventory(
+        product_id=clone.id,
+        stock_quantity=purchased_qty,
+        last_restocked_at=(datetime.now(UTC) if purchased_qty > 0 else None),
+    )
+    session.add(inv)
+
+    session.commit()
+    session.refresh(clone)
+    return clone

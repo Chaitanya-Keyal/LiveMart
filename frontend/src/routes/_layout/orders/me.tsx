@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Heading,
   HStack,
   Icon,
@@ -19,6 +20,7 @@ import { OrdersService } from "@/client"
 import type { OrderPublic, OrdersPublic } from "@/client/types.gen"
 import { OrderStatusBadge } from "@/components/Orders/OrderStatusBadge"
 import useAuth from "@/hooks/useAuth"
+import useCloneProduct from "@/hooks/useCloneProduct"
 import { getPlaceholderImageUrl, getProductImageUrl } from "@/utils/images"
 
 export const Route = createFileRoute("/_layout/orders/me")({
@@ -28,6 +30,7 @@ export const Route = createFileRoute("/_layout/orders/me")({
 function OrdersMePage() {
   const navigate = useNavigate()
   const { activeRole } = useAuth()
+  const cloneMutation = useCloneProduct()
   const isRetailer = activeRole === "retailer"
   const isWholesaler = activeRole === "wholesaler"
   const isSeller = isRetailer || isWholesaler
@@ -56,11 +59,13 @@ function OrdersMePage() {
     isLoading,
     emptyMessage,
     showBuyerInfo = false,
+    enableClone = false,
   }: {
     orders?: OrderPublic[]
     isLoading: boolean
     emptyMessage: string
     showBuyerInfo?: boolean
+    enableClone?: boolean
   }) => {
     if (isLoading) {
       return <Spinner />
@@ -177,6 +182,33 @@ function OrdersMePage() {
                           >
                             View Product
                           </Link>
+                          {enableClone && item.product_id && (
+                            <Button
+                              size="xs"
+                              variant="solid"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (cloneMutation.isPending) return
+                                cloneMutation.mutate(item.id, {
+                                  onSuccess: (newProd) => {
+                                    const newId =
+                                      (newProd as any)?.id ||
+                                      (newProd as any)?.product?.id
+                                    if (newId) {
+                                      navigate({
+                                        to: "/sell/$productId",
+                                        params: { productId: newId },
+                                        search: { cloned: "1" },
+                                      })
+                                    }
+                                  },
+                                })
+                              }}
+                              loading={cloneMutation.isPending}
+                            >
+                              Copy to My Store
+                            </Button>
+                          )}
                         </HStack>
                       </Stack>
                     </HStack>
@@ -200,7 +232,7 @@ function OrdersMePage() {
         {isRetailer ? "Orders" : isWholesaler ? "Received Orders" : "My Orders"}
       </Heading>
       {isRetailer ? (
-        <Tabs.Root defaultValue="received" variant="enclosed">
+        <Tabs.Root defaultValue="placed" variant="enclosed">
           <Tabs.List>
             <Tabs.Trigger value="received">
               Received ({sellerOrders?.count ?? 0})
@@ -222,6 +254,7 @@ function OrdersMePage() {
               orders={buyerOrders?.data}
               isLoading={buyerLoading}
               emptyMessage="No placed orders yet."
+              enableClone={true}
             />
           </Tabs.Content>
         </Tabs.Root>

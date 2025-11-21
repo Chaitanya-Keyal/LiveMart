@@ -28,6 +28,7 @@ router = APIRouter(prefix="/products", tags=["products"])
 PRODUCT_NOT_FOUND = "Product not found"
 NOT_ENOUGH_PERMISSIONS = "Not enough permissions"
 INVALID_SELLER_ROLE = "User must have RETAILER or WHOLESALER role to create products"
+CLONE_ERROR_PREFIX = "Cannot clone product:"
 
 
 def get_current_seller(current_user: CurrentUser) -> CurrentUser:
@@ -460,3 +461,29 @@ def reorder_product_images(
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/clone/{order_item_id}", response_model=ProductPublic)
+def clone_product(
+    *,
+    session: SessionDep,
+    current_seller: CurrentSeller,
+    order_item_id: uuid.UUID,
+) -> Any:
+    """Clone a wholesaler product (from an order item) into the retailer's catalog.
+
+    Restrictions:
+    - Active role must be RETAILER.
+    - Order item must belong to an order placed by this retailer (buyer_type=RETAILER).
+    - Source product must be a WHOLESALER product.
+    Returns the newly created product (with CUSTOMER pricing tier).
+    """
+    if current_seller.active_role != RoleEnum.RETAILER:
+        raise HTTPException(status_code=403, detail="Only retailers can clone products")
+    try:
+        product = crud.clone_product_from_order_item(
+            session=session, order_item_id=order_item_id, new_seller=current_seller
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"{CLONE_ERROR_PREFIX} {str(e)}")
+    return ProductPublic.from_product(product, buyer_type=BuyerType.CUSTOMER)

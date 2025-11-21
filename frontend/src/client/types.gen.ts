@@ -635,6 +635,12 @@ export type ProductsReorderProductImagesData = {
 
 export type ProductsReorderProductImagesResponse = (ProductPublic);
 
+export type ProductsCloneProductData = {
+    orderItemId: string;
+};
+
+export type ProductsCloneProductResponse = (ProductPublic);
+
 export type UsersReadUsersData = {
     limit?: number;
     skip?: number;

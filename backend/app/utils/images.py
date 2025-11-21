@@ -3,7 +3,10 @@ from pathlib import Path
 
 from fastapi import HTTPException, UploadFile
 
-from app.models.product import ProductImageSchema
+from app.models.product import (
+    Product,
+    ProductImageSchema,
+)
 
 ALLOWED_IMAGE_TYPES = {
     "image/jpeg",
@@ -100,6 +103,58 @@ def ensure_primary_image(images: list[dict]) -> list[dict]:
             images[i]["is_primary"] = False
 
     return images
+
+
+def copy_product_images(
+    *, source_product: Product, target_product_id: uuid.UUID
+) -> list[dict]:
+    """Copy all images from source product to target product directory.
+
+    Each image file is duplicated with a new unique filename preserving the original extension.
+    The relative JSON structure (path/order/is_primary) is preserved except for the new path.
+    Returns a list of image dicts ready to persist on the target product.
+    If no images present, returns empty list.
+    """
+    if not source_product.images:
+        return []
+
+    base_static = Path("app/static/products")
+    target_dir = base_static / str(target_product_id)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    copied: list[dict] = []
+    for img in source_product.images:
+        path_str = img.get("path")
+        if not path_str:
+            continue
+        # Expect format /static/products/{source_id}/{filename}
+        # Strip leading / if present for filesystem access
+        rel = path_str[1:] if path_str.startswith("/") else path_str
+        src_path = Path("app") / Path(rel)  # existing stored path under app/static...
+        if not src_path.exists() or not src_path.is_file():
+            # Skip missing files, still replicate metadata without file content
+            new_filename = f"{uuid.uuid4()}{Path(path_str).suffix or '.jpg'}"
+            new_rel = f"/static/products/{target_product_id}/{new_filename}"
+        else:
+            new_filename = f"{uuid.uuid4()}{src_path.suffix}"
+            new_abs = target_dir / new_filename
+            try:
+                with open(src_path, "rb") as rf, open(new_abs, "wb") as wf:
+                    wf.write(rf.read())
+            except Exception:
+                # On failure, skip copying this file
+                continue
+            new_rel = f"/static/products/{target_product_id}/{new_filename}"
+
+        copied.append(
+            {
+                "path": new_rel,
+                "order": img.get("order", 0),
+                "is_primary": bool(img.get("is_primary")),
+            }
+        )
+
+    return ensure_primary_image(copied)
 
 
 def reorder_images(

@@ -27,6 +27,7 @@ from .orders import (
 from .otp import create_otp, verify_otp
 from .products import (
     autocomplete_products,
+    clone_product_from_order_item,
     create_product,
     delete_product,
     get_address_coords,
@@ -91,4 +92,5 @@ __all__ = [
     "update_order_status",
     "get_available_delivery_orders",
     "get_orders_for_delivery_partner",
+    "clone_product_from_order_item",
 ]

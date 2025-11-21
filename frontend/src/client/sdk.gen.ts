@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, ProductsCloneProductData, ProductsCloneProductResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
 
 export class AddressesService {
     /**
@@ -786,6 +786,33 @@ export class ProductsService {
             },
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Clone Product
+     * Clone a wholesaler product (from an order item) into the retailer's catalog.
+     *
+     * Restrictions:
+     * - Active role must be RETAILER.
+     * - Order item must belong to an order placed by this retailer (buyer_type=RETAILER).
+     * - Source product must be a WHOLESALER product.
+     * Returns the newly created product (with CUSTOMER pricing tier).
+     * @param data The data for the request.
+     * @param data.orderItemId
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static cloneProduct(data: ProductsCloneProductData): CancelablePromise<ProductsCloneProductResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/clone/{order_item_id}',
+            path: {
+                order_item_id: data.orderItemId
+            },
             errors: {
                 422: 'Validation Error'
             }
