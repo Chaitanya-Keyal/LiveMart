@@ -5,6 +5,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select
 
 from app.models.address import Address
@@ -256,12 +257,19 @@ def get_orders_for_buyer(
     limit: int = 50,
 ) -> tuple[list[Order], int]:
     stmt = (
-        select(Order).where(Order.buyer_id == user_id).where(Order.deleted_at.is_(None))
+        select(Order)
+        .where(Order.buyer_id == user_id)
+        .where(Order.deleted_at.is_(None))
+        .options(
+            joinedload(Order.buyer),
+            joinedload(Order.seller),
+            joinedload(Order.delivery_partner),
+        )
     )
     if buyer_type is not None:
         stmt = stmt.where(Order.buyer_type == buyer_type)
     stmt = stmt.order_by(Order.created_at.desc()).offset(skip).limit(limit)
-    orders = session.exec(stmt).all()
+    orders = session.exec(stmt).unique().all()
     count = session.exec(select(func.count()).select_from(stmt.subquery())).one()
     return list(orders), count
 
@@ -278,11 +286,16 @@ def get_orders_for_seller(
         select(Order)
         .where(Order.seller_id == seller_id)
         .where(Order.deleted_at.is_(None))
+        .options(
+            joinedload(Order.buyer),
+            joinedload(Order.seller),
+            joinedload(Order.delivery_partner),
+        )
     )
     if buyer_type is not None:
         stmt = stmt.where(Order.buyer_type == buyer_type)
     stmt = stmt.order_by(Order.created_at.desc()).offset(skip).limit(limit)
-    orders = session.exec(stmt).all()
+    orders = session.exec(stmt).unique().all()
     count = session.exec(select(func.count()).select_from(stmt.subquery())).one()
     return list(orders), count
 
@@ -294,11 +307,16 @@ def get_orders_for_delivery_partner(
         select(Order)
         .where(Order.delivery_partner_id == delivery_partner_id)
         .where(Order.deleted_at.is_(None))
+        .options(
+            joinedload(Order.buyer),
+            joinedload(Order.seller),
+            joinedload(Order.delivery_partner),
+        )
         .order_by(Order.created_at.desc())
         .offset(skip)
         .limit(limit)
     )
-    orders = session.exec(stmt).all()
+    orders = session.exec(stmt).unique().all()
     count = session.exec(select(func.count()).select_from(stmt.subquery())).one()
     return list(orders), count
 
@@ -345,11 +363,16 @@ def get_available_delivery_orders(
         select(Order)
         .where(Order.order_status == OrderStatus.READY_TO_SHIP)
         .where(Order.delivery_partner_id.is_(None))
+        .options(
+            joinedload(Order.buyer),
+            joinedload(Order.seller),
+            # delivery_partner is None here, so no need to join
+        )
         .order_by(Order.created_at.desc())
         .offset(skip)
         .limit(limit)
     )
-    rows = session.exec(stmt).all()
+    rows = session.exec(stmt).unique().all()
     # For simplicity, compute distances in Python
     results = []
     for order in rows:

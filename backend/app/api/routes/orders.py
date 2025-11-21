@@ -120,13 +120,18 @@ def serialize_order(order, current_user: CurrentUser | None = None) -> OrderPubl
 
     # Add delivery partner contact if assigned
     if order.delivery_partner_id:
-        session = object_session(order)
-        if session:
-            dp = session.get(User, order.delivery_partner_id)
-            if dp:
-                payload.delivery_partner_contact = ContactInfo(
-                    id=dp.id, full_name=dp.full_name, email=dp.email
-                )
+        # Use relationship if available (eager loaded)
+        dp = order.delivery_partner
+        if not dp:
+            # Fallback if not eager loaded (should not happen with updated CRUD)
+            session = object_session(order)
+            if session:
+                dp = session.get(User, order.delivery_partner_id)
+
+        if dp:
+            payload.delivery_partner_contact = ContactInfo(
+                id=dp.id, full_name=dp.full_name, email=dp.email
+            )
 
     if current_user is not None:
         hints = get_order_action_hints(order, current_user)

@@ -192,6 +192,9 @@ class Order(TimestampModel, table=True):
     seller: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Order.seller_id]"}
     )
+    delivery_partner: "User" = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Order.delivery_partner_id]"}
+    )
     pickup_address: "Address" = Relationship()
     items: list["OrderItem"] = Relationship(back_populates="order", cascade_delete=True)
     payment: "Payment" = Relationship(back_populates="orders")
