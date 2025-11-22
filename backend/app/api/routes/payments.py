@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 from typing import Any
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
 from sqlmodel import select
 
 from app.api.deps import SessionDep
@@ -29,6 +27,7 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 async def razorpay_webhook(
     request: Request,
     session: SessionDep,
+    background_tasks: BackgroundTasks,
     x_razorpay_signature: str | None = Header(default=None),
 ) -> Any:
     if not settings.RAZORPAY_WEBHOOK_SECRET:
@@ -97,7 +96,8 @@ async def razorpay_webhook(
                 orders=order_summaries,
                 payment={"total_amount": payment.total_amount},
             )
-            send_email(
+            background_tasks.add_task(
+                send_email,
                 email_to=buyer.email,
                 subject=conf.subject,
                 html_content=conf.html_content,
@@ -123,7 +123,8 @@ async def razorpay_webhook(
                         ],
                     },
                 )
-                send_email(
+                background_tasks.add_task(
+                    send_email,
                     email_to=seller.email,
                     subject=notif.subject,
                     html_content=notif.html_content,
