@@ -14,7 +14,7 @@ import { FiMapPin } from "react-icons/fi"
 import type { ProductPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import { formatPrice } from "@/utils"
-import { getPrimaryImageUrl } from "@/utils/images"
+import { getPlaceholderImageUrl, getPrimaryImageUrl } from "@/utils/images"
 import { StarRating } from "./StarRating"
 
 interface ProductCardProps {
@@ -98,7 +98,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               onError={(e) => {
                 // Fallback to placeholder on error
                 const target = e.target as HTMLImageElement
-                target.src = "https://via.placeholder.com/400x400?text=No+Image"
+                target.src = getPlaceholderImageUrl()
               }}
             />
             {isLocal && (

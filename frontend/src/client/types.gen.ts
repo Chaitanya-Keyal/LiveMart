@@ -672,6 +672,12 @@ export type ProductsCloneProductData = {
 
 export type ProductsCloneProductResponse = (ProductPublic);
 
+export type ProductsBulkImportProductsData = {
+    requestBody: Array<ProductCreate>;
+};
+
+export type ProductsBulkImportProductsResponse = (Message);
+
 export type ReviewsGetProductReviewsData = {
     limit?: number;
     productId: string;

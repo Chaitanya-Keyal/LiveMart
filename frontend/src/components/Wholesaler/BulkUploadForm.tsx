@@ -11,16 +11,40 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { FiUpload } from "react-icons/fi"
+import { ProductsService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { getCSVTemplate, type ParsedProduct, parseCSV } from "@/utils/csvParser"
 
 export const BulkUploadForm = () => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const [parsedProducts, setParsedProducts] = useState<ParsedProduct[]>([])
   const [errors, setErrors] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [importResults, setImportResults] = useState<any>(null)
+
+  const bulkImportMutation = useMutation({
+    mutationFn: (products: ParsedProduct[]) =>
+      ProductsService.bulkImportProducts({
+        requestBody: products.map((p) => p.product),
+      }),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      setImportResults(data)
+      showSuccessToast(data.message)
+      setTimeout(() => {
+        navigate({ to: "/sell" })
+      }, 2000)
+    },
+    onError: (error: any) => {
+      showErrorToast(error?.body?.detail || "Failed to import products")
+    },
+  })
 
   const handleFileAccepted = async (files: File[]) => {
     const file = files?.[0]
@@ -63,10 +87,7 @@ export const BulkUploadForm = () => {
       return
     }
 
-    // Note: Bulk import endpoint not yet implemented
-    showErrorToast(
-      "Bulk import functionality will be available in a future update",
-    )
+    bulkImportMutation.mutate(parsedProducts)
   }
 
   const handleDownloadTemplate = () => {
@@ -98,9 +119,21 @@ export const BulkUploadForm = () => {
           <Alert.Content>
             <Alert.Title>CSV Format</Alert.Title>
             <Alert.Description>
-              <Text fontSize="sm">
-                Columns: name, description, category, price, stock, sku, tags
-              </Text>
+              <VStack align="start" gap={2} fontSize="sm">
+                <Text>
+                  <strong>Required:</strong> name, category (from enum), price
+                </Text>
+                <Text>
+                  <strong>Optional:</strong> description, min_quantity (default:
+                  1), initial_stock (default: 0), brand, tags (pipe-separated:
+                  tag1|tag2)
+                </Text>
+                <Text fontStyle="italic" color="fg.muted">
+                  Categories: electronics, clothing, food_beverage, home_garden,
+                  health_beauty, sports, toys, books, automotive,
+                  office_supplies, pet_supplies, jewellery, furniture
+                </Text>
+              </VStack>
             </Alert.Description>
             <HStack mt={3}>
               <Button
@@ -179,6 +212,34 @@ export const BulkUploadForm = () => {
           </Box>
         )}
 
+        {importResults?.errors && importResults.errors.length > 0 && (
+          <Box
+            p={4}
+            borderWidth={1}
+            borderRadius="md"
+            borderColor="orange.muted"
+            bg="orange.muted"
+          >
+            <Text fontWeight="semibold" color="orange.solid" mb={2}>
+              Import Errors ({importResults.errors.length})
+            </Text>
+            <VStack align="stretch" gap={1}>
+              {importResults.errors
+                .slice(0, 10)
+                .map((error: any, index: number) => (
+                  <Text key={index} fontSize="sm" color="orange.solid">
+                    {error.name}: {error.error}
+                  </Text>
+                ))}
+              {importResults.errors.length > 10 && (
+                <Text fontSize="sm" color="orange.solid">
+                  ... and {importResults.errors.length - 10} more errors
+                </Text>
+              )}
+            </VStack>
+          </Box>
+        )}
+
         {parsedProducts.length > 0 && (
           <>
             <Box>
@@ -189,24 +250,31 @@ export const BulkUploadForm = () => {
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Name</Table.ColumnHeader>
+                    <Table.ColumnHeader>Brand</Table.ColumnHeader>
                     <Table.ColumnHeader>Category</Table.ColumnHeader>
                     <Table.ColumnHeader>Price</Table.ColumnHeader>
+                    <Table.ColumnHeader>Min Qty</Table.ColumnHeader>
+                    <Table.ColumnHeader>Max Qty</Table.ColumnHeader>
                     <Table.ColumnHeader>Stock</Table.ColumnHeader>
-                    <Table.ColumnHeader>SKU</Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {parsedProducts.slice(0, 10).map((item, index) => (
-                    <Table.Row key={index}>
-                      <Table.Cell>{item.product.name}</Table.Cell>
-                      <Table.Cell>{item.product.category}</Table.Cell>
-                      <Table.Cell>
-                        {item.product.pricing_tiers?.[0]?.price || "N/A"}
-                      </Table.Cell>
-                      <Table.Cell>{item.product.initial_stock || 0}</Table.Cell>
-                      <Table.Cell>{item.product.sku || "Auto"}</Table.Cell>
-                    </Table.Row>
-                  ))}
+                  {parsedProducts.slice(0, 10).map((item, index) => {
+                    const pricing = item.product.pricing_tiers?.[0]
+                    return (
+                      <Table.Row key={index}>
+                        <Table.Cell>{item.product.name}</Table.Cell>
+                        <Table.Cell>{item.product.brand || "-"}</Table.Cell>
+                        <Table.Cell>{item.product.category}</Table.Cell>
+                        <Table.Cell>${pricing?.price || "N/A"}</Table.Cell>
+                        <Table.Cell>{pricing?.min_quantity || 1}</Table.Cell>
+                        <Table.Cell>{pricing?.max_quantity ?? "-"}</Table.Cell>
+                        <Table.Cell>
+                          {item.product.initial_stock || 0}
+                        </Table.Cell>
+                      </Table.Row>
+                    )
+                  })}
                 </Table.Body>
               </Table.Root>
               {parsedProducts.length > 10 && (
@@ -218,8 +286,8 @@ export const BulkUploadForm = () => {
 
             <Button
               onClick={handleImport}
-              disabled={errors.length > 0 || isProcessing}
-              loading={isProcessing}
+              disabled={errors.length > 0 || bulkImportMutation.isPending}
+              loading={bulkImportMutation.isPending}
               size="lg"
             >
               <FiUpload />

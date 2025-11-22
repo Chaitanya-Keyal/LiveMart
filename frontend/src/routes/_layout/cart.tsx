@@ -18,7 +18,7 @@ import useAuth from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import useCustomToast from "@/hooks/useCustomToast"
 import useProductsByIds from "@/hooks/useProductsByIds"
-import { getPrimaryImageUrl } from "@/utils/images"
+import { getPlaceholderImageUrl, getPrimaryImageUrl } from "@/utils/images"
 
 export const Route = createFileRoute("/_layout/cart")({
   component: CartPage,
@@ -141,7 +141,7 @@ function CartPage() {
                       />
                     ) : (
                       <Image
-                        src={"https://via.placeholder.com/120?text=No+Image"}
+                        src={getPlaceholderImageUrl()}
                         alt="No image"
                         w="100%"
                         h="100%"

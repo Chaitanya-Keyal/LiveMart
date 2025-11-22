@@ -20,7 +20,11 @@ import useAuth from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import useCustomToast from "@/hooks/useCustomToast"
 import { formatPrice } from "@/utils"
-import { getAllProductImageUrls, getPrimaryImageUrl } from "@/utils/images"
+import {
+  getAllProductImageUrls,
+  getPlaceholderImageUrl,
+  getPrimaryImageUrl,
+} from "@/utils/images"
 import { ProductReviewsSection } from "./ProductReviewsSection"
 import { StarRating } from "./StarRating"
 
@@ -139,7 +143,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
               objectFit="cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement
-                target.src = "https://via.placeholder.com/600x600?text=No+Image"
+                target.src = getPlaceholderImageUrl()
               }}
             />
           </Box>

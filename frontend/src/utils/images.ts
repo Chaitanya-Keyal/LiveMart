@@ -60,7 +60,7 @@ export const getPrimaryImageUrl = (
  */
 export const getPlaceholderImageUrl = (): string => {
   // Using a placeholder service or local placeholder
-  return "https://via.placeholder.com/400x400?text=No+Image"
+  return "/assets/images/placeholder.jpg"
 }
 
 /**

@@ -547,3 +547,59 @@ def clone_product(
     return enrich_product_with_ratings(
         session, cloned_product, buyer_type=BuyerType.CUSTOMER
     )
+
+
+@router.post("/bulk-import", response_model=Message)
+def bulk_import_products(
+    *,
+    session: SessionDep,
+    current_seller: CurrentSeller,
+    products_in: list[ProductCreate],
+) -> Any:
+    """
+    Bulk import products. Maximum 500 products per request.
+    Only wholesalers can use this endpoint.
+    """
+    if current_seller.active_role != RoleEnum.WHOLESALER:
+        raise HTTPException(
+            status_code=403, detail="Only wholesalers can bulk import products"
+        )
+
+    if len(products_in) > 500:
+        raise HTTPException(
+            status_code=400, detail="Maximum 500 products per bulk import"
+        )
+
+    if len(products_in) == 0:
+        raise HTTPException(status_code=400, detail="No products provided")
+
+    success_count = 0
+    failed_count = 0
+    errors = []
+
+    for idx, product_data in enumerate(products_in):
+        try:
+            crud.create_product(
+                session=session,
+                product_in=product_data,
+                seller_id=current_seller.id,
+                seller_type=SellerType.WHOLESALER,
+            )
+            success_count += 1
+        except Exception as e:
+            failed_count += 1
+            session.rollback()
+            errors.append(f"Row {idx + 1}: {str(e)}")
+            if len(errors) >= 10:  # Limit error messages
+                errors.append(f"... and {failed_count - 10} more errors")
+                break
+
+    session.commit()
+
+    if failed_count > 0:
+        error_msg = f"Imported {success_count} products with {failed_count} failures. Errors: {'; '.join(errors)}"
+        if failed_count == len(products_in):
+            raise HTTPException(status_code=400, detail=error_msg)
+        return Message(message=error_msg)
+
+    return Message(message=f"Successfully imported {success_count} products")

@@ -68,8 +68,17 @@ const validateProductRow = (
     pricing_tiers: [],
   }
 
-  // Expected columns: name, description, category, price, stock, sku, tags
-  const [name, description, category, price, stock, sku, tags] = row
+  const [
+    name,
+    description,
+    category,
+    price,
+    minQuantity,
+    maxQuantity,
+    initialStock,
+    brand,
+    tags,
+  ] = row
 
   // Validate name (required)
   if (!name || name.trim().length === 0) {
@@ -124,44 +133,66 @@ const validateProductRow = (
         message: "Price must be a valid positive number",
       })
     } else {
-      // Create default pricing tier for customer
+      const minQty =
+        minQuantity && minQuantity.trim().length > 0
+          ? parseInt(minQuantity.trim(), 10)
+          : 1
+      if (Number.isNaN(minQty) || minQty < 1) {
+        errors.push({
+          row: rowIndex + 1,
+          field: "min_quantity",
+          message: "Minimum quantity must be a valid positive integer",
+        })
+      }
+      let maxQty: number | null = null
+      if (maxQuantity && maxQuantity.trim().length > 0) {
+        maxQty = parseInt(maxQuantity.trim(), 10)
+        if (Number.isNaN(maxQty) || maxQty < minQty) {
+          errors.push({
+            row: rowIndex + 1,
+            field: "max_quantity",
+            message: "Max quantity must be a valid integer >= min quantity",
+          })
+          maxQty = null
+        }
+      }
       product.pricing_tiers = [
         {
-          buyer_type: "customer",
+          buyer_type: "retailer",
           price: priceNum,
-          min_quantity: 1,
-          max_quantity: null,
+          min_quantity: minQty,
+          max_quantity: maxQty,
           is_active: true,
         } as ProductPricingCreate,
       ]
     }
   }
 
-  // Stock (optional, defaults to 0)
-  if (stock && stock.trim().length > 0) {
-    const stockNum = parseInt(stock.trim(), 10)
+  // Initial stock (optional, defaults to 1)
+  if (initialStock && initialStock.trim().length > 0) {
+    const stockNum = parseInt(initialStock.trim(), 10)
     if (Number.isNaN(stockNum) || stockNum < 0) {
       errors.push({
         row: rowIndex + 1,
-        field: "stock",
-        message: "Stock must be a valid non-negative integer",
+        field: "initial_stock",
+        message: "Initial stock must be a valid non-negative integer",
       })
     } else {
       product.initial_stock = stockNum
     }
   } else {
-    product.initial_stock = 0
+    product.initial_stock = 1
   }
 
-  // SKU (optional)
-  if (sku && sku.trim().length > 0) {
-    product.sku = sku.trim()
+  // Brand (optional)
+  if (brand && brand.trim().length > 0) {
+    product.brand = brand.trim()
   }
 
-  // Tags (optional, comma-separated)
+  // Tags (optional, pipe-separated to avoid comma conflicts)
   if (tags && tags.trim().length > 0) {
     product.tags = tags
-      .split(",")
+      .split("|")
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0)
   }
@@ -224,6 +255,8 @@ export const parseCSV = async (
 }
 
 export const getCSVTemplate = (): string => {
-  return `name,description,category,price,stock,sku,tags
-Example Product,Product description,electronics,99.99,100,SKU-001,featured,local`
+  return `name,description,category,price,min_quantity,max_quantity,initial_stock,brand,tags
+Wireless Mouse,"Ergonomic wireless mouse with adjustable DPI",electronics,24.99,10,100,500,TechBrand,wireless|computer|office
+Premium Coffee Beans,"Arabica coffee beans - medium roast",food_beverage,12.99,50,500,1000,CoffeeCo,organic|local
+Cotton T-Shirt,"100% organic cotton t-shirt",clothing,14.99,20,100,300,FashionBrand,organic|sustainable`
 }
