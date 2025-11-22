@@ -16,6 +16,7 @@ import {
 } from "@tanstack/react-router"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { FaFacebook } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
 import { FiLock, FiMail, FiUser } from "react-icons/fi"
 
@@ -187,38 +188,21 @@ function SignUp() {
               </Text>
             </Field>
 
-            <Field
-              label="Password"
-              required
-              invalid={!!errors.password}
-              errorText={errors.password?.message}
-            >
-              <PasswordInput
-                type="password"
-                startElement={<FiLock />}
-                {...register("password", passwordRules())}
-                placeholder="Password"
-                errors={errors}
-              />
-            </Field>
+            <PasswordInput
+              type="password"
+              startElement={<FiLock />}
+              {...register("password", passwordRules())}
+              placeholder="Password"
+              errors={errors}
+            />
 
-            <Field
-              label="Confirm Password"
-              required
-              invalid={!!errors.confirm_password}
-              errorText={errors.confirm_password?.message}
-            >
-              <PasswordInput
-                type="confirm_password"
-                startElement={<FiLock />}
-                {...register(
-                  "confirm_password",
-                  confirmPasswordRules(getValues),
-                )}
-                placeholder="Confirm password"
-                errors={errors}
-              />
-            </Field>
+            <PasswordInput
+              type="confirm_password"
+              startElement={<FiLock />}
+              {...register("confirm_password", confirmPasswordRules(getValues))}
+              placeholder="Confirm password"
+              errors={errors}
+            />
 
             <Button
               variant="solid"
@@ -240,16 +224,29 @@ function SignUp() {
             <Separator flex="1" />
           </Stack>
 
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => startGoogleLogin()}
-            w="100%"
-            gap={2}
-          >
-            <FcGoogle size={20} />
-            Continue with Google
-          </Button>
+          <Stack gap={3}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => startGoogleLogin()}
+              w="100%"
+              gap={2}
+            >
+              <FcGoogle size={20} />
+              Continue with Google
+            </Button>
+
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {}}
+              w="100%"
+              gap={2}
+            >
+              <FaFacebook size={20} color="#1877F2" />
+              Continue with Facebook
+            </Button>
+          </Stack>
 
           {/* Login Link */}
           <Text textAlign="center" fontSize="sm" color="fg.muted">

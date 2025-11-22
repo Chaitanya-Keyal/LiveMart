@@ -18,6 +18,7 @@ import {
 } from "@tanstack/react-router"
 import { useEffect, useMemo, useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { FaFacebook } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
 import { FiKey, FiLock, FiMail } from "react-icons/fi"
 
@@ -215,20 +216,13 @@ function Login() {
 
                 <Tabs.Content value="password" pt={4}>
                   <Stack gap={3}>
-                    <Field
-                      label="Password"
-                      required
-                      invalid={!!errors.password}
-                      errorText={errors.password?.message}
-                    >
-                      <PasswordInput
-                        type="password"
-                        startElement={<FiLock />}
-                        {...register("password", passwordRules())}
-                        placeholder="Enter your password"
-                        errors={errors}
-                      />
-                    </Field>
+                    <PasswordInput
+                      type="password"
+                      startElement={<FiLock />}
+                      {...register("password", passwordRules())}
+                      placeholder="Enter your password"
+                      errors={errors}
+                    />
                     <RouterLink to="/recover-password" className="main-link">
                       <Text fontSize="sm" fontWeight="medium">
                         Forgot Password?
@@ -308,16 +302,29 @@ function Login() {
             <Separator flex="1" />
           </Stack>
 
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => startGoogleLogin()}
-            w="100%"
-            gap={2}
-          >
-            <FcGoogle size={20} />
-            Continue with Google
-          </Button>
+          <Stack gap={3}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => startGoogleLogin()}
+              w="100%"
+              gap={2}
+            >
+              <FcGoogle size={20} />
+              Continue with Google
+            </Button>
+
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {}}
+              w="100%"
+              gap={2}
+            >
+              <FaFacebook size={20} color="#1877F2" />
+              Continue with Facebook
+            </Button>
+          </Stack>
 
           {/* Signup Link */}
           <Text textAlign="center" fontSize="sm" color="fg.muted">
