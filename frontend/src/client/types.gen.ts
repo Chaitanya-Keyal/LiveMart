@@ -92,6 +92,7 @@ export type CategoryEnum = 'electronics' | 'clothing' | 'food_beverage' | 'home_
 
 export type CheckoutRequest = {
     delivery_address_id?: (string | null);
+    coupon_code?: (string | null);
 };
 
 export type CheckoutResponse = {
@@ -107,6 +108,71 @@ export type ContactInfo = {
     full_name?: (string | null);
     email: string;
 };
+
+export type CouponCreate = {
+    code: string;
+    discount_type: DiscountType;
+    discount_value: (number | string);
+    min_order_value?: (number | string | null);
+    max_discount?: (number | string | null);
+    usage_limit?: (number | null);
+    valid_from: string;
+    valid_until: string;
+    is_active?: boolean;
+    is_featured?: boolean;
+    target_emails?: (Array<(string)> | null);
+    send_notification?: boolean;
+};
+
+export type CouponPublic = {
+    code: string;
+    discount_type: DiscountType;
+    discount_value: string;
+    min_order_value?: (string | null);
+    max_discount?: (string | null);
+    usage_limit?: (number | null);
+    valid_from: string;
+    valid_until: string;
+    is_active?: boolean;
+    is_featured?: boolean;
+    target_emails?: (Array<(string)> | null);
+    id: string;
+    used_count: number;
+    created_at: string;
+    updated_at: string;
+};
+
+export type CouponsPublic = {
+    data: Array<CouponPublic>;
+    count: number;
+};
+
+export type CouponUpdate = {
+    code?: (string | null);
+    discount_type?: (DiscountType | null);
+    discount_value?: (number | string | null);
+    min_order_value?: (number | string | null);
+    max_discount?: (number | string | null);
+    usage_limit?: (number | null);
+    valid_from?: (string | null);
+    valid_until?: (string | null);
+    is_active?: (boolean | null);
+    is_featured?: (boolean | null);
+    target_emails?: (Array<(string)> | null);
+};
+
+export type CouponValidateRequest = {
+    code: string;
+    cart_total: (number | string);
+};
+
+export type CouponValidateResponse = {
+    valid: boolean;
+    discount_amount: string;
+    message?: (string | null);
+};
+
+export type DiscountType = 'percentage' | 'fixed';
 
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
@@ -154,9 +220,11 @@ export type OrderPublic = {
     delivery_partner_id?: (string | null);
     delivery_fee: string;
     order_subtotal: string;
+    original_subtotal: string;
     order_total: string;
     payment_id?: (string | null);
     payment_amount?: (string | null);
+    settlement_id?: (string | null);
     pickup_address_snapshot?: ({
     [key: string]: unknown;
 } | null);
@@ -208,6 +276,32 @@ export type PaymentPublic = {
     id: string;
     created_at: string;
     updated_at: string;
+};
+
+export type PaymentSettlementCreate = {
+    user_id: string;
+    order_ids: Array<(string)>;
+    notes?: (string | null);
+};
+
+export type PaymentSettlementPublic = {
+    user_id: string;
+    user_type: UserType;
+    amount: string;
+    commission_amount: string;
+    net_amount: string;
+    settlement_date: string;
+    status: SettlementStatus;
+    notes?: (string | null);
+    id: string;
+    order_ids: Array<(string)>;
+    created_at: string;
+    updated_at: string;
+};
+
+export type PaymentSettlementsPublic = {
+    data: Array<PaymentSettlementPublic>;
+    count: number;
 };
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed';
@@ -370,6 +464,8 @@ export type RoleSwitch = {
 
 export type SellerType = 'retailer' | 'wholesaler';
 
+export type SettlementStatus = 'pending' | 'completed';
+
 export type Token = {
     access_token: string;
     token_type?: string;
@@ -417,6 +513,8 @@ export type UsersPublic = {
     data: Array<UserPublic>;
     count: number;
 };
+
+export type UserType = 'seller' | 'delivery_partner';
 
 export type UserUpdate = {
     email?: (string | null);
@@ -485,6 +583,40 @@ export type CartRemoveItemData = {
 };
 
 export type CartRemoveItemResponse = (CartPublic);
+
+export type CouponsCreateCouponData = {
+    requestBody: CouponCreate;
+};
+
+export type CouponsCreateCouponResponse = (CouponPublic);
+
+export type CouponsReadCouponsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type CouponsReadCouponsResponse = (CouponsPublic);
+
+export type CouponsGetFeaturedCouponsResponse = (Array<CouponPublic>);
+
+export type CouponsValidateCouponData = {
+    requestBody: CouponValidateRequest;
+};
+
+export type CouponsValidateCouponResponse = (CouponValidateResponse);
+
+export type CouponsUpdateCouponData = {
+    couponId: string;
+    requestBody: CouponUpdate;
+};
+
+export type CouponsUpdateCouponResponse = (CouponPublic);
+
+export type CouponsDeleteCouponData = {
+    couponId: string;
+};
+
+export type CouponsDeleteCouponResponse = (unknown);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
@@ -581,6 +713,32 @@ export type PaymentsRazorpayWebhookData = {
 };
 
 export type PaymentsRazorpayWebhookResponse = (unknown);
+
+export type PaymentsGetPendingSettlementsResponse = ({
+    [key: string]: unknown;
+});
+
+export type PaymentsCreateSettlementData = {
+    requestBody: PaymentSettlementCreate;
+};
+
+export type PaymentsCreateSettlementResponse = (PaymentSettlementPublic);
+
+export type PaymentsGetSettlementData = {
+    settlementId: string;
+};
+
+export type PaymentsGetSettlementResponse = ({
+    [key: string]: unknown;
+});
+
+export type PaymentsGetSettlementHistoryData = {
+    limit?: number;
+    skip?: number;
+    userId?: (string | null);
+};
+
+export type PaymentsGetSettlementHistoryResponse = (PaymentSettlementsPublic);
 
 export type ProductsListProductsData = {
     brands?: (string | null);

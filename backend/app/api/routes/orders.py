@@ -158,16 +158,21 @@ def checkout(
         raise HTTPException(status_code=400, detail="No delivery address selected")
 
     try:
+        # Clean up any existing pending payment and orders
+        crud.cleanup_pending_payment(session=session, user_id=current_user.id)
+
         orders = crud.create_orders_from_cart(
-            session=session, user=current_user, delivery_address_id=delivery_address_id
+            session=session,
+            user=current_user,
+            delivery_address_id=delivery_address_id,
+            coupon_code=body.coupon_code,
         )
         payment = crud.create_unified_payment_for_orders(
-            session=session, user=current_user, orders=orders
+            session=session,
+            user=current_user,
+            orders=orders,
+            coupon_code=body.coupon_code,
         )
-        # Clear cart after creating orders & payment intent
-        from app.crud.cart import clear_cart
-
-        clear_cart(session=session, user_id=current_user.id)
 
         return CheckoutResponse(
             payment=PaymentPublic.model_validate(payment),

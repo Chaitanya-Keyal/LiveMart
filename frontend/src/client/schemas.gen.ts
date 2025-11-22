@@ -519,6 +519,18 @@ export const CheckoutRequestSchema = {
                 }
             ],
             title: 'Delivery Address Id'
+        },
+        coupon_code: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Coupon Code'
         }
     },
     type: 'object',
@@ -570,6 +582,456 @@ export const ContactInfoSchema = {
     required: ['id', 'email'],
     title: 'ContactInfo',
     description: 'Contact information for buyer/seller/delivery partner'
+} as const;
+
+export const CouponCreateSchema = {
+    properties: {
+        code: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Code'
+        },
+        discount_type: {
+            '$ref': '#/components/schemas/DiscountType'
+        },
+        discount_value: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Discount Value'
+        },
+        min_order_value: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Min Order Value'
+        },
+        max_discount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Max Discount'
+        },
+        usage_limit: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Usage Limit'
+        },
+        valid_from: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Valid From'
+        },
+        valid_until: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Valid Until'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        is_featured: {
+            type: 'boolean',
+            title: 'Is Featured',
+            default: false
+        },
+        target_emails: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Emails'
+        },
+        send_notification: {
+            type: 'boolean',
+            title: 'Send Notification',
+            default: false
+        }
+    },
+    type: 'object',
+    required: ['code', 'discount_type', 'discount_value', 'valid_from', 'valid_until'],
+    title: 'CouponCreate'
+} as const;
+
+export const CouponPublicSchema = {
+    properties: {
+        code: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Code'
+        },
+        discount_type: {
+            '$ref': '#/components/schemas/DiscountType'
+        },
+        discount_value: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Discount Value'
+        },
+        min_order_value: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Min Order Value'
+        },
+        max_discount: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Max Discount'
+        },
+        usage_limit: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Usage Limit'
+        },
+        valid_from: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Valid From'
+        },
+        valid_until: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Valid Until'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        is_featured: {
+            type: 'boolean',
+            title: 'Is Featured',
+            default: false
+        },
+        target_emails: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Emails'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        used_count: {
+            type: 'integer',
+            title: 'Used Count'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['code', 'discount_type', 'discount_value', 'valid_from', 'valid_until', 'id', 'used_count', 'created_at', 'updated_at'],
+    title: 'CouponPublic'
+} as const;
+
+export const CouponUpdateSchema = {
+    properties: {
+        code: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Code'
+        },
+        discount_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/DiscountType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        discount_value: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Discount Value'
+        },
+        min_order_value: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Min Order Value'
+        },
+        max_discount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Max Discount'
+        },
+        usage_limit: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Usage Limit'
+        },
+        valid_from: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Valid From'
+        },
+        valid_until: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Valid Until'
+        },
+        is_active: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Active'
+        },
+        is_featured: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Featured'
+        },
+        target_emails: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Emails'
+        }
+    },
+    type: 'object',
+    title: 'CouponUpdate'
+} as const;
+
+export const CouponValidateRequestSchema = {
+    properties: {
+        code: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Code'
+        },
+        cart_total: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Cart Total'
+        }
+    },
+    type: 'object',
+    required: ['code', 'cart_total'],
+    title: 'CouponValidateRequest'
+} as const;
+
+export const CouponValidateResponseSchema = {
+    properties: {
+        valid: {
+            type: 'boolean',
+            title: 'Valid'
+        },
+        discount_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Discount Amount'
+        },
+        message: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Message'
+        }
+    },
+    type: 'object',
+    required: ['valid', 'discount_amount'],
+    title: 'CouponValidateResponse'
+} as const;
+
+export const CouponsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/CouponPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'CouponsPublic'
+} as const;
+
+export const DiscountTypeSchema = {
+    type: 'string',
+    enum: ['percentage', 'fixed'],
+    title: 'DiscountType'
 } as const;
 
 export const HTTPValidationErrorSchema = {
@@ -825,6 +1287,11 @@ export const OrderPublicSchema = {
             pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
             title: 'Order Subtotal'
         },
+        original_subtotal: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Original Subtotal'
+        },
         order_total: {
             type: 'string',
             pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
@@ -853,6 +1320,18 @@ export const OrderPublicSchema = {
                 }
             ],
             title: 'Payment Amount'
+        },
+        settlement_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Settlement Id'
         },
         pickup_address_snapshot: {
             anyOf: [
@@ -951,7 +1430,7 @@ export const OrderPublicSchema = {
         }
     },
     type: 'object',
-    required: ['order_number', 'buyer_id', 'seller_id', 'order_status', 'buyer_type', 'delivery_fee', 'order_subtotal', 'order_total', 'id', 'created_at', 'updated_at'],
+    required: ['order_number', 'buyer_id', 'seller_id', 'order_status', 'buyer_type', 'delivery_fee', 'order_subtotal', 'original_subtotal', 'order_total', 'id', 'created_at', 'updated_at'],
     title: 'OrderPublic'
 } as const;
 
@@ -1087,6 +1566,131 @@ export const PaymentPublicSchema = {
     type: 'object',
     required: ['buyer_id', 'status', 'total_amount', 'id', 'created_at', 'updated_at'],
     title: 'PaymentPublic'
+} as const;
+
+export const PaymentSettlementCreateSchema = {
+    properties: {
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        order_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            minItems: 1,
+            title: 'Order Ids'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1024
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'order_ids'],
+    title: 'PaymentSettlementCreate'
+} as const;
+
+export const PaymentSettlementPublicSchema = {
+    properties: {
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        user_type: {
+            '$ref': '#/components/schemas/UserType'
+        },
+        amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Amount'
+        },
+        commission_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Commission Amount'
+        },
+        net_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Net Amount'
+        },
+        settlement_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Settlement Date'
+        },
+        status: {
+            '$ref': '#/components/schemas/SettlementStatus'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        order_ids: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Order Ids'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'user_type', 'amount', 'commission_amount', 'net_amount', 'settlement_date', 'status', 'id', 'order_ids', 'created_at', 'updated_at'],
+    title: 'PaymentSettlementPublic'
+} as const;
+
+export const PaymentSettlementsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/PaymentSettlementPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PaymentSettlementsPublic'
 } as const;
 
 export const PaymentStatusSchema = {
@@ -1941,6 +2545,12 @@ export const SellerTypeSchema = {
     title: 'SellerType'
 } as const;
 
+export const SettlementStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'completed'],
+    title: 'SettlementStatus'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -2156,6 +2766,12 @@ export const UserRegisterSchema = {
     type: 'object',
     required: ['email', 'password'],
     title: 'UserRegister'
+} as const;
+
+export const UserTypeSchema = {
+    type: 'string',
+    enum: ['seller', 'delivery_partner'],
+    title: 'UserType'
 } as const;
 
 export const UserUpdateSchema = {

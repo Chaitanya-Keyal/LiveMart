@@ -25,7 +25,10 @@ function RoleRedirect() {
     const activeRole = user.active_role
     if (!activeRole) return
 
-    if (activeRole === "customer") {
+    if (activeRole === "admin") {
+      // @ts-expect-error
+      navigate({ to: "/admin" })
+    } else if (activeRole === "customer") {
       navigate({ to: "/buy" })
     } else if (activeRole === "retailer" || activeRole === "wholesaler") {
       navigate({ to: "/sell" })

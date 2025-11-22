@@ -197,3 +197,47 @@ def generate_delivery_claimed_email(
         },
     )
     return EmailData(html_content=html_content, subject=subject)
+
+
+def send_coupon_notification_email(coupon, target_emails: list[str]) -> None:
+    """Send coupon notification emails to target users."""
+    if not settings.emails_enabled:
+        return
+
+    subject = f"{settings.PROJECT_NAME} - New Coupon Available: {coupon.code}"
+
+    # Format discount display
+    if coupon.discount_type == "percentage":
+        discount_display = f"{coupon.discount_value}% off"
+    else:
+        discount_display = f"₹{coupon.discount_value} off"
+
+    # TODO: Replace with actual MJML template when created
+    # For now, using a simple HTML template
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #2563eb;">New Coupon Available!</h2>
+            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin: 0 0 10px 0; color: #1f2937;">Coupon Code: <span style="color: #2563eb;">{coupon.code}</span></h3>
+                <p style="font-size: 18px; font-weight: bold; color: #059669; margin: 10px 0;">{discount_display}</p>
+                {f'<p style="margin: 5px 0;">Minimum order: ₹{coupon.min_order_value}</p>' if coupon.min_order_value else ""}
+                {f'<p style="margin: 5px 0;">Maximum discount: ₹{coupon.max_discount}</p>' if coupon.max_discount else ""}
+                <p style="margin: 5px 0;">Valid from: {coupon.valid_from.strftime("%b %d, %Y")}</p>
+                <p style="margin: 5px 0;">Valid until: {coupon.valid_until.strftime("%b %d, %Y")}</p>
+            </div>
+            <a href="{settings.FRONTEND_HOST}/buy" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">
+                Shop Now
+            </a>
+            <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+                {settings.PROJECT_NAME} © {datetime.utcnow().year}
+            </p>
+        </body>
+    </html>
+    """
+
+    for email in target_emails:
+        try:
+            send_email(email_to=email, subject=subject, html_content=html_content)
+        except Exception as e:
+            logger.error(f"Failed to send coupon email to {email}: {e}")

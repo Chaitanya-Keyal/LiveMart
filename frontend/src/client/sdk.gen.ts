@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, ProductsCloneProductData, ProductsCloneProductResponse, ProductsBulkImportProductsData, ProductsBulkImportProductsResponse, ReviewsGetProductReviewsData, ReviewsGetProductReviewsResponse, ReviewsCreateProductReviewData, ReviewsCreateProductReviewResponse, ReviewsUpdateProductReviewData, ReviewsUpdateProductReviewResponse, ReviewsDeleteProductReviewData, ReviewsDeleteProductReviewResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
+import type { AddressesListAddressesResponse, AddressesCreateAddressData, AddressesCreateAddressResponse, AddressesUpdateAddressData, AddressesUpdateAddressResponse, AddressesDeleteAddressData, AddressesDeleteAddressResponse, AddressesSetActiveAddressData, AddressesSetActiveAddressResponse, CartGetCartResponse, CartClearCartResponse, CartAddItemData, CartAddItemResponse, CartUpdateItemData, CartUpdateItemResponse, CartRemoveItemData, CartRemoveItemResponse, CouponsCreateCouponData, CouponsCreateCouponResponse, CouponsReadCouponsData, CouponsReadCouponsResponse, CouponsGetFeaturedCouponsResponse, CouponsValidateCouponData, CouponsValidateCouponResponse, CouponsUpdateCouponData, CouponsUpdateCouponResponse, CouponsDeleteCouponData, CouponsDeleteCouponResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginLoginWithGoogleResponse, LoginLoginWithGoogleCallbackResponse, LoginRequestLoginOtpData, LoginRequestLoginOtpResponse, LoginVerifyLoginOtpData, LoginVerifyLoginOtpResponse, OrdersCheckoutData, OrdersCheckoutResponse, OrdersMyOrdersData, OrdersMyOrdersResponse, OrdersSellerOrdersData, OrdersSellerOrdersResponse, OrdersMyDeliveryOrdersData, OrdersMyDeliveryOrdersResponse, OrdersGetOrderData, OrdersGetOrderResponse, OrdersUpdateStatusData, OrdersUpdateStatusResponse, OrdersClaimDeliveryData, OrdersClaimDeliveryResponse, OrdersAvailableDeliveriesData, OrdersAvailableDeliveriesResponse, PaymentsRazorpayWebhookData, PaymentsRazorpayWebhookResponse, PaymentsGetPendingSettlementsResponse, PaymentsCreateSettlementData, PaymentsCreateSettlementResponse, PaymentsGetSettlementData, PaymentsGetSettlementResponse, PaymentsGetSettlementHistoryData, PaymentsGetSettlementHistoryResponse, ProductsListProductsData, ProductsListProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsAutocompleteProductsData, ProductsAutocompleteProductsResponse, ProductsGetProductData, ProductsGetProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, ProductsUpdateProductInventoryData, ProductsUpdateProductInventoryResponse, ProductsUploadProductImageData, ProductsUploadProductImageResponse, ProductsDeleteProductImageData, ProductsDeleteProductImageResponse, ProductsReorderProductImagesData, ProductsReorderProductImagesResponse, ProductsCloneProductData, ProductsCloneProductResponse, ProductsBulkImportProductsData, ProductsBulkImportProductsResponse, ReviewsGetProductReviewsData, ReviewsGetProductReviewsResponse, ReviewsCreateProductReviewData, ReviewsCreateProductReviewResponse, ReviewsUpdateProductReviewData, ReviewsUpdateProductReviewResponse, ReviewsDeleteProductReviewData, ReviewsDeleteProductReviewResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UsersGetUserRolesResponse, UsersAddUserRoleData, UsersAddUserRoleResponse, UsersRemoveUserRoleData, UsersRemoveUserRoleResponse, UsersSwitchUserRoleData, UsersSwitchUserRoleResponse, UsersSignupRegisterUserData, UsersSignupRegisterUserResponse, UsersSignupVerifyEmailData, UsersSignupVerifyEmailResponse, UsersSignupResendVerificationOtpResponse, UtilsHealthResponse } from './types.gen';
 
 export class AddressesService {
     /**
@@ -181,6 +181,129 @@ export class CartService {
             url: '/api/v1/cart/items/{cart_item_id}',
             path: {
                 cart_item_id: data.cartItemId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class CouponsService {
+    /**
+     * Create Coupon
+     * Create a new coupon (Admin only).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CouponPublic Successful Response
+     * @throws ApiError
+     */
+    public static createCoupon(data: CouponsCreateCouponData): CancelablePromise<CouponsCreateCouponResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/coupons/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Coupons
+     * Retrieve all coupons (Admin only).
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns CouponsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readCoupons(data: CouponsReadCouponsData = {}): CancelablePromise<CouponsReadCouponsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/coupons/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Featured Coupons
+     * Get featured coupons (Public endpoint).
+     * @returns CouponPublic Successful Response
+     * @throws ApiError
+     */
+    public static getFeaturedCoupons(): CancelablePromise<CouponsGetFeaturedCouponsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/coupons/featured'
+        });
+    }
+    
+    /**
+     * Validate Coupon
+     * Validate a coupon and calculate discount.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns CouponValidateResponse Successful Response
+     * @throws ApiError
+     */
+    public static validateCoupon(data: CouponsValidateCouponData): CancelablePromise<CouponsValidateCouponResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/coupons/validate',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Coupon
+     * Update a coupon (Admin only).
+     * @param data The data for the request.
+     * @param data.couponId
+     * @param data.requestBody
+     * @returns CouponPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateCoupon(data: CouponsUpdateCouponData): CancelablePromise<CouponsUpdateCouponResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/coupons/{coupon_id}',
+            path: {
+                coupon_id: data.couponId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Coupon
+     * Delete a coupon (Admin only).
+     * @param data The data for the request.
+     * @param data.couponId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static deleteCoupon(data: CouponsDeleteCouponData): CancelablePromise<CouponsDeleteCouponResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/coupons/{coupon_id}',
+            path: {
+                coupon_id: data.couponId
             },
             errors: {
                 422: 'Validation Error'
@@ -511,6 +634,85 @@ export class PaymentsService {
             url: '/api/v1/payments/razorpay/webhook',
             headers: {
                 'x-razorpay-signature': data.xRazorpaySignature
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Pending Settlements
+     * Get pending settlements aggregated by user (Admin only).
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getPendingSettlements(): CancelablePromise<PaymentsGetPendingSettlementsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/payments/settlements/pending'
+        });
+    }
+    
+    /**
+     * Create Settlement
+     * Create a settlement for a user (Admin only).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns PaymentSettlementPublic Successful Response
+     * @throws ApiError
+     */
+    public static createSettlement(data: PaymentsCreateSettlementData): CancelablePromise<PaymentsCreateSettlementResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/payments/settlements',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Settlement
+     * Get settlement by ID with all associated orders (Admin only).
+     * @param data The data for the request.
+     * @param data.settlementId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getSettlement(data: PaymentsGetSettlementData): CancelablePromise<PaymentsGetSettlementResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/payments/settlements/{settlement_id}',
+            path: {
+                settlement_id: data.settlementId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Settlement History
+     * Get settlement history (Admin only).
+     * @param data The data for the request.
+     * @param data.userId
+     * @param data.skip
+     * @param data.limit
+     * @returns PaymentSettlementsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getSettlementHistory(data: PaymentsGetSettlementHistoryData = {}): CancelablePromise<PaymentsGetSettlementHistoryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/payments/settlements/history',
+            query: {
+                user_id: data.userId,
+                skip: data.skip,
+                limit: data.limit
             },
             errors: {
                 422: 'Validation Error'

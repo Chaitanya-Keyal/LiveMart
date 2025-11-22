@@ -143,9 +143,11 @@ class OrderBase(BaseModel):
     delivery_partner_id: uuid.UUID | None = None
     delivery_fee: Decimal = Field(ge=0, decimal_places=2)
     order_subtotal: Decimal = Field(ge=0, decimal_places=2)
+    original_subtotal: Decimal = Field(ge=0, decimal_places=2)
     order_total: Decimal = Field(ge=0, decimal_places=2)
     payment_id: uuid.UUID | None = None
     payment_amount: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    settlement_id: uuid.UUID | None = None
     pickup_address_snapshot: dict | None = None
     delivery_address_snapshot: dict | None = None
 
@@ -174,11 +176,20 @@ class Order(TimestampModel, table=True):
     )
     delivery_fee: Decimal = SQLField(sa_column=Column(Numeric(10, 2), nullable=False))
     order_subtotal: Decimal = SQLField(sa_column=Column(Numeric(10, 2), nullable=False))
+    original_subtotal: Decimal = SQLField(
+        sa_column=Column(Numeric(10, 2), nullable=False)
+    )
     order_total: Decimal = SQLField(sa_column=Column(Numeric(10, 2), nullable=False))
     payment_id: uuid.UUID | None = SQLField(
         default=None, foreign_key="payment.id", ondelete="SET NULL", index=True
     )
     payment_amount: Decimal | None = SQLField(sa_column=Column(Numeric(10, 2)))
+    settlement_id: uuid.UUID | None = SQLField(
+        default=None,
+        foreign_key="paymentsettlement.id",
+        ondelete="SET NULL",
+        index=True,
+    )
     pickup_address_snapshot: dict | None = SQLField(
         default=None, sa_column=Column(postgresql.JSONB)
     )
@@ -298,6 +309,7 @@ class PaymentPublic(PaymentBase):
 
 class CheckoutRequest(BaseModel):
     delivery_address_id: uuid.UUID | None = None
+    coupon_code: str | None = Field(default=None, max_length=50)
 
     @model_validator(mode="after")
     def ensure_address(self) -> "CheckoutRequest":

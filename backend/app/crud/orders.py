@@ -13,6 +13,7 @@ from app.models.order import (
     OrderStatus,
     OrderStatusHistory,
     Payment,
+    PaymentStatus,
 )
 from app.models.product import BuyerType, Product, ProductInventory, SellerType
 from app.models.role import RoleEnum
@@ -22,6 +23,59 @@ from app.utils.razorpay import amount_rupees_to_paise, create_razorpay_order
 
 BASE_DELIVERY_FEE = Decimal("10")
 PER_KM_FEE = Decimal("1")
+
+
+def cleanup_pending_payment(*, session: Session, user_id: uuid.UUID) -> None:
+    """
+    Delete existing pending payment and associated orders for a user.
+    Restores inventory for deleted orders.
+    """
+    existing_payment = session.exec(
+        select(Payment)
+        .where(Payment.buyer_id == user_id)
+        .where(Payment.status == PaymentStatus.PENDING)
+        .order_by(Payment.created_at.desc())
+    ).first()
+
+    if not existing_payment:
+        return
+
+    # Delete associated orders and restore inventory
+    old_orders = session.exec(
+        select(Order).where(Order.payment_id == existing_payment.id)
+    ).all()
+
+    for order in old_orders:
+        # Delete order status history first to avoid constraint violations
+        history_records = session.exec(
+            select(OrderStatusHistory).where(OrderStatusHistory.order_id == order.id)
+        ).all()
+        for history in history_records:
+            session.delete(history)
+
+        # Restore inventory before deleting
+        for item in order.items:
+            inv = session.exec(
+                select(ProductInventory)
+                .where(ProductInventory.product_id == item.product_id)
+                .with_for_update()
+            ).first()
+            if inv:
+                inv.stock_quantity += item.quantity
+                session.add(inv)
+        session.delete(order)
+
+    # Delete payment coupon association if exists
+    from app.models.coupon import PaymentCoupon
+
+    payment_coupon = session.exec(
+        select(PaymentCoupon).where(PaymentCoupon.payment_id == existing_payment.id)
+    ).first()
+    if payment_coupon:
+        session.delete(payment_coupon)
+
+    session.delete(existing_payment)
+    session.commit()
 
 
 def _buyer_type_for_user(user: User) -> BuyerType:
@@ -65,11 +119,16 @@ def _address_snapshot(addr: Address) -> dict:
 
 
 def create_orders_from_cart(
-    *, session: Session, user: User, delivery_address_id: uuid.UUID
+    *,
+    session: Session,
+    user: User,
+    delivery_address_id: uuid.UUID,
+    coupon_code: str | None = None,
 ) -> list[Order]:
     """Create orders grouped by (seller_id, pickup_address_id) from user's cart.
 
     Applies delivery fee: 10 + 1 per km, capped at 50% of order subtotal.
+    Optionally applies coupon discount to order subtotals.
     Decrements inventory with SELECT FOR UPDATE to avoid race conditions.
     """
 
@@ -90,6 +149,15 @@ def create_orders_from_cart(
         float(delivery_addr.latitude),
         float(delivery_addr.longitude),
     )
+
+    # Validate coupon if provided
+    coupon = None
+    total_discount = Decimal("0")
+    if coupon_code:
+        from app.crud import get_coupon_by_code
+
+        # We'll validate after calculating cart total
+        coupon = get_coupon_by_code(session=session, code=coupon_code)
 
     # Group items by (seller_id, pickup_address_id)
     groups: dict[tuple[uuid.UUID, uuid.UUID | None], list[CartItem]] = defaultdict(list)
@@ -114,7 +182,9 @@ def create_orders_from_cart(
         groups[(product.seller_id, pickup_addr_id)].append(it)
 
     created_orders: list[Order] = []
+    total_original_subtotal = Decimal("0")
 
+    # First pass: create orders with original pricing
     for (seller_id, pickup_addr_id), items in groups.items():
         order_number = Order.generate_order_number()
         order_items: list[OrderItem] = []
@@ -162,6 +232,8 @@ def create_orders_from_cart(
                 )
             )
 
+        total_original_subtotal += order_subtotal
+
         # Calculate delivery fee using group-level pickup coords; if missing, fee=base only
         if lat is not None and lon is not None:
             distance_km = Decimal(
@@ -173,8 +245,7 @@ def create_orders_from_cart(
         cap = order_subtotal * Decimal("0.5")
         delivery_fee = raw_fee if raw_fee <= cap else cap
 
-        order_total = order_subtotal + delivery_fee
-
+        # Store with original subtotal - discount applied later
         order = Order(
             order_number=order_number,
             buyer_id=user.id,
@@ -184,7 +255,8 @@ def create_orders_from_cart(
             buyer_type=buyer_type,
             delivery_fee=delivery_fee.quantize(Decimal("0.01")),
             order_subtotal=order_subtotal.quantize(Decimal("0.01")),
-            order_total=order_total.quantize(Decimal("0.01")),
+            original_subtotal=order_subtotal.quantize(Decimal("0.01")),
+            order_total=(order_subtotal + delivery_fee).quantize(Decimal("0.01")),
             pickup_address_snapshot=(
                 _address_snapshot(session.get(Address, pickup_addr_id))
                 if pickup_addr_id
@@ -211,6 +283,39 @@ def create_orders_from_cart(
 
         created_orders.append(order)
 
+    # Apply coupon discount if valid
+    if coupon:
+        from app.crud import validate_coupon
+
+        valid, discount, msg = validate_coupon(
+            session=session,
+            code=coupon_code,
+            cart_total=total_original_subtotal,
+            user_email=user.email,
+        )
+        if not valid:
+            raise ValueError(f"Coupon validation failed: {msg}")
+
+        total_discount = discount
+
+        # Distribute discount proportionally across orders
+        if total_discount > Decimal("0") and len(created_orders) > 0:
+            for order in created_orders:
+                # Calculate proportional discount for this order
+                proportion = order.original_subtotal / total_original_subtotal
+                order_discount = (total_discount * proportion).quantize(Decimal("0.01"))
+
+                # Apply discount to order_subtotal
+                order.order_subtotal = max(
+                    Decimal("0"), order.order_subtotal - order_discount
+                )
+
+                # Recalculate order_total
+                order.order_total = (
+                    order.order_subtotal + order.delivery_fee
+                ).quantize(Decimal("0.01"))
+                session.add(order)
+
     session.commit()
     # Do not clear cart here; caller should clear after payment creation
     # But we do want fresh state on orders
@@ -220,7 +325,7 @@ def create_orders_from_cart(
 
 
 def create_unified_payment_for_orders(
-    *, session: Session, user: User, orders: list[Order]
+    *, session: Session, user: User, orders: list[Order], coupon_code: str | None = None
 ) -> Payment:
     total_amount = sum((o.order_total for o in orders), start=Decimal("0"))
     amount_paise = amount_rupees_to_paise(total_amount)
@@ -235,6 +340,29 @@ def create_unified_payment_for_orders(
     )
     session.add(payment)
     session.flush()
+
+    # Link coupon to payment if used
+    if coupon_code:
+        from app.crud import get_coupon_by_code
+        from app.models.coupon import PaymentCoupon
+
+        coupon = get_coupon_by_code(session=session, code=coupon_code)
+        if coupon:
+            # Calculate total discount applied
+            total_original = sum(
+                (o.original_subtotal for o in orders), start=Decimal("0")
+            )
+            total_discounted = sum(
+                (o.order_subtotal for o in orders), start=Decimal("0")
+            )
+            discount_amount = total_original - total_discounted
+
+            payment_coupon = PaymentCoupon(
+                payment_id=payment.id,
+                coupon_id=coupon.id,
+                discount_amount=discount_amount.quantize(Decimal("0.01")),
+            )
+            session.add(payment_coupon)
 
     for o in orders:
         o.payment_id = payment.id

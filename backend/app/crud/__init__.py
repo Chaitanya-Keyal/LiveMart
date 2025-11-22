@@ -14,7 +14,20 @@ from .cart import (
     remove_from_cart,
     update_cart_item_quantity,
 )
+from .coupons import (
+    create_coupon,
+    delete_coupon,
+    get_all_user_emails,
+    get_coupon_by_code,
+    get_coupon_by_id,
+    get_coupons,
+    get_featured_coupons,
+    increment_coupon_usage,
+    update_coupon,
+    validate_coupon,
+)
 from .orders import (
+    cleanup_pending_payment,
     create_orders_from_cart,
     create_unified_payment_for_orders,
     get_available_delivery_orders,
@@ -49,6 +62,12 @@ from .reviews import (
     get_user_review_for_product,
     has_purchased_product,
     update_review,
+)
+from .settlements import (
+    create_settlement,
+    get_pending_settlements_by_user,
+    get_settlement_by_id,
+    get_settlement_history,
 )
 from .users import (
     add_role_to_user,
@@ -94,6 +113,7 @@ __all__ = [
     "get_address_coords",
     "autocomplete_products",
     "get_users_active_address_coords",
+    "cleanup_pending_payment",
     "create_orders_from_cart",
     "create_unified_payment_for_orders",
     "get_orders_for_buyer",
@@ -111,4 +131,18 @@ __all__ = [
     "get_user_review_for_product",
     "has_purchased_product",
     "get_product_rating_stats",
+    "create_coupon",
+    "get_coupons",
+    "get_coupon_by_id",
+    "get_coupon_by_code",
+    "update_coupon",
+    "delete_coupon",
+    "validate_coupon",
+    "increment_coupon_usage",
+    "get_featured_coupons",
+    "get_all_user_emails",
+    "get_pending_settlements_by_user",
+    "create_settlement",
+    "get_settlement_by_id",
+    "get_settlement_history",
 ]

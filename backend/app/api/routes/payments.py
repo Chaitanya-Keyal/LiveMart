@@ -1,17 +1,23 @@
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
 from sqlmodel import select
 
-from app.api.deps import SessionDep
-from app.core.config import settings
+from app import crud
+from app.api.deps import SessionDep, require_admin
 from app.models.common import Message
 from app.models.order import (
     Order,
+    OrderPublic,
     OrderStatus,
     OrderStatusHistory,
     Payment,
     PaymentStatus,
+)
+from app.models.settlement import (
+    PaymentSettlementCreate,
+    PaymentSettlementPublic,
+    PaymentSettlementsPublic,
 )
 from app.utils.email import (
     generate_new_order_notification_email,
@@ -30,6 +36,8 @@ async def razorpay_webhook(
     background_tasks: BackgroundTasks,
     x_razorpay_signature: str | None = Header(default=None),
 ) -> Any:
+    from app.core.config import settings
+
     if not settings.RAZORPAY_WEBHOOK_SECRET:
         raise HTTPException(status_code=500, detail="Webhook not configured")
 
@@ -63,10 +71,28 @@ async def razorpay_webhook(
         payment.razorpay_payment_id = payment_id
         session.add(payment)
 
+        # Increment coupon usage if coupon was used
+        from app.crud import increment_coupon_usage
+        from app.models.coupon import Coupon, PaymentCoupon
+
+        payment_coupon = session.exec(
+            select(PaymentCoupon).where(PaymentCoupon.payment_id == payment.id)
+        ).first()
+        if payment_coupon:
+            coupon = session.get(Coupon, payment_coupon.coupon_id)
+            if coupon:
+                increment_coupon_usage(session=session, coupon=coupon)
+
         orders = session.exec(select(Order).where(Order.payment_id == payment.id)).all()
         order_summaries = []
 
         buyer = payment.buyer
+
+        # Clear buyer's cart on successful payment
+        from app.crud.cart import clear_cart
+
+        clear_cart(session=session, user_id=buyer.id)
+
         for o in orders:
             o.order_status = OrderStatus.CONFIRMED
             session.add(o)
@@ -139,3 +165,99 @@ async def razorpay_webhook(
         return Message(message="ok")
 
     return Message(message="ignored")
+
+
+@router.get(
+    "/settlements/pending",
+    dependencies=[Depends(require_admin)],
+    response_model=dict,
+)
+def get_pending_settlements(session: SessionDep) -> Any:
+    """Get pending settlements aggregated by user (Admin only)."""
+    pending_list, summary = crud.settlements.get_pending_settlements_by_user(
+        session=session
+    )
+    return {
+        "pending_settlements": pending_list,
+        "summary": summary,
+    }
+
+
+@router.post(
+    "/settlements",
+    dependencies=[Depends(require_admin)],
+    response_model=PaymentSettlementPublic,
+)
+def create_settlement(
+    *, session: SessionDep, settlement_in: PaymentSettlementCreate
+) -> Any:
+    """Create a settlement for a user (Admin only)."""
+    try:
+        settlement = crud.settlements.create_settlement(
+            session=session, settlement_in=settlement_in
+        )
+        return settlement
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get(
+    "/settlements/history",
+    dependencies=[Depends(require_admin)],
+    response_model=PaymentSettlementsPublic,
+)
+def get_settlement_history(
+    session: SessionDep,
+    user_id: str | None = None,
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """Get settlement history (Admin only)."""
+    import uuid
+
+    user_uuid = None
+    if user_id:
+        try:
+            user_uuid = uuid.UUID(user_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    settlements, count = crud.settlements.get_settlement_history(
+        session=session, user_id=user_uuid, skip=skip, limit=limit
+    )
+
+    return PaymentSettlementsPublic(data=settlements, count=count)
+
+
+@router.get(
+    "/settlements/{settlement_id}",
+    dependencies=[Depends(require_admin)],
+    response_model=dict,
+)
+def get_settlement(*, session: SessionDep, settlement_id: str) -> Any:
+    """Get settlement by ID with all associated orders (Admin only)."""
+    import uuid
+
+    try:
+        settlement_uuid = uuid.UUID(settlement_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid settlement ID")
+
+    result = crud.settlements.get_settlement_by_id(
+        session=session, settlement_id=settlement_uuid
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Settlement not found")
+
+    settlement, orders = result
+
+    # Serialize orders
+    serialized_orders = []
+    for order in orders:
+        # Create a minimal serialization without action hints
+        serialized_orders.append(OrderPublic.model_validate(order))
+
+    return {
+        "settlement": PaymentSettlementPublic.model_validate(settlement),
+        "orders": serialized_orders,
+    }

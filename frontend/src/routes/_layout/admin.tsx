@@ -13,6 +13,8 @@ import { z } from "zod"
 
 import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
+import CouponManagement from "@/components/Admin/CouponManagement"
+import PaymentSettlements from "@/components/Admin/PaymentSettlements"
 import PageContainer from "@/components/Common/PageContainer"
 import { UserActionsMenu } from "@/components/Common/UserActionsMenu"
 import PendingUsers from "@/components/Pending/PendingUsers"
@@ -22,6 +24,12 @@ import {
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
+import {
+  TabsContent,
+  TabsList,
+  TabsRoot,
+  TabsTrigger,
+} from "@/components/ui/tabs.tsx"
 
 const usersSearchSchema = z.object({
   page: z.number().catch(1),
@@ -139,17 +147,35 @@ function Admin() {
       <VStack align="start" gap={8} w="100%">
         <Box>
           <Heading size="xl" mb={2}>
-            User Management
+            Admin Panel
           </Heading>
           <Text fontSize="lg" color="fg.muted">
-            Manage users and permissions
+            Manage coupons, settlements, and users
           </Text>
         </Box>
 
-        <Box w="100%">
-          <AddUser />
-          <UsersTable />
-        </Box>
+        <TabsRoot defaultValue="coupons" w="100%">
+          <TabsList>
+            <TabsTrigger value="coupons">Coupons</TabsTrigger>
+            <TabsTrigger value="settlements">Settlements</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="coupons" mt={6}>
+            <CouponManagement />
+          </TabsContent>
+
+          <TabsContent value="settlements" mt={6}>
+            <PaymentSettlements />
+          </TabsContent>
+
+          <TabsContent value="users" mt={6}>
+            <Box w="100%">
+              <AddUser />
+              <UsersTable />
+            </Box>
+          </TabsContent>
+        </TabsRoot>
       </VStack>
     </PageContainer>
   )
