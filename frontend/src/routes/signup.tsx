@@ -115,7 +115,7 @@ function SignUp() {
 
           {/* Form Fields */}
           <Stack
-            gap={4}
+            gap={6}
             p={{ base: 6, md: 8 }}
             borderRadius="xl"
             borderWidth="1px"

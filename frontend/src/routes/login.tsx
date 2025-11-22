@@ -1,11 +1,12 @@
 import {
-  Accordion,
-  Box,
   Container,
+  Flex,
+  Heading,
   Image,
   Input,
   Separator,
   Stack,
+  Tabs,
   Text,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -57,7 +58,7 @@ function Login() {
   const [otpCode, setOtpCode] = useState("")
   const [otpSent, setOtpSent] = useState(false)
   const [otpTimer, setOtpTimer] = useState(0)
-  const [accordionValue, setAccordionValue] = useState<string[]>(["password"]) // which panel is open
+  const [activeTab, setActiveTab] = useState("password") // which tab is active
   const {
     register,
     handleSubmit,
@@ -131,213 +132,204 @@ function Login() {
   }, [otpTimer])
 
   return (
-    <Container
-      h="100vh"
-      maxW="md"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      px={{ base: 4, md: 6 }}
-    >
-      <Stack
-        gap={6}
-        as="form"
-        onSubmit={handleSubmit(onSubmit)}
-        w="100%"
-        p={{ base: 6, md: 8 }}
-        borderRadius="xl"
-        borderWidth="1px"
-        borderColor="border.default"
-        bg="bg.surface"
-        shadow="sm"
+    <Flex flexDir={{ base: "column", md: "row" }} justify="center" h="100vh">
+      <Container
+        maxW="lg"
+        px={{ base: 4, md: 6 }}
+        alignItems="stretch"
+        justifyContent="center"
+        centerContent
       >
-        <Stack align="center" gap={2}>
-          <Image
-            src="/assets/images/logo.png"
-            alt="logo"
-            height="auto"
-            maxW="2s"
-          />
-        </Stack>
-
-        {oauthErrorMessage && (
-          <Text color="danger.solid" fontSize="sm" textAlign="center">
-            {oauthErrorMessage}
-          </Text>
-        )}
-
-        {/* Shared Email */}
-        <Field
-          label="Email"
-          invalid={!!errors.username || !!error}
-          errorText={errors.username?.message || error || undefined}
-        >
-          <InputGroup w="100%" startElement={<FiMail />}>
-            <Input
-              {...register("username", {
-                required: "Email is required",
-                pattern: emailPattern,
-              })}
-              placeholder="Email"
-              type="email"
-              id="login_email"
+        <Stack gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="100%">
+          {/* Header */}
+          <Stack gap={2} textAlign="center">
+            <Image
+              src="/assets/images/logo.png"
+              alt="logo"
+              height="auto"
+              maxW="2s"
+              alignSelf="center"
             />
-          </InputGroup>
-        </Field>
+            <Heading size="lg" fontWeight="bold">
+              Sign in to your account
+            </Heading>
+            <Text color="fg.muted" fontSize="sm">
+              Welcome back! Please enter your details
+            </Text>
+          </Stack>
 
-        {/* Collapsible Auth Options (Chakra v3 API) */}
-        <Accordion.Root
-          multiple={false}
-          value={accordionValue}
-          onValueChange={(details: any) =>
-            setAccordionValue(details?.value ?? ["password"])
-          }
-          style={{ width: "100%" }}
-        >
-          {/* Password Panel */}
-          <Box borderRadius="0.75rem" overflow="hidden">
-            <Accordion.Item value="password">
-              <Accordion.ItemTrigger
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: ".5rem",
-                  padding: ".875rem 1rem",
-                  width: "100%",
-                  cursor: "pointer",
-                }}
-              >
-                <FiLock />
-                <Text flex="1" textAlign="left" fontWeight="semibold">
-                  Login with Password
-                </Text>
-                <Accordion.ItemIndicator />
-              </Accordion.ItemTrigger>
-              <Accordion.ItemContent style={{ padding: "1rem" }}>
-                <Stack gap={3}>
-                  <PasswordInput
-                    type="password"
-                    startElement={<FiLock />}
-                    {...register("password", passwordRules())}
-                    placeholder="Password"
-                    errors={errors}
-                  />
-                  <RouterLink to="/recover-password" className="main-link">
-                    Forgot Password?
-                  </RouterLink>
-                </Stack>
-              </Accordion.ItemContent>
-            </Accordion.Item>
-          </Box>
+          {oauthErrorMessage && (
+            <Text color="danger.solid" fontSize="sm" textAlign="center">
+              {oauthErrorMessage}
+            </Text>
+          )}
 
-          {/* OTP Panel */}
-          <Box mt={3} borderRadius="0.75rem" overflow="hidden">
-            <Accordion.Item value="otp">
-              <Accordion.ItemTrigger
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: ".5rem",
-                  padding: ".875rem 1rem",
-                  width: "100%",
-                  cursor: "pointer",
-                }}
+          {/* Form Fields */}
+          <Stack
+            gap={6}
+            p={{ base: 6, md: 8 }}
+            borderRadius="xl"
+            borderWidth="1px"
+            borderColor="border.default"
+            bg="bg.surface"
+            shadow="sm"
+          >
+            {/* Shared Email */}
+            <Field
+              label="Email"
+              required
+              invalid={!!errors.username || !!error}
+              errorText={errors.username?.message || error || undefined}
+            >
+              <InputGroup w="100%" startElement={<FiMail />}>
+                <Input
+                  {...register("username", {
+                    required: "Email is required",
+                    pattern: emailPattern,
+                  })}
+                  placeholder="you@example.com"
+                  type="email"
+                  id="login_email"
+                />
+              </InputGroup>
+            </Field>
+
+            {/* Tab-based Auth Options */}
+            <Stack gap={4}>
+              <Tabs.Root
+                value={activeTab}
+                onValueChange={(details) => setActiveTab(details.value)}
+                variant="enclosed"
+                fitted
               >
-                <FiKey />
-                <Text flex="1" textAlign="left" fontWeight="semibold">
-                  Login with OTP
-                </Text>
-                <Accordion.ItemIndicator />
-              </Accordion.ItemTrigger>
-              <Accordion.ItemContent style={{ padding: "1rem" }}>
-                <Stack gap={3}>
-                  <Button
-                    variant="outline"
-                    type="button"
-                    onClick={() =>
-                      requestOtpMutation.mutate(getValues("username") || "")
-                    }
-                    w="100%"
-                    loading={requestOtpMutation.isPending}
-                    disabled={otpTimer > 0}
-                  >
-                    {(() => {
-                      if (otpTimer > 0) return `Resend OTP (${otpTimer}s)`
-                      return otpSent ? "Resend OTP" : "Send OTP"
-                    })()}
-                  </Button>
-                  {otpSent && (
-                    <Field label="Code">
-                      <Input
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                        placeholder="Enter OTP code"
-                        inputMode="numeric"
+                <Tabs.List>
+                  <Tabs.Trigger value="password" gap={2}>
+                    <FiLock />
+                    Password
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="otp" gap={2}>
+                    <FiKey />
+                    OTP
+                  </Tabs.Trigger>
+                </Tabs.List>
+
+                <Tabs.Content value="password" pt={4}>
+                  <Stack gap={3}>
+                    <Field
+                      label="Password"
+                      required
+                      invalid={!!errors.password}
+                      errorText={errors.password?.message}
+                    >
+                      <PasswordInput
+                        type="password"
+                        startElement={<FiLock />}
+                        {...register("password", passwordRules())}
+                        placeholder="Enter your password"
+                        errors={errors}
                       />
                     </Field>
-                  )}
-                </Stack>
-              </Accordion.ItemContent>
-            </Accordion.Item>
-          </Box>
-        </Accordion.Root>
+                    <RouterLink to="/recover-password" className="main-link">
+                      <Text fontSize="sm" fontWeight="medium">
+                        Forgot Password?
+                      </Text>
+                    </RouterLink>
+                  </Stack>
+                </Tabs.Content>
 
-        {/* Common Login button (handles password or OTP based on active panel) */}
-        <Button
-          variant="solid"
-          type="button"
-          onClick={() => {
-            if (accordionValue.includes("otp")) {
-              const email = getValues("username") || ""
-              if (!otpSent) {
-                showErrorToast("Please send OTP first")
-                return
-              }
-              if (!otpCode) {
-                showErrorToast("Enter the OTP code")
-                return
-              }
-              verifyOtpMutation.mutate({ email, code: otpCode })
-            } else {
-              if (isSubmitting) return
-              resetError()
-              handleSubmit(onSubmit)()
-            }
-          }}
-          loading={isSubmitting || verifyOtpMutation.isPending}
-          w="100%"
-        >
-          Log In
-        </Button>
+                <Tabs.Content value="otp" pt={4}>
+                  <Stack gap={3}>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() =>
+                        requestOtpMutation.mutate(getValues("username") || "")
+                      }
+                      w="100%"
+                      loading={requestOtpMutation.isPending}
+                      disabled={otpTimer > 0}
+                    >
+                      {(() => {
+                        if (otpTimer > 0) return `Resend OTP (${otpTimer}s)`
+                        return otpSent ? "Resend OTP" : "Send OTP"
+                      })()}
+                    </Button>
+                    {otpSent && (
+                      <Field label="OTP Code" required>
+                        <Input
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          placeholder="Enter 6-digit code"
+                          inputMode="numeric"
+                        />
+                      </Field>
+                    )}
+                  </Stack>
+                </Tabs.Content>
+              </Tabs.Root>
+            </Stack>
 
-        <Stack direction="row" align="center" w="100%">
-          <Separator flex="1" />
-          <Text fontSize="sm" color="fg.muted" px={2}>
-            or
-          </Text>
-          <Separator flex="1" />
-        </Stack>
+            {/* Login Button */}
+            <Button
+              variant="solid"
+              type="button"
+              onClick={() => {
+                if (activeTab === "otp") {
+                  const email = getValues("username") || ""
+                  if (!otpSent) {
+                    showErrorToast("Please send OTP first")
+                    return
+                  }
+                  if (!otpCode) {
+                    showErrorToast("Enter the OTP code")
+                    return
+                  }
+                  verifyOtpMutation.mutate({ email, code: otpCode })
+                } else {
+                  if (isSubmitting) return
+                  resetError()
+                  handleSubmit(onSubmit)()
+                }
+              }}
+              loading={isSubmitting || verifyOtpMutation.isPending}
+              size="lg"
+              mt={2}
+            >
+              Log In
+            </Button>
+          </Stack>
 
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => startGoogleLogin()}
-          w="100%"
-          gap={2}
-        >
-          <FcGoogle size={20} />
-          Continue with Google
-        </Button>
-
-        <Stack direction="row" gap={1} justify="center">
-          <Text fontSize="sm">Don't have an account?</Text>
-          <RouterLink to="/signup" className="main-link">
-            <Text fontSize="sm" fontWeight="semibold">
-              Sign Up
+          {/* OAuth */}
+          <Stack direction="row" align="center" w="100%" my={2}>
+            <Separator flex="1" />
+            <Text fontSize="sm" color="fg.muted" px={2}>
+              or
             </Text>
-          </RouterLink>
+            <Separator flex="1" />
+          </Stack>
+
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => startGoogleLogin()}
+            w="100%"
+            gap={2}
+          >
+            <FcGoogle size={20} />
+            Continue with Google
+          </Button>
+
+          {/* Signup Link */}
+          <Text textAlign="center" fontSize="sm" color="fg.muted">
+            Don't have an account?{" "}
+            <RouterLink to="/signup" className="main-link">
+              <Text as="span" fontWeight="semibold" color="brand.primary">
+                Sign Up
+              </Text>
+            </RouterLink>
+          </Text>
         </Stack>
-      </Stack>
-    </Container>
+      </Container>
+    </Flex>
   )
 }
