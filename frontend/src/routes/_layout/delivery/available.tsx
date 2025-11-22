@@ -1,12 +1,13 @@
 import {
   Badge,
+  Box,
   Button,
   Card,
   createListCollection,
   Heading,
   HStack,
+  SimpleGrid,
   Spinner,
-  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -14,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import React from "react"
 import { OrdersService } from "@/client"
+import PageContainer from "@/components/Common/PageContainer"
 import { OrderStatusBadge } from "@/components/Orders/OrderStatusBadge"
 import {
   SelectContent,
@@ -99,11 +101,18 @@ function DeliveryAvailablePage() {
   })
 
   return (
-    <Stack gap={6} maxW="4xl" mx="auto" p={6}>
-      <VStack align="stretch" gap={4}>
-        <Heading size="lg">Available Deliveries</Heading>
+    <PageContainer variant="list">
+      <VStack align="start" gap={8} w="100%">
+        <Box>
+          <Heading size="xl" mb={2}>
+            Available Deliveries
+          </Heading>
+          <Text fontSize="lg" color="fg.muted">
+            Find and claim nearby delivery orders
+          </Text>
+        </Box>
 
-        <Card.Root>
+        <Card.Root w="100%">
           <Card.Body>
             <VStack align="stretch" gap={3}>
               <Text fontWeight="medium" fontSize="sm" color="fg.muted">
@@ -114,6 +123,7 @@ function DeliveryAvailablePage() {
                 value={[locationSource]}
                 onValueChange={handleLocationChange}
                 size="sm"
+                width="100%"
               >
                 <SelectTrigger>
                   <SelectValueText placeholder="Select location" />
@@ -148,93 +158,52 @@ function DeliveryAvailablePage() {
             </VStack>
           </Card.Body>
         </Card.Root>
-      </VStack>
 
-      {isLoadingLocation || isLoading ? (
-        <HStack justify="center" py={8}>
-          <Spinner size="lg" />
-          <Text color="fg.muted">Loading deliveries...</Text>
-        </HStack>
-      ) : lat === null || lon === null ? (
-        <Card.Root>
-          <Card.Body>
-            <Text textAlign="center" color="fg.muted">
-              Unable to determine location. Please select a saved address or
-              enable location access.
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      ) : data?.data?.length === 0 ? (
-        <Card.Root>
-          <Card.Body>
-            <Text textAlign="center" color="fg.muted">
-              No deliveries available nearby.
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <VStack align="stretch" gap={3}>
-          {data?.data.map((row: any) => (
-            <Card.Root key={row.order.id}>
-              <Card.Body>
-                <HStack justify="space-between" align="start">
-                  <VStack align="start" flex={1} gap={2}>
-                    <HStack>
-                      <Text fontWeight="bold" fontSize="lg">
-                        {row.order.order_number}
-                      </Text>
-                      <OrderStatusBadge status={row.order.order_status} />
-                    </HStack>
-
-                    {/* Contact Information */}
-                    <VStack align="start" gap={1} fontSize="sm">
-                      {row.order.seller_contact && (
-                        <HStack gap={1}>
-                          <Text fontWeight="medium" color="fg.muted">
-                            Seller:
-                          </Text>
-                          <Text>
-                            {row.order.seller_contact.full_name || "N/A"} (
-                            {row.order.seller_contact.email})
-                          </Text>
-                        </HStack>
-                      )}
-                      {row.order.buyer_contact && (
-                        <HStack gap={1}>
-                          <Text fontWeight="medium" color="fg.muted">
-                            Buyer:
-                          </Text>
-                          <Text>
-                            {row.order.buyer_contact.full_name || "N/A"} (
-                            {row.order.buyer_contact.email})
-                          </Text>
-                        </HStack>
-                      )}
-                    </VStack>
-
-                    <HStack gap={4} fontSize="sm" color="fg.muted" wrap="wrap">
-                      <HStack gap={1}>
-                        <Text fontWeight="medium">Amount:</Text>
-                        <Text>₹{row.order.order_total}</Text>
-                      </HStack>
-                      <HStack gap={1}>
-                        <Text fontWeight="medium">Delivery Fee:</Text>
-                        <Text>₹{row.order.delivery_fee}</Text>
-                      </HStack>
-                    </HStack>
-
-                    <HStack gap={4} fontSize="sm" wrap="wrap">
-                      <Badge colorPalette="blue">
-                        Pickup: {row.pickup_distance_km?.toFixed(1) ?? "-"} km
-                      </Badge>
-                      <Badge colorPalette="green">
-                        Journey: {row.journey_distance_km?.toFixed(1) ?? "-"} km
-                      </Badge>
-                    </HStack>
+        {isLoadingLocation || isLoading ? (
+          <HStack justify="center" py={8}>
+            <Spinner size="lg" />
+            <Text color="fg.muted">Loading deliveries...</Text>
+          </HStack>
+        ) : lat === null || lon === null ? (
+          <Card.Root>
+            <Card.Body>
+              <Text textAlign="center" color="fg.muted">
+                Unable to determine location. Please select a saved address or
+                enable location access.
+              </Text>
+            </Card.Body>
+          </Card.Root>
+        ) : data?.data?.length === 0 ? (
+          <Card.Root>
+            <Card.Body>
+              <Text textAlign="center" color="fg.muted">
+                No deliveries available nearby.
+              </Text>
+            </Card.Body>
+          </Card.Root>
+        ) : (
+          <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} w="100%">
+            {data?.data.map((row: any) => (
+              <Box
+                key={row.order.id}
+                borderWidth="1px"
+                rounded="xl"
+                p={6}
+                bg="bg.surface"
+                _hover={{
+                  shadow: "lg",
+                  borderColor: "brand.primary",
+                  transform: "translateY(-2px)",
+                }}
+                transition="all 0.2s"
+              >
+                <HStack justify="space-between" align="start" mb={4}>
+                  <VStack align="start" gap={1}>
+                    <Heading size="sm">{row.order.order_number}</Heading>
+                    <OrderStatusBadge status={row.order.order_status} />
                   </VStack>
-
                   <Button
-                    colorPalette="teal"
+                    colorPalette="cyan"
                     size="sm"
                     onClick={() => claim.mutate(row.order.id)}
                     loading={claim.isPending}
@@ -242,11 +211,88 @@ function DeliveryAvailablePage() {
                     Claim Order
                   </Button>
                 </HStack>
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </VStack>
-      )}
-    </Stack>
+
+                <VStack align="start" gap={4}>
+                  {/* Amount & Fee */}
+                  <HStack gap={6}>
+                    <Box>
+                      <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                        ORDER AMOUNT
+                      </Text>
+                      <Text
+                        fontSize="lg"
+                        fontWeight="700"
+                        color="brand.primary"
+                      >
+                        ₹{row.order.order_total}
+                      </Text>
+                    </Box>
+                    <Box>
+                      <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                        DELIVERY FEE
+                      </Text>
+                      <Text fontSize="lg" fontWeight="700" color="green.500">
+                        ₹{row.order.delivery_fee}
+                      </Text>
+                    </Box>
+                  </HStack>
+
+                  {/* Distance Badges */}
+                  <HStack gap={3}>
+                    <Badge colorPalette="blue" size="sm">
+                      Pickup: {row.pickup_distance_km?.toFixed(1) ?? "-"} km
+                    </Badge>
+                    <Badge colorPalette="green" size="sm">
+                      Journey: {row.journey_distance_km?.toFixed(1) ?? "-"} km
+                    </Badge>
+                  </HStack>
+
+                  {/* Addresses */}
+                  {(row.order.pickup_address_snapshot?.street_address ||
+                    row.order.delivery_address_snapshot?.street_address) && (
+                    <SimpleGrid
+                      columns={{ base: 1, md: 2 }}
+                      gap={4}
+                      fontSize="sm"
+                      pt={2}
+                      borderTopWidth="1px"
+                    >
+                      {row.order.pickup_address_snapshot?.street_address && (
+                        <Box>
+                          <Text
+                            fontSize="xs"
+                            color="fg.subtle"
+                            fontWeight="600"
+                          >
+                            PICKUP FROM
+                          </Text>
+                          <Text fontWeight="500" lineClamp={2}>
+                            {row.order.pickup_address_snapshot.street_address}
+                          </Text>
+                        </Box>
+                      )}
+                      {row.order.delivery_address_snapshot?.street_address && (
+                        <Box>
+                          <Text
+                            fontSize="xs"
+                            color="fg.subtle"
+                            fontWeight="600"
+                          >
+                            DELIVER TO
+                          </Text>
+                          <Text fontWeight="500" lineClamp={2}>
+                            {row.order.delivery_address_snapshot.street_address}
+                          </Text>
+                        </Box>
+                      )}
+                    </SimpleGrid>
+                  )}
+                </VStack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        )}
+      </VStack>
+    </PageContainer>
   )
 }

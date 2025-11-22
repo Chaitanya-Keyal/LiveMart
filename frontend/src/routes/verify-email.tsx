@@ -55,10 +55,10 @@ function VerifyEmail() {
       gap={6}
     >
       <Heading size="lg">Verify your email</Heading>
-      <Text color="gray.600">Enter the code sent to your email</Text>
+      <Text color="fg.muted">Enter the code sent to your email</Text>
 
       <Stack gap={4} w="100%">
-        <Text color="gray.600" fontSize="sm" mb={2}>
+        <Text color="fg.muted" fontSize="sm" mb={2}>
           Code sent to:{" "}
           <Text as="span" fontWeight="medium">
             {email || "(email unavailable)"}

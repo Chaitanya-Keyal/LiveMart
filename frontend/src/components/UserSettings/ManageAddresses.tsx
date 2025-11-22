@@ -159,7 +159,7 @@ const ManageAddresses = () => {
       >
         <Box>
           <Heading size="md">Delivery addresses</Heading>
-          <Text color="gray.600" fontSize="sm">
+          <Text color="fg.muted" fontSize="sm">
             Set a default drop-off point and keep multiple addresses for
             convenience.
           </Text>
@@ -176,7 +176,7 @@ const ManageAddresses = () => {
             return (
               <Stack align="center" py={10}>
                 <Spinner />
-                <Text color="gray.600">Loading addresses...</Text>
+                <Text color="fg.muted">Loading addresses...</Text>
               </Stack>
             )
           }
@@ -193,7 +193,7 @@ const ManageAddresses = () => {
                 <Heading size="sm" mb={2}>
                   {emptyStateCopy.title}
                 </Heading>
-                <Text color="gray.600" fontSize="sm">
+                <Text color="fg.muted" fontSize="sm">
                   {emptyStateCopy.description}
                 </Text>
               </Box>
@@ -208,9 +208,14 @@ const ManageAddresses = () => {
                   borderWidth="1px"
                   borderRadius="lg"
                   p={4}
-                  borderColor={address.is_active ? "teal.500" : "gray.200"}
+                  borderColor={
+                    address.is_active ? "brand.primary" : "border.default"
+                  }
+                  minH="280px"
+                  display="flex"
+                  flexDirection="column"
                 >
-                  <Stack gap={2}>
+                  <Stack gap={2} flex="1">
                     <Stack
                       direction="row"
                       justify="space-between"
@@ -226,34 +231,43 @@ const ManageAddresses = () => {
                         </Text>
                       </Stack>
                       {address.is_active && (
-                        <Badge colorScheme="teal">Active</Badge>
+                        <Badge colorPalette="cyan">Active</Badge>
                       )}
                     </Stack>
 
                     <Text>{address.street_address}</Text>
-                    {address.apartment_suite && (
-                      <Text color="gray.700">{address.apartment_suite}</Text>
-                    )}
-                    <Text color="gray.700">
+                    <Box minH="24px">
+                      {address.apartment_suite && (
+                        <Text color="fg.default">
+                          {address.apartment_suite}
+                        </Text>
+                      )}
+                    </Box>
+                    <Text color="fg.default">
                       {address.city}, {address.state} {address.postal_code}
                     </Text>
-                    <Text color="gray.600">{address.country}</Text>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text color="fg.muted">{address.country}</Text>
+                    <Text fontSize="xs" color="fg.subtle">
                       Lat: {address.latitude.toFixed(6)} • Lng:{" "}
                       {address.longitude.toFixed(6)}
                     </Text>
-                    {address.additional_notes && (
-                      <Text fontSize="sm" color="gray.600">
-                        Notes: {address.additional_notes}
-                      </Text>
-                    )}
+                    <Box minH="40px" mb={2}>
+                      {address.additional_notes && (
+                        <Text fontSize="sm" color="fg.muted">
+                          Notes: {address.additional_notes}
+                        </Text>
+                      )}
+                    </Box>
+                  </Stack>
 
-                    <Separator />
+                  <Box mt="auto">
+                    <Separator mb={3} />
                     <Stack direction="row" gap={2}>
                       {!address.is_active && (
                         <Button
                           size="sm"
-                          variant="subtle"
+                          variant="outline"
+                          colorPalette="cyan"
                           gap={2}
                           onClick={() => handleSetActive(address.id)}
                           loading={setActiveAddressMutation.isPending}
@@ -285,7 +299,7 @@ const ManageAddresses = () => {
                         Delete
                       </Button>
                     </Stack>
-                  </Stack>
+                  </Box>
                 </Box>
               ))}
             </SimpleGrid>
@@ -325,7 +339,7 @@ const ManageAddresses = () => {
             />
           </DialogBody>
           <DialogFooter>
-            <Text fontSize="sm" color="gray.500">
+            <Text fontSize="sm" color="fg.muted">
               Exact coordinates ensure delivery partners can reach you.
             </Text>
           </DialogFooter>

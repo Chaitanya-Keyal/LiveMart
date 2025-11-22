@@ -128,11 +128,7 @@ export const StockUpdateDialog = ({ product }: StockUpdateDialogProps) => {
             </DialogBody>
             <DialogFooter gap={2}>
               <DialogActionTrigger asChild>
-                <Button
-                  variant="subtle"
-                  colorPalette="gray"
-                  disabled={isSubmitting}
-                >
+                <Button variant="outline" disabled={isSubmitting}>
                   Cancel
                 </Button>
               </DialogActionTrigger>

@@ -179,7 +179,7 @@ const MapPicker = ({
         borderRadius="lg"
       >
         <Spinner />
-        <Text fontSize="sm" color="gray.600">
+        <Text fontSize="sm" color="fg.muted">
           Loading map...
         </Text>
       </Stack>
@@ -225,28 +225,28 @@ const MapPicker = ({
           >
             <Input
               placeholder="Search for a location"
-              bg="white"
-              color="gray.900"
+              bg="bg.surface"
+              color="fg.default"
               borderWidth="1px"
-              borderColor="gray.300"
+              borderColor="border.default"
               boxShadow="lg"
-              _placeholder={{ color: "gray.500" }}
+              _placeholder={{ color: "fg.subtle" }}
               _focus={{
-                borderColor: "blue.500",
-                boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)",
+                borderColor: "brand.primary",
+                boxShadow: "0 0 0 1px var(--chakra-colors-brand-primary)",
               }}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
             />
           </Autocomplete>
         </Box>
       </Box>
-      <Text fontSize="sm" color="gray.600">
+      <Text fontSize="sm" color="fg.muted">
         {markerPosition
           ? `Lat: ${markerPosition.lat.toFixed(6)} | Lng: ${markerPosition.lng.toFixed(6)}`
           : "Search or tap on the map to pin your delivery location."}
       </Text>
       {error && (
-        <Text fontSize="sm" color="red.500">
+        <Text fontSize="sm" color="danger.solid">
           {error}
         </Text>
       )}

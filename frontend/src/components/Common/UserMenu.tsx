@@ -1,6 +1,6 @@
-import { Box, Button, Flex, Text } from "@chakra-ui/react"
+import { Box, Button, HStack, Text } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
-import { FiLogOut, FiRefreshCw, FiUser } from "react-icons/fi"
+import { FiLogOut, FiUser } from "react-icons/fi"
 
 import type { RoleEnum } from "@/client"
 import useAuth from "@/hooks/useAuth"
@@ -20,9 +20,16 @@ const roleLabels: Record<RoleEnum, string> = {
   delivery_partner: "Delivery Partner",
 }
 
+const roleIcons: Record<RoleEnum, string> = {
+  admin: "⚙️",
+  customer: "🛒",
+  retailer: "🏪",
+  wholesaler: "📦",
+  delivery_partner: "🚚",
+}
+
 const UserMenu = () => {
-  const { user, logout, activeRole, availableRoles, switchRoleMutation } =
-    useAuth()
+  const { logout, activeRole, availableRoles, switchRoleMutation } = useAuth()
 
   const handleLogout = async () => {
     logout()
@@ -37,78 +44,113 @@ const UserMenu = () => {
   }
 
   return (
-    <Flex>
-      <MenuRoot>
-        <MenuTrigger asChild p={2}>
-          <Button data-testid="user-menu" variant="solid" maxW="sm" truncate>
-            <Flex direction="column" align="flex-start" lineHeight="1.1">
-              <Text fontSize="sm" fontWeight="semibold">
-                {user?.full_name || "User"}
-              </Text>
-              {activeRole && (
-                <Text fontSize="xs" color="gray.600" fontWeight="medium">
+    <MenuRoot>
+      <MenuTrigger asChild>
+        <Button
+          data-testid="user-menu"
+          variant="outline"
+          size="md"
+          px={4}
+          py={2}
+          borderRadius="md"
+          _hover={{
+            bg: "bg.muted",
+            borderColor: "brand.primary",
+          }}
+          transition="all 0.2s"
+        >
+          <HStack gap={2}>
+            {activeRole && (
+              <>
+                <span style={{ fontSize: "1rem" }}>
+                  {roleIcons[activeRole]}
+                </span>
+                <Text
+                  fontSize="sm"
+                  fontWeight="600"
+                  display={{ base: "none", sm: "block" }}
+                >
                   {roleLabels[activeRole]}
                 </Text>
-              )}
-            </Flex>
-          </Button>
-        </MenuTrigger>
-
-        <MenuContent>
-          {/* Switch Role */}
-          {availableRoles.length > 1 && (
-            <>
-              <Box px={3} py={2}>
-                <Text fontSize="xs" color="gray.500" fontWeight="bold" mb={1}>
-                  SWITCH ROLE
+              </>
+            )}
+            {!activeRole && (
+              <>
+                <FiUser size={18} />
+                <Text
+                  fontSize="sm"
+                  fontWeight="600"
+                  display={{ base: "none", sm: "block" }}
+                >
+                  Menu
                 </Text>
-              </Box>
-              {availableRoles
-                .filter((role) => role !== activeRole)
-                .map((role) => (
-                  <MenuItem
-                    key={role}
-                    value={`switch-${role}`}
-                    gap={2}
-                    py={2}
-                    onClick={() => handleSwitchRole(role)}
-                    style={{ cursor: "pointer" }}
-                    disabled={switchRoleMutation.isPending}
-                  >
-                    <FiRefreshCw />
-                    <Box flex="1">{roleLabels[role]}</Box>
-                  </MenuItem>
-                ))}
-              <MenuSeparator />
-            </>
-          )}
+              </>
+            )}
+          </HStack>
+        </Button>
+      </MenuTrigger>
 
-          <Link to="/settings">
-            <MenuItem
-              closeOnSelect
-              value="user-settings"
-              gap={2}
-              py={2}
-              style={{ cursor: "pointer" }}
-            >
-              <FiUser fontSize="18px" />
-              <Box flex="1">My Profile</Box>
-            </MenuItem>
-          </Link>
+      <MenuContent>
+        {/* Switch Role */}
+        {availableRoles.length > 1 && (
+          <>
+            <Box px={3} py={2} bg="bg.subtle">
+              <Text
+                fontSize="xs"
+                color="fg.emphasis"
+                fontWeight="700"
+                letterSpacing="wide"
+              >
+                SWITCH ROLE
+              </Text>
+            </Box>
+            {availableRoles
+              .filter((role) => role !== activeRole)
+              .map((role) => (
+                <MenuItem
+                  key={role}
+                  value={`switch-${role}`}
+                  gap={2}
+                  py={2.5}
+                  onClick={() => handleSwitchRole(role)}
+                  style={{ cursor: "pointer" }}
+                  disabled={switchRoleMutation.isPending}
+                >
+                  <span style={{ fontSize: "1.1rem" }}>{roleIcons[role]}</span>
+                  <Box flex="1">
+                    <Text fontWeight="500">{roleLabels[role]}</Text>
+                  </Box>
+                </MenuItem>
+              ))}
+            <MenuSeparator />
+          </>
+        )}
 
+        <Link to="/settings">
           <MenuItem
-            value="logout"
+            closeOnSelect
+            value="user-settings"
             gap={2}
             py={2}
-            onClick={handleLogout}
             style={{ cursor: "pointer" }}
           >
-            <FiLogOut />
-            Log Out
+            <FiUser fontSize="18px" />
+            <Box flex="1">My Profile</Box>
           </MenuItem>
-        </MenuContent>
-      </MenuRoot>
-    </Flex>
+        </Link>
+
+        <MenuItem
+          value="logout"
+          gap={2}
+          py={2}
+          onClick={handleLogout}
+          style={{ cursor: "pointer" }}
+        >
+          <FiLogOut />
+          Log Out
+        </MenuItem>
+      </MenuContent>
+    </MenuRoot>
   )
 }
 

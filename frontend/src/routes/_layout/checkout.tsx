@@ -7,10 +7,12 @@ import {
   Spinner,
   Stack,
   Text,
+  VStack,
 } from "@chakra-ui/react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { OrderPublic, PaymentPublic } from "@/client/types.gen"
+import { PageContainer } from "@/components/Common/PageContainer"
 import { RazorpayPayButton } from "@/components/Payments/RazorpayPayButton"
 import useAddresses from "@/hooks/useAddresses"
 import { useCheckout } from "@/hooks/useCheckout"
@@ -50,70 +52,97 @@ function CheckoutPage() {
 
   if (!addressesLoading && addresses.length === 0) {
     return (
-      <Stack mt={6} gap={6} align="center">
-        <Heading size="md" color="orange.500">
-          No Delivery Address
-        </Heading>
-        <Text textAlign="center">
-          Please add a delivery address before checking out.
-        </Text>
-        <Button
-          onClick={() => navigate({ to: "/settings" })}
-          colorScheme="teal"
-        >
-          Add Address
-        </Button>
-      </Stack>
+      <PageContainer variant="narrow">
+        <VStack gap={8} py={20} align="center">
+          <Box fontSize="6xl">📍</Box>
+          <VStack gap={3}>
+            <Heading size="xl">No Delivery Address</Heading>
+            <Text textAlign="center" color="fg.muted" fontSize="lg" maxW="md">
+              Please add a delivery address before checking out.
+            </Text>
+          </VStack>
+          <Button size="lg" onClick={() => navigate({ to: "/settings" })}>
+            Add Address
+          </Button>
+        </VStack>
+      </PageContainer>
     )
   }
 
   if (!payment) {
     if (isError) {
       return (
-        <Stack mt={6} gap={6} align="center">
-          <Heading size="md" color="red.500">
-            Checkout Failed
-          </Heading>
-          <Text>{(error as any)?.message || "Something went wrong"}</Text>
-          <Button onClick={() => navigate({ to: "/cart" })} colorScheme="teal">
-            Back to Cart
-          </Button>
-        </Stack>
+        <PageContainer variant="narrow">
+          <VStack gap={8} py={20} align="center">
+            <Heading size="lg" color="danger.solid">
+              Checkout Failed
+            </Heading>
+            <Text color="fg.muted" fontSize="lg" textAlign="center">
+              {(error as any)?.message || "Something went wrong"}
+            </Text>
+            <Button size="lg" onClick={() => navigate({ to: "/cart" })}>
+              Back to Cart
+            </Button>
+          </VStack>
+        </PageContainer>
       )
     }
 
     return (
-      <Center mt={10} flexDirection="column" gap={4}>
-        <Spinner size="xl" />
-        <Text>Preparing your order...</Text>
-      </Center>
+      <PageContainer variant="narrow">
+        <Center py={20} flexDirection="column" gap={4}>
+          <Spinner size="xl" />
+          <Text color="fg.muted" fontSize="lg">
+            Preparing your order...
+          </Text>
+        </Center>
+      </PageContainer>
     )
   }
 
   return (
-    <Stack mt={6} gap={6}>
-      <Heading size="md">Checkout</Heading>
-      <Stack gap={4}>
-        <Heading size="sm">Order Summary</Heading>
-        <Stack gap={2} fontSize="sm">
-          <Heading size="xs">Orders</Heading>
-          {orders.map((o) => (
-            <HStack
-              key={o.id}
-              justify="space-between"
-              borderWidth="1px"
-              rounded="md"
-              p={2}
-            >
-              <Text>{o.order_number}</Text>
-              <Text>₹{o.order_total}</Text>
-            </HStack>
-          ))}
-        </Stack>
-        <Box>
-          <Text fontWeight="semibold">
-            Grand Total: ₹{payment.total_amount}
-          </Text>
+    <PageContainer variant="narrow">
+      <VStack gap={8} align="stretch">
+        <Heading size="xl">Checkout</Heading>
+        <Box
+          borderWidth="1px"
+          borderColor="border.default"
+          rounded="lg"
+          p={6}
+          bg="bg.surface"
+        >
+          <VStack gap={6} align="stretch">
+            <Heading size="md">Order Summary</Heading>
+            <Stack gap={3}>
+              <Text fontSize="sm" color="fg.muted" fontWeight="600">
+                ORDERS
+              </Text>
+              {orders.map((o) => (
+                <HStack
+                  key={o.id}
+                  justify="space-between"
+                  borderWidth="1px"
+                  borderColor="border.default"
+                  rounded="md"
+                  p={3}
+                  bg="bg.subtle"
+                >
+                  <Text fontWeight="500">{o.order_number}</Text>
+                  <Text fontWeight="600">₹{o.order_total}</Text>
+                </HStack>
+              ))}
+            </Stack>
+            <Box pt={4} borderTopWidth="2px" borderTopColor="border.default">
+              <HStack justify="space-between">
+                <Text fontSize="xl" fontWeight="700">
+                  Grand Total:
+                </Text>
+                <Text fontSize="2xl" fontWeight="700" color="brand.primary">
+                  ₹{payment.total_amount}
+                </Text>
+              </HStack>
+            </Box>
+          </VStack>
         </Box>
         <RazorpayPayButton
           orderId={payment.razorpay_order_id || ""}
@@ -124,7 +153,7 @@ function CheckoutPage() {
           }}
           onError={() => showErrorToast("Payment failed")}
         />
-      </Stack>
-    </Stack>
+      </VStack>
+    </PageContainer>
   )
 }

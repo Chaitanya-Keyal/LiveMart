@@ -1,4 +1,4 @@
-import { Container, Heading, Input, Text } from "@chakra-ui/react"
+import { Container, Heading, Input, Stack, Text } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -62,33 +62,45 @@ function RecoverPassword() {
       as="form"
       onSubmit={handleSubmit(onSubmit)}
       h="100vh"
-      maxW="sm"
+      maxW="md"
       alignItems="stretch"
       justifyContent="center"
-      gap={4}
+      gap={6}
       centerContent
+      px={{ base: 4, md: 6 }}
     >
-      <Heading size="xl" color="ui.main" textAlign="center" mb={2}>
-        Password Recovery
-      </Heading>
-      <Text textAlign="center">
-        A password recovery email will be sent to the registered account.
-      </Text>
-      <Field invalid={!!errors.email} errorText={errors.email?.message}>
-        <InputGroup w="100%" startElement={<FiMail />}>
-          <Input
-            {...register("email", {
-              required: "Email is required",
-              pattern: emailPattern,
-            })}
-            placeholder="Email"
-            type="email"
-          />
-        </InputGroup>
-      </Field>
-      <Button variant="solid" type="submit" loading={isSubmitting}>
-        Continue
-      </Button>
+      <Stack
+        gap={6}
+        w="100%"
+        p={{ base: 6, md: 8 }}
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor="border.default"
+        bg="bg.surface"
+        shadow="sm"
+      >
+        <Heading size="xl" textAlign="center" mb={2}>
+          Password Recovery
+        </Heading>
+        <Text textAlign="center" color="fg.muted">
+          A password recovery email will be sent to the registered account.
+        </Text>
+        <Field invalid={!!errors.email} errorText={errors.email?.message}>
+          <InputGroup w="100%" startElement={<FiMail />}>
+            <Input
+              {...register("email", {
+                required: "Email is required",
+                pattern: emailPattern,
+              })}
+              placeholder="Email"
+              type="email"
+            />
+          </InputGroup>
+        </Field>
+        <Button variant="solid" type="submit" loading={isSubmitting} size="lg">
+          Continue
+        </Button>
+      </Stack>
     </Container>
   )
 }

@@ -103,7 +103,7 @@ function ManageRoles() {
       <Heading size="lg" mb={4}>
         Manage Roles
       </Heading>
-      <Text color="gray.600" mb={6}>
+      <Text color="fg.muted" mb={6}>
         Add or remove roles to access different features. Each role maintains
         separate data.
       </Text>
@@ -113,19 +113,24 @@ function ManageRoles() {
         <Text fontWeight="semibold" mb={2}>
           Active Role
         </Text>
-        <Box p={4} borderWidth="2px" borderColor="teal.500" borderRadius="lg">
+        <Box
+          p={4}
+          borderWidth="2px"
+          borderColor="brand.primary"
+          borderRadius="lg"
+        >
           <Stack direction="row" justify="space-between" align="center">
             <Box>
               <Text fontWeight="bold" fontSize="lg">
                 {activeRole ? roleLabels[activeRole] : "No active role"}
               </Text>
-              <Text color="gray.600" fontSize="sm">
+              <Text color="fg.muted" fontSize="sm">
                 {activeRole
                   ? roleDescriptions[activeRole]
                   : "Please select a role"}
               </Text>
             </Box>
-            <Badge colorScheme="teal">Active</Badge>
+            <Badge colorPalette="cyan">Active</Badge>
           </Stack>
         </Box>
       </Box>
@@ -141,7 +146,7 @@ function ManageRoles() {
               <Stack direction="row" justify="space-between" align="center">
                 <Box flex="1">
                   <Text fontWeight="bold">{roleLabels[role]}</Text>
-                  <Text color="gray.600" fontSize="sm">
+                  <Text color="fg.muted" fontSize="sm">
                     {roleDescriptions[role]}
                   </Text>
                 </Box>
@@ -163,7 +168,7 @@ function ManageRoles() {
                       }
                     >
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" colorScheme="red">
+                        <Button size="sm" variant="outline">
                           <FiTrash2 />
                         </Button>
                       </DialogTrigger>
@@ -175,18 +180,18 @@ function ManageRoles() {
                           <Stack gap={4}>
                             <Box
                               p={3}
-                              bg="orange.50"
+                              bg="warning.muted"
                               borderRadius="md"
                               borderWidth="1px"
-                              borderColor="orange.200"
+                              borderColor="warning.solid"
                             >
                               <Stack direction="row" gap={2} align="start">
                                 <FiAlertTriangle color="orange" size={20} />
                                 <Box>
-                                  <Text fontWeight="bold" color="orange.800">
+                                  <Text fontWeight="bold" color="warning.solid">
                                     Warning: Data will be inaccessible
                                   </Text>
-                                  <Text fontSize="sm" color="orange.700">
+                                  <Text fontSize="sm" color="warning.solid">
                                     Removing this role will make all data
                                     created as a {roleLabels[role]}{" "}
                                     inaccessible. You can add the role back

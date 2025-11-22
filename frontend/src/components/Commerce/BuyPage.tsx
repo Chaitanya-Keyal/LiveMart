@@ -1,7 +1,8 @@
-import { Container, Heading, SimpleGrid, VStack } from "@chakra-ui/react"
+import { Box, Heading, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 import type { AddressPublic, CategoryEnum } from "@/client"
 import { FilterSidebar } from "@/components/Common/FilterSidebar"
+import { PageContainer } from "@/components/Common/PageContainer"
 import { SearchBar } from "@/components/Common/SearchBar"
 import { ProductGrid } from "@/components/Products/ProductGrid"
 import useAddresses from "@/hooks/useAddresses"
@@ -66,21 +67,34 @@ export const BuyPage = () => {
 
   const heading =
     activeRole === "retailer" ? "Wholesaler Catalog" : "Browse Products"
+  const subheading = count
+    ? `${count} product${count === 1 ? "" : "s"} available`
+    : "Loading..."
 
   return (
-    <Container maxW="full">
-      <VStack align="stretch" gap={6} pt={4}>
-        <Heading size="lg">{heading}</Heading>
+    <PageContainer variant="list">
+      <VStack align="stretch" gap={8}>
+        <Box>
+          <Heading size="xl" mb={2}>
+            {heading}
+          </Heading>
+          <Text color="fg.muted" fontSize="md">
+            {subheading}
+          </Text>
+        </Box>
         <SearchBar
           value={search}
           onChange={setSearch}
           onClear={() => setSearch("")}
         />
-        <SimpleGrid columns={{ base: 1, md: 4 }} gap={6}>
-          <VStack
-            align="stretch"
-            gap={4}
-            gridColumn={{ base: "1", md: "span 1" }}
+        <SimpleGrid columns={{ base: 1, lg: 4 }} gap={8}>
+          <Box
+            gridColumn={{ base: "1", lg: "span 1" }}
+            position={{ base: "static", lg: "sticky" }}
+            top={{ lg: "80px" }}
+            h={{ lg: "fit-content" }}
+            maxH={{ lg: "calc(100vh - 100px)" }}
+            overflowY={{ lg: "auto" }}
           >
             <FilterSidebar
               category={category}
@@ -114,12 +128,8 @@ export const BuyPage = () => {
                 setSortBy("newest")
               }}
             />
-          </VStack>
-          <VStack
-            align="stretch"
-            gap={4}
-            gridColumn={{ base: "1", md: "span 3" }}
-          >
+          </Box>
+          <Box gridColumn={{ base: "1", lg: "span 3" }}>
             <ProductGrid
               products={products}
               count={count}
@@ -128,9 +138,9 @@ export const BuyPage = () => {
               currentPage={page}
               onPageChange={setPage}
             />
-          </VStack>
+          </Box>
         </SimpleGrid>
       </VStack>
-    </Container>
+    </PageContainer>
   )
 }

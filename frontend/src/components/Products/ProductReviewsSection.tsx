@@ -3,11 +3,13 @@ import {
   Box,
   Button,
   Card,
+  createListCollection,
   Flex,
   Heading,
   HStack,
   IconButton,
-  NativeSelect,
+  Portal,
+  Select,
   Separator,
   Text,
   VStack,
@@ -106,9 +108,7 @@ export const ProductReviewsSection = ({
             !editingReview &&
             hasPurchased &&
             !isPurchaseCheckPending && (
-              <Button colorPalette="blue" onClick={() => setShowForm(true)}>
-                Write a Review
-              </Button>
+              <Button onClick={() => setShowForm(true)}>Write a Review</Button>
             )}
         </Flex>
 
@@ -134,20 +134,52 @@ export const ProductReviewsSection = ({
         {count > 0 && (
           <Flex gap={3} align="center">
             <Text fontWeight="medium">Sort by:</Text>
-            <NativeSelect.Root size="sm" width="200px">
-              <NativeSelect.Field
-                value={sort}
-                onChange={(e) =>
-                  setSort(
-                    e.target.value as "newest" | "rating_desc" | "rating_asc",
-                  )
-                }
-              >
-                <option value="newest">Most Recent</option>
-                <option value="rating_desc">Highest Rating</option>
-                <option value="rating_asc">Lowest Rating</option>
-              </NativeSelect.Field>
-            </NativeSelect.Root>
+            <Select.Root
+              collection={createListCollection({
+                items: [
+                  { label: "Most Recent", value: "newest" },
+                  { label: "Highest Rating", value: "rating_desc" },
+                  { label: "Lowest Rating", value: "rating_asc" },
+                ],
+              })}
+              size="sm"
+              width="200px"
+              value={[sort]}
+              onValueChange={(e) => setSort(e.value[0] as typeof sort)}
+            >
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content>
+                    <Select.Item
+                      item={{ label: "Most Recent", value: "newest" }}
+                    >
+                      Most Recent
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                    <Select.Item
+                      item={{ label: "Highest Rating", value: "rating_desc" }}
+                    >
+                      Highest Rating
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                    <Select.Item
+                      item={{ label: "Lowest Rating", value: "rating_asc" }}
+                    >
+                      Lowest Rating
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
           </Flex>
         )}
 
@@ -155,13 +187,13 @@ export const ProductReviewsSection = ({
         {count === 0 ? (
           hasPurchased && !isPurchaseCheckPending ? (
             <Box textAlign="center" py={8}>
-              <Text fontSize="lg" color="gray.500">
+              <Text fontSize="lg" color="fg.muted">
                 No reviews yet. Be the first to review this product!
               </Text>
             </Box>
           ) : (
             <Box textAlign="center" py={8}>
-              <Text fontSize="lg" color="gray.500">
+              <Text fontSize="lg" color="fg.muted">
                 No reviews yet.
               </Text>
             </Box>
@@ -177,13 +209,13 @@ export const ProductReviewsSection = ({
                         <HStack gap={2} mb={2}>
                           <StarRating value={review.rating} size="sm" />
                           {review.author_user_id === user?.id && (
-                            <Badge colorPalette="blue">Your Review</Badge>
+                            <Badge colorPalette="cyan">Your Review</Badge>
                           )}
                         </HStack>
                         <Heading size="md" mb={1}>
                           {review.title}
                         </Heading>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color="fg.muted">
                           By {review.author_name || "Anonymous"} •{" "}
                           {new Date(review.created_at).toLocaleDateString()}
                         </Text>

@@ -2,7 +2,6 @@ import {
   Badge,
   Box,
   Button,
-  Container,
   Flex,
   Heading,
   HStack,
@@ -16,6 +15,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import React from "react"
 import { CartService, type ProductPublic } from "@/client"
+import { PageContainer } from "@/components/Common/PageContainer"
 import useAuth from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -119,8 +119,8 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
   const isLowStock = stockQuantity > 0 && stockQuantity < lowStockThreshold
 
   return (
-    <Container maxW="6xl" py={8}>
-      <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8}>
+    <PageContainer variant="detail">
+      <SimpleGrid columns={{ base: 1, lg: 2 }} gap={10}>
         {/* Image Gallery */}
         <Box>
           <Box
@@ -129,7 +129,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
             mb={4}
             borderRadius="md"
             overflow="hidden"
-            bg="gray.100"
+            bg="bg.subtle"
           >
             <Image
               src={imageUrls[selectedImageIndex] || getPrimaryImageUrl(product)}
@@ -154,10 +154,12 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
                   cursor="pointer"
                   borderWidth={selectedImageIndex === index ? 2 : 1}
                   borderColor={
-                    selectedImageIndex === index ? "blue.500" : "gray.200"
+                    selectedImageIndex === index
+                      ? "brand.primary"
+                      : "border.default"
                   }
                   onClick={() => setSelectedImageIndex(index)}
-                  _hover={{ borderColor: "blue.300" }}
+                  _hover={{ borderColor: "brand.accent" }}
                 >
                   <Image
                     src={url}
@@ -176,7 +178,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
         <VStack align="stretch" gap={4}>
           <Box>
             <Flex gap={2} mb={2} flexWrap="wrap">
-              <Badge colorPalette="blue" variant="subtle">
+              <Badge colorPalette="cyan" variant="subtle">
                 {getCategoryLabel(product.category)}
               </Badge>
               {product.tags?.includes("local") && (
@@ -210,7 +212,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
                 </Box>
               )}
             {product.description && (
-              <Text color="gray.600" fontSize="md">
+              <Text color="fg.muted" fontSize="md">
                 {product.description}
               </Text>
             )}
@@ -219,11 +221,11 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
           <Separator />
 
           <Box>
-            <Text fontSize="3xl" fontWeight="bold" color="blue.600" mb={2}>
+            <Text fontSize="3xl" fontWeight="bold" color="brand.primary" mb={2}>
               {formatPrice(price)}
             </Text>
             {minQuantity > 1 && (
-              <Text fontSize="sm" color="gray.600">
+              <Text fontSize="sm" color="fg.muted">
                 Minimum quantity: {minQuantity}
                 {maxQuantity && ` (max: ${maxQuantity})`}
               </Text>
@@ -235,19 +237,13 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
               Stock Status:
             </Text>
             {isInStock ? (
-              <Badge
-                colorPalette={isLowStock ? "orange" : "green"}
-                variant="subtle"
-                fontSize="md"
-              >
+              <Text color={isLowStock ? "orange.500" : "green.600"}>
                 {isLowStock
                   ? `Low Stock (${stockQuantity} remaining)`
                   : `In Stock (${stockQuantity} available)`}
-              </Badge>
+              </Text>
             ) : (
-              <Badge colorPalette="red" variant="subtle" fontSize="md">
-                Out of Stock
-              </Badge>
+              <Text color="red.500">Out of Stock</Text>
             )}
           </Box>
 
@@ -256,7 +252,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
               <Text fontWeight="semibold" mb={1}>
                 SKU:
               </Text>
-              <Text fontSize="sm" color="gray.600">
+              <Text fontSize="sm" color="fg.muted">
                 {product.sku}
               </Text>
             </Box>
@@ -328,7 +324,6 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
             </Box>
             <Button
               size="lg"
-              colorPalette="blue"
               disabled={!isInStock || !product.is_active}
               loading={addToCartMutation.isPending}
               onClick={handleAddToCart}
@@ -340,7 +335,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
                   ? "Unavailable"
                   : "Add to Cart"}
             </Button>
-            <Text fontSize="xs" color="gray.600" textAlign="center">
+            <Text fontSize="xs" color="fg.muted" textAlign="center">
               In cart: {existingInCart}{" "}
               {maxQuantity
                 ? `(remaining max: ${Math.max(0, maxQuantity - existingInCart)})`
@@ -351,7 +346,9 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
       </SimpleGrid>
 
       {/* Reviews Section */}
-      <ProductReviewsSection productId={product.id} />
-    </Container>
+      <Box mt={12}>
+        <ProductReviewsSection productId={product.id} />
+      </Box>
+    </PageContainer>
   )
 }

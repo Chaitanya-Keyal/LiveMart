@@ -42,7 +42,6 @@ export function RazorpayPayButton({
     <Button
       size="md"
       variant="solid"
-      colorScheme="teal"
       disabled={!ready}
       onClick={() => {
         if (!window.Razorpay) return
@@ -53,7 +52,7 @@ export function RazorpayPayButton({
           currency,
           handler: (resp: any) => onSuccess(resp),
           modal: { ondismiss: () => onError?.({ dismissed: true }) },
-          theme: { color: "#009688" },
+          theme: { color: "#0891b2" },
         })
         try {
           rzp.open()

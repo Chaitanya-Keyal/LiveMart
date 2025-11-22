@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Flex,
   Heading,
   HStack,
   IconButton,
@@ -9,8 +10,10 @@ import {
   Spinner,
   Stack,
   Text,
+  VStack,
 } from "@chakra-ui/react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { PageContainer } from "@/components/Common/PageContainer"
 import useAuth from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -61,175 +64,211 @@ function CartPage() {
     )
   }
 
-  if (cartQuery.isLoading) return <Spinner mt={10} />
+  if (cartQuery.isLoading) {
+    return (
+      <PageContainer variant="narrow">
+        <Stack align="center" py={20}>
+          <Spinner size="xl" />
+          <Text color="fg.muted">Loading your cart...</Text>
+        </Stack>
+      </PageContainer>
+    )
+  }
   if (!cart || !cart.items?.length) {
     return (
-      <Stack mt={10} gap={4} align="center">
-        <Heading size="md">Your cart is empty</Heading>
-        <Text fontSize="sm">Browse products to add items.</Text>
-        <Button onClick={() => navigate({ to: "/" })}>Go Home</Button>
-      </Stack>
+      <PageContainer variant="narrow">
+        <VStack gap={8} py={20} align="center">
+          <Box fontSize="6xl">🛒</Box>
+          <VStack gap={3}>
+            <Heading size="xl">Your cart is empty</Heading>
+            <Text color="fg.muted" fontSize="lg" textAlign="center">
+              Browse products to add items to your cart.
+            </Text>
+          </VStack>
+          <Button size="lg" onClick={() => navigate({ to: "/buy" })}>
+            Start Shopping
+          </Button>
+        </VStack>
+      </PageContainer>
     )
   }
 
   return (
-    <Stack gap={8} mt={6}>
-      <Heading size="md">Cart</Heading>
-      <Stack gap={4}>
-        {(cart.items || []).map((it) => {
-          const product = productsMap[it.product_id]
-          return (
-            <HStack
-              key={it.id}
-              justify="space-between"
-              borderWidth="1px"
-              rounded="md"
-              p={3}
-              gap={4}
-            >
-              <HStack gap={4} flex={1} align="stretch">
-                <Box
-                  boxSize="60px"
-                  bg="gray.100"
-                  overflow="hidden"
-                  rounded="md"
-                >
-                  {productsLoading && !product ? (
-                    <Skeleton w="100%" h="100%" />
-                  ) : product?.images?.length ? (
-                    <Image
-                      src={getPrimaryImageUrl(product)}
-                      alt={product.name}
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                    />
-                  ) : (
-                    <Image
-                      src={"https://via.placeholder.com/120?text=No+Image"}
-                      alt="No image"
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                    />
-                  )}
-                </Box>
-                <Stack gap={1} flex={1} minW={0}>
-                  {product ? (
-                    <Link
-                      to="/buy/$productId"
-                      params={{ productId: product.id }}
-                      style={{ fontWeight: 600 }}
-                    >
-                      {product.name}
-                    </Link>
-                  ) : (
-                    <Text fontWeight="semibold" color="gray.500">
-                      Loading...
+    <PageContainer variant="narrow">
+      <VStack gap={8} align="stretch">
+        <Box>
+          <Heading size="xl" mb={2}>
+            Shopping Cart
+          </Heading>
+          <Text color="fg.muted">
+            {cart.items.length} item{cart.items.length !== 1 ? "s" : ""} in your
+            cart
+          </Text>
+        </Box>
+        <Stack gap={4}>
+          {(cart.items || []).map((it) => {
+            const product = productsMap[it.product_id]
+            return (
+              <HStack
+                key={it.id}
+                justify="space-between"
+                borderWidth="1px"
+                borderColor="border.default"
+                rounded="lg"
+                p={4}
+                gap={4}
+                bg="bg.surface"
+                _hover={{ borderColor: "border.strong", shadow: "sm" }}
+                transition="all 0.2s"
+              >
+                <HStack gap={4} flex={1} align="stretch">
+                  <Box
+                    boxSize="80px"
+                    bg="bg.subtle"
+                    overflow="hidden"
+                    rounded="md"
+                    flexShrink={0}
+                  >
+                    {productsLoading && !product ? (
+                      <Skeleton w="100%" h="100%" />
+                    ) : product?.images?.length ? (
+                      <Image
+                        src={getPrimaryImageUrl(product)}
+                        alt={product.name}
+                        w="100%"
+                        h="100%"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Image
+                        src={"https://via.placeholder.com/120?text=No+Image"}
+                        alt="No image"
+                        w="100%"
+                        h="100%"
+                        objectFit="cover"
+                      />
+                    )}
+                  </Box>
+                  <Stack gap={1} flex={1} minW={0}>
+                    {product ? (
+                      <Link
+                        to="/buy/$productId"
+                        params={{ productId: product.id }}
+                        style={{ fontWeight: 600 }}
+                      >
+                        {product.name}
+                      </Link>
+                    ) : (
+                      <Text fontWeight="semibold" color="fg.muted">
+                        Loading...
+                      </Text>
+                    )}
+                    <Text fontSize="xs" color="fg.muted">
+                      Qty: {it.quantity}
                     </Text>
-                  )}
-                  <Text fontSize="xs" color="gray.600">
-                    Qty: {it.quantity}
-                  </Text>
-                </Stack>
-              </HStack>
-              <HStack gap={2}>
-                <HStack>
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    onClick={() =>
-                      handleQty(it.id, it.product_id, it.quantity - 1)
-                    }
-                    disabled={(() => {
-                      const product = productsMap[it.product_id]
-                      const buyerType =
-                        activeRole === "retailer" ? "retailer" : "customer"
-                      const tier =
-                        product?.pricing_tiers?.find(
-                          (t) => t.buyer_type === buyerType && t.is_active,
-                        ) ||
-                        product?.pricing_tiers?.find(
-                          (t) => t.buyer_type === "customer" && t.is_active,
-                        )
-                      const minQ = tier?.min_quantity || 1
-                      return it.quantity <= minQ
-                    })()}
-                  >
-                    -
-                  </Button>
-                  <Text fontSize="sm" minW="24px" textAlign="center">
-                    {it.quantity}
-                  </Text>
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    onClick={() =>
-                      handleQty(it.id, it.product_id, it.quantity + 1)
-                    }
-                    disabled={(() => {
-                      const product = productsMap[it.product_id]
-                      const buyerType =
-                        activeRole === "retailer" ? "retailer" : "customer"
-                      const tier =
-                        product?.pricing_tiers?.find(
-                          (t) => t.buyer_type === buyerType && t.is_active,
-                        ) ||
-                        product?.pricing_tiers?.find(
-                          (t) => t.buyer_type === "customer" && t.is_active,
-                        )
-
-                      // Check stock limit
-                      const stock = product?.inventory?.stock_quantity ?? 0
-                      if (it.quantity >= stock) return true
-
-                      const maxQ = tier?.max_quantity
-                      if (maxQ == null) return false
-                      return it.quantity >= maxQ
-                    })()}
-                  >
-                    +
-                  </Button>
+                  </Stack>
                 </HStack>
-                <IconButton
-                  aria-label="Remove"
-                  size="xs"
-                  variant="outline"
-                  onClick={() =>
-                    removeItem.mutate(it.id, {
-                      onError: (e: any) =>
-                        showErrorToast(e?.message || "Remove failed"),
-                    })
-                  }
-                >
-                  ✕
-                </IconButton>
+                <HStack gap={2}>
+                  <HStack>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      onClick={() =>
+                        handleQty(it.id, it.product_id, it.quantity - 1)
+                      }
+                      disabled={(() => {
+                        const product = productsMap[it.product_id]
+                        const buyerType =
+                          activeRole === "retailer" ? "retailer" : "customer"
+                        const tier =
+                          product?.pricing_tiers?.find(
+                            (t) => t.buyer_type === buyerType && t.is_active,
+                          ) ||
+                          product?.pricing_tiers?.find(
+                            (t) => t.buyer_type === "customer" && t.is_active,
+                          )
+                        const minQ = tier?.min_quantity || 1
+                        return it.quantity <= minQ
+                      })()}
+                    >
+                      -
+                    </Button>
+                    <Text fontSize="sm" minW="24px" textAlign="center">
+                      {it.quantity}
+                    </Text>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      onClick={() =>
+                        handleQty(it.id, it.product_id, it.quantity + 1)
+                      }
+                      disabled={(() => {
+                        const product = productsMap[it.product_id]
+                        const buyerType =
+                          activeRole === "retailer" ? "retailer" : "customer"
+                        const tier =
+                          product?.pricing_tiers?.find(
+                            (t) => t.buyer_type === buyerType && t.is_active,
+                          ) ||
+                          product?.pricing_tiers?.find(
+                            (t) => t.buyer_type === "customer" && t.is_active,
+                          )
+
+                        // Check stock limit
+                        const stock = product?.inventory?.stock_quantity ?? 0
+                        if (it.quantity >= stock) return true
+
+                        const maxQ = tier?.max_quantity
+                        if (maxQ == null) return false
+                        return it.quantity >= maxQ
+                      })()}
+                    >
+                      +
+                    </Button>
+                  </HStack>
+                  <IconButton
+                    aria-label="Remove"
+                    size="xs"
+                    variant="outline"
+                    onClick={() =>
+                      removeItem.mutate(it.id, {
+                        onError: (e: any) =>
+                          showErrorToast(e?.message || "Remove failed"),
+                      })
+                    }
+                  >
+                    ✕
+                  </IconButton>
+                </HStack>
               </HStack>
-            </HStack>
-          )
-        })}
-      </Stack>
-      <HStack>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() =>
-            clearCart.mutate(undefined, {
-              onSuccess: () => showSuccessToast("Cart cleared"),
-              onError: (e: any) => showErrorToast(e?.message || "Clear failed"),
-            })
-          }
+            )
+          })}
+        </Stack>
+        <Flex
+          justify="space-between"
+          align="center"
+          pt={4}
+          borderTopWidth="2px"
+          borderTopColor="border.default"
         >
-          Clear Cart
-        </Button>
-        <Button
-          size="sm"
-          colorScheme="teal"
-          onClick={() => navigate({ to: "/checkout" })}
-        >
-          Checkout
-        </Button>
-      </HStack>
-    </Stack>
+          <Button
+            size="md"
+            variant="ghost"
+            onClick={() =>
+              clearCart.mutate(undefined, {
+                onSuccess: () => showSuccessToast("Cart cleared"),
+                onError: (e: any) =>
+                  showErrorToast(e?.message || "Clear failed"),
+              })
+            }
+          >
+            Clear Cart
+          </Button>
+          <Button size="lg" onClick={() => navigate({ to: "/checkout" })}>
+            Proceed to Checkout →
+          </Button>
+        </Flex>
+      </VStack>
+    </PageContainer>
   )
 }

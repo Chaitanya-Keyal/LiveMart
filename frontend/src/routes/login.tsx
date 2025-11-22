@@ -133,12 +133,24 @@ function Login() {
   return (
     <Container
       h="100vh"
-      maxW="lg"
+      maxW="md"
       display="flex"
       alignItems="center"
       justifyContent="center"
+      px={{ base: 4, md: 6 }}
     >
-      <Stack gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
+      <Stack
+        gap={6}
+        as="form"
+        onSubmit={handleSubmit(onSubmit)}
+        w="100%"
+        p={{ base: 6, md: 8 }}
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor="border.default"
+        bg="bg.surface"
+        shadow="sm"
+      >
         <Stack align="center" gap={2}>
           <Image
             src="/assets/images/logo.png"
@@ -149,7 +161,7 @@ function Login() {
         </Stack>
 
         {oauthErrorMessage && (
-          <Text color="red.500" fontSize="sm" textAlign="center">
+          <Text color="danger.solid" fontSize="sm" textAlign="center">
             {oauthErrorMessage}
           </Text>
         )}
@@ -300,7 +312,7 @@ function Login() {
 
         <Stack direction="row" align="center" w="100%">
           <Separator flex="1" />
-          <Text fontSize="sm" color="gray.500" px={2}>
+          <Text fontSize="sm" color="fg.muted" px={2}>
             or
           </Text>
           <Separator flex="1" />

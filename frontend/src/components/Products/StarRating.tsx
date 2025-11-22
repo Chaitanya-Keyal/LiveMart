@@ -37,7 +37,7 @@ export const StarRating = ({
         </RatingGroup.Control>
       </RatingGroup.Root>
       {showCount && count !== undefined && (
-        <Text fontSize="sm" color="gray.600">
+        <Text fontSize="sm" color="fg.muted">
           ({count})
         </Text>
       )}

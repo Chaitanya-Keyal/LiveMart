@@ -1,8 +1,9 @@
-import { Container, Heading, Spinner, VStack } from "@chakra-ui/react"
+import { Box, Heading, HStack, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
 import type { UserPublic } from "@/client"
+import PageContainer from "@/components/Common/PageContainer"
 import { ProductForm } from "@/components/Retailer/ProductForm"
 import { useProduct } from "@/hooks/useProducts"
 
@@ -31,34 +32,49 @@ function SellEditProductPage() {
 
   if (isLoading) {
     return (
-      <Container maxW="4xl" py={8}>
-        <VStack gap={4}>
+      <PageContainer variant="form">
+        <HStack justify="center" py={12}>
           <Spinner size="xl" />
-        </VStack>
-      </Container>
+          <Text fontSize="lg" color="fg.muted">
+            Loading product...
+          </Text>
+        </HStack>
+      </PageContainer>
     )
   }
 
   if (!product) {
     return (
-      <Container maxW="4xl" py={8}>
-        <VStack gap={4}>
-          <p>Product not found</p>
-        </VStack>
-      </Container>
+      <PageContainer variant="form">
+        <Box textAlign="center" py={12}>
+          <Heading size="lg" mb={2}>
+            Product Not Found
+          </Heading>
+          <Text color="fg.muted">
+            The product you're looking for doesn't exist.
+          </Text>
+        </Box>
+      </PageContainer>
     )
   }
 
   return (
-    <Container maxW="4xl" py={8}>
-      <Heading size="lg" mb={6}>
-        Edit Product
-      </Heading>
-      <ProductForm
-        product={product}
-        onSuccess={() => navigate({ to: "/sell" })}
-        onCancel={() => navigate({ to: "/sell" })}
-      />
-    </Container>
+    <PageContainer variant="form">
+      <VStack align="start" gap={8} w="100%">
+        <Box>
+          <Heading size="xl" mb={2}>
+            Edit Product
+          </Heading>
+          <Text fontSize="lg" color="fg.muted">
+            Update your product information
+          </Text>
+        </Box>
+        <ProductForm
+          product={product}
+          onSuccess={() => navigate({ to: "/sell" })}
+          onCancel={() => navigate({ to: "/sell" })}
+        />
+      </VStack>
+    </PageContainer>
   )
 }

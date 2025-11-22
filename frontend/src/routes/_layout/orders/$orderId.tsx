@@ -1,17 +1,20 @@
 import {
+  Badge,
   Box,
   Button,
   Heading,
   HStack,
   Image,
-  Separator,
   SimpleGrid,
   Spinner,
   Stack,
   Text,
+  VStack,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { OrdersService } from "@/client"
 import type {
   OrderActionHints,
@@ -19,9 +22,11 @@ import type {
   OrderPublic,
   OrderStatus,
 } from "@/client/types.gen"
+import PageContainer from "@/components/Common/PageContainer"
 import { OrderStatusBadge } from "@/components/Orders/OrderStatusBadge"
 import { OrderTimeline } from "@/components/Orders/OrderTimeline"
 import useAuth from "@/hooks/useAuth"
+import { useCloneProduct } from "@/hooks/useCloneProduct"
 import useCustomToast from "@/hooks/useCustomToast"
 import { getPlaceholderImageUrl, getProductImageUrl } from "@/utils/images"
 
@@ -31,9 +36,11 @@ export const Route = createFileRoute("/_layout/orders/$orderId")({
 
 function OrderDetailPage() {
   const { orderId } = Route.useParams()
-  const { activeRole } = useAuth()
+  const { activeRole, user } = useAuth()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const cloneMutation = useCloneProduct()
 
   const { data, isLoading } = useQuery<OrderPublic>({
     queryKey: ["order", orderId],
@@ -53,8 +60,33 @@ function OrderDetailPage() {
     },
   })
 
-  if (isLoading) return <Spinner />
-  if (!data) return <Text>Not found</Text>
+  if (isLoading) {
+    return (
+      <PageContainer variant="detail">
+        <HStack justify="center" py={12}>
+          <Spinner size="xl" />
+          <Text fontSize="lg" color="fg.muted">
+            Loading order...
+          </Text>
+        </HStack>
+      </PageContainer>
+    )
+  }
+
+  if (!data) {
+    return (
+      <PageContainer variant="detail">
+        <Box textAlign="center" py={12}>
+          <Heading size="lg" mb={2}>
+            Order Not Found
+          </Heading>
+          <Text color="fg.muted">
+            The order you're looking for doesn't exist.
+          </Text>
+        </Box>
+      </PageContainer>
+    )
+  }
 
   const actionHints: OrderActionHints | null | undefined = data.action_hints
   const placedDate = new Date(data.created_at).toLocaleString()
@@ -95,178 +127,294 @@ function OrderDetailPage() {
       ["retailer", "wholesaler", "delivery_partner"].includes(activeRole),
   )
 
+  // Only allow cloning for retailers when viewing orders they placed (as buyers, not sellers)
+  const enableClone = Boolean(
+    activeRole === "retailer" &&
+      user?.id === data.buyer_id &&
+      user?.id !== data.seller_id,
+  )
+
   return (
-    <Stack mt={6} gap={6}>
-      <Stack borderWidth="1px" rounded="lg" p={4} gap={3} bg="bg.surface">
-        <HStack
-          justify="space-between"
-          align={{ base: "flex-start", md: "center" }}
-        >
-          <Stack gap={0}>
-            <Heading size="md">Order {data.order_number}</Heading>
-            <Text fontSize="sm" color="fg.muted">
+    <PageContainer variant="detail">
+      <VStack align="start" gap={8} w="100%">
+        {/* Header Section */}
+        <HStack justify="space-between" w="100%" flexWrap="wrap" gap={4}>
+          <VStack align="start" gap={1}>
+            <Heading size="xl">Order {data.order_number}</Heading>
+            <Text fontSize="md" color="fg.muted">
               Placed on {placedDate}
             </Text>
-          </Stack>
+          </VStack>
           <OrderStatusBadge status={data.order_status} />
         </HStack>
-        <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} fontSize="sm">
-          <Box>
-            <Text color="fg.muted">Subtotal</Text>
-            <Text fontWeight="semibold">
-              {formatCurrency(data.order_subtotal)}
-            </Text>
-          </Box>
-          <Box>
-            <Text color="fg.muted">Delivery Fee</Text>
-            <Text fontWeight="semibold">
-              {formatCurrency(data.delivery_fee)}
-            </Text>
-          </Box>
-          <Box>
-            <Text color="fg.muted">Grand Total</Text>
-            <Text fontWeight="semibold">
-              {formatCurrency(data.order_total)}
-            </Text>
-          </Box>
-        </SimpleGrid>
-        <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} fontSize="sm">
-          <Box>
-            <Text color="fg.muted">Total Items</Text>
-            <Text fontWeight="semibold">{totalItems}</Text>
-          </Box>
-          {data.seller_contact && (
-            <Box>
-              <Text color="fg.muted">Seller</Text>
-              <Text fontWeight="semibold">
-                {data.seller_contact.full_name || "N/A"}
+
+        {/* Main Order Card */}
+        <Box borderWidth="1px" rounded="xl" p={6} bg="bg.surface" w="100%">
+          <VStack align="start" gap={6}>
+            {/* Financial Summary */}
+            <Box w="100%">
+              <Text fontSize="xs" color="fg.subtle" fontWeight="600" mb={3}>
+                {activeRole === "delivery_partner"
+                  ? "DELIVERY INFORMATION"
+                  : "ORDER SUMMARY"}
               </Text>
-              <Text fontSize="xs" color="fg.muted">
-                {data.seller_contact.email}
-              </Text>
+              {activeRole === "delivery_partner" ? (
+                <SimpleGrid columns={{ base: 2, md: 3 }} gap={6}>
+                  <Box>
+                    <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                      DELIVERY FEE
+                    </Text>
+                    <Text fontSize="xl" fontWeight="700" color="brand.primary">
+                      {formatCurrency(data.delivery_fee)}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                      ITEMS
+                    </Text>
+                    <Text fontSize="lg" fontWeight="700">
+                      {totalItems}
+                    </Text>
+                  </Box>
+                </SimpleGrid>
+              ) : (
+                <SimpleGrid columns={{ base: 2, md: 4 }} gap={6}>
+                  <Box>
+                    <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                      SUBTOTAL
+                    </Text>
+                    <Text fontSize="lg" fontWeight="700">
+                      {formatCurrency(data.order_subtotal)}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                      DELIVERY FEE
+                    </Text>
+                    <Text fontSize="lg" fontWeight="700">
+                      {formatCurrency(data.delivery_fee)}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                      TOTAL
+                    </Text>
+                    <Text fontSize="xl" fontWeight="700" color="brand.primary">
+                      {formatCurrency(data.order_total)}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                      ITEMS
+                    </Text>
+                    <Text fontSize="lg" fontWeight="700">
+                      {totalItems}
+                    </Text>
+                  </Box>
+                </SimpleGrid>
+              )}
             </Box>
-          )}
-          {data.buyer_contact && activeRole !== "customer" && (
-            <Box>
-              <Text color="fg.muted">Buyer</Text>
-              <Text fontWeight="semibold">
-                {data.buyer_contact.full_name || "N/A"}
-              </Text>
-              <Text fontSize="xs" color="fg.muted">
-                {data.buyer_contact.email}
-              </Text>
-            </Box>
-          )}
-          {data.delivery_partner_contact && (
-            <Box>
-              <Text color="fg.muted">Delivery Partner</Text>
-              <Text fontWeight="semibold">
-                {data.delivery_partner_contact.full_name || "N/A"}
-              </Text>
-              <Text fontSize="xs" color="fg.muted">
-                {data.delivery_partner_contact.email}
-              </Text>
-            </Box>
-          )}
-        </SimpleGrid>
-        {deliveryAddress?.street_address && (
-          <Box>
-            <Text color="fg.muted" fontSize="sm">
-              Deliver To
-            </Text>
-            <Text fontWeight="semibold" fontSize="sm" lineClamp={2}>
-              {deliveryAddress.street_address}
-            </Text>
+
+            {/* Contact Information */}
+            {(data.seller_contact ||
+              data.buyer_contact ||
+              data.delivery_partner_contact) && (
+              <Box w="100%" pt={4} borderTopWidth="1px">
+                <Text fontSize="xs" color="fg.subtle" fontWeight="600" mb={3}>
+                  CONTACT INFORMATION
+                </Text>
+                <HStack gap={6} flexWrap="wrap">
+                  {data.seller_contact && (
+                    <Box>
+                      <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                        SELLER
+                      </Text>
+                      <Text fontWeight="500">
+                        {data.seller_contact.full_name || "N/A"}
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted">
+                        {data.seller_contact.email}
+                      </Text>
+                    </Box>
+                  )}
+                  {data.buyer_contact && activeRole !== "customer" && (
+                    <Box>
+                      <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                        BUYER
+                      </Text>
+                      <Text fontWeight="500">
+                        {data.buyer_contact.full_name || "N/A"}
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted">
+                        {data.buyer_contact.email}
+                      </Text>
+                    </Box>
+                  )}
+                  {data.delivery_partner_contact && (
+                    <Box>
+                      <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                        DELIVERY PARTNER
+                      </Text>
+                      <Text fontWeight="500">
+                        {data.delivery_partner_contact.full_name || "N/A"}
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted">
+                        {data.delivery_partner_contact.email}
+                      </Text>
+                    </Box>
+                  )}
+                </HStack>
+              </Box>
+            )}
+
+            {/* Delivery Address */}
+            {deliveryAddress?.street_address && (
+              <Box w="100%" pt={4} borderTopWidth="1px">
+                <Text fontSize="xs" color="fg.subtle" fontWeight="600">
+                  DELIVERY ADDRESS
+                </Text>
+                <Text fontWeight="500" lineClamp={2}>
+                  {deliveryAddress.street_address}
+                </Text>
+              </Box>
+            )}
+          </VStack>
+        </Box>
+
+        {/* Action Buttons */}
+        {actionHints && canAct && (
+          <HStack gap={3} flexWrap="wrap">
+            {actionHints.next_status && (
+              <Button
+                colorPalette="cyan"
+                onClick={() =>
+                  handleAdvance(actionHints.next_status as OrderStatus)
+                }
+                loading={updateStatusMutation.isPending}
+              >
+                Mark as{" "}
+                {humanizeStatus(
+                  actionHints.next_status_label || actionHints.next_status,
+                )}
+              </Button>
+            )}
+            {actionHints.can_cancel && (
+              <Button
+                variant="outline"
+                colorPalette="red"
+                onClick={() => handleAdvance("cancelled")}
+                disabled={updateStatusMutation.isPending}
+              >
+                Cancel Order
+              </Button>
+            )}
+          </HStack>
+        )}
+
+        {/* Items Section - Hidden for delivery partners */}
+        {activeRole !== "delivery_partner" && (
+          <Box w="100%">
+            <Heading size="md" mb={4}>
+              Order Items ({data.items?.length || 0})
+            </Heading>
+            <Wrap gap={4}>
+              {data.items?.map((it: OrderItemPublic) => (
+                <WrapItem key={it.id} minW="280px" maxW="400px" flex="1">
+                  <Box
+                    borderWidth="1px"
+                    rounded="lg"
+                    bg="bg.surface"
+                    w="100%"
+                    _hover={{ borderColor: "brand.primary", shadow: "md" }}
+                    transition="all 0.2s"
+                  >
+                    <HStack gap={3} align="flex-start" p={4}>
+                      <Image
+                        boxSize="80px"
+                        rounded="md"
+                        objectFit="cover"
+                        src={resolveImage(it.image_path)}
+                        alt={it.product_name}
+                        flexShrink={0}
+                      />
+                      <Stack flex={1} gap={2} minW={0}>
+                        <Text fontWeight="600" lineClamp={2} fontSize="sm">
+                          {it.product_name}
+                        </Text>
+                        <Text
+                          fontWeight="700"
+                          fontSize="lg"
+                          color="brand.primary"
+                        >
+                          {formatCurrency(it.price_paid)}
+                        </Text>
+                        <Badge
+                          size="xs"
+                          colorPalette="cyan"
+                          alignSelf="flex-start"
+                        >
+                          Qty: {it.quantity}
+                        </Badge>
+                      </Stack>
+                    </HStack>
+                    <HStack gap={2} px={4} pb={4} flexWrap="wrap">
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        colorPalette="cyan"
+                        asChild
+                      >
+                        <Link
+                          to="/buy/$productId"
+                          params={{ productId: it.product_id }}
+                        >
+                          View Product
+                        </Link>
+                      </Button>
+                      {enableClone && it.product_id && (
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          onClick={() => {
+                            if (cloneMutation.isPending) return
+                            cloneMutation.mutate(it.id, {
+                              onSuccess: (newProd) => {
+                                const newId =
+                                  (newProd as any)?.id ||
+                                  (newProd as any)?.product?.id
+                                if (newId) {
+                                  navigate({
+                                    to: "/sell/$productId",
+                                    params: { productId: newId },
+                                    search: { cloned: "1" },
+                                  })
+                                }
+                              },
+                            })
+                          }}
+                          loading={cloneMutation.isPending}
+                        >
+                          Clone to Store
+                        </Button>
+                      )}
+                    </HStack>
+                  </Box>
+                </WrapItem>
+              ))}
+            </Wrap>
           </Box>
         )}
-      </Stack>
 
-      {actionHints && canAct && (
-        <HStack gap={3} flexWrap="wrap">
-          {actionHints.next_status && (
-            <Button
-              colorPalette="teal"
-              onClick={() =>
-                handleAdvance(actionHints.next_status as OrderStatus)
-              }
-              loading={updateStatusMutation.isPending}
-            >
-              Mark as{" "}
-              {humanizeStatus(
-                actionHints.next_status_label || actionHints.next_status,
-              )}
-            </Button>
-          )}
-          {actionHints.can_cancel && (
-            <Button
-              variant="outline"
-              colorPalette="red"
-              onClick={() => handleAdvance("cancelled")}
-              disabled={updateStatusMutation.isPending}
-            >
-              Cancel Order
-            </Button>
-          )}
-        </HStack>
-      )}
-
-      <Stack gap={4}>
-        <Heading size="sm">Items</Heading>
-        <Stack gap={3}>
-          {data.items?.map((it: OrderItemPublic) => (
-            <HStack
-              key={it.id}
-              borderWidth="1px"
-              rounded="lg"
-              p={3}
-              align="flex-start"
-              gap={4}
-            >
-              <Image
-                boxSize="80px"
-                rounded="md"
-                objectFit="cover"
-                src={resolveImage(it.image_path)}
-                alt={it.product_name}
-              />
-              <Stack flex={1} gap={1} minW={0}>
-                <HStack justify="space-between" align="flex-start">
-                  <Text fontWeight="semibold" lineClamp={1}>
-                    {it.product_name}
-                  </Text>
-                  <Text fontWeight="semibold">
-                    {formatCurrency(it.price_paid)}
-                  </Text>
-                </HStack>
-                <Text fontSize="sm" color="fg.muted">
-                  Qty x{it.quantity}
-                </Text>
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  alignSelf="flex-start"
-                  asChild
-                >
-                  <Link
-                    to="/buy/$productId"
-                    params={{ productId: it.product_id }}
-                  >
-                    View Product
-                  </Link>
-                </Button>
-              </Stack>
-            </HStack>
-          ))}
-        </Stack>
-      </Stack>
-
-      <Separator />
-      {data.history && data.history.length > 0 && (
-        <>
-          <Heading size="sm">Order History</Heading>
-          <OrderTimeline history={data.history} />
-        </>
-      )}
-    </Stack>
+        {/* Order History */}
+        {data.history && data.history.length > 0 && (
+          <Box w="100%" pt={6} borderTopWidth="1px">
+            <Heading size="md" mb={6}>
+              Order Timeline
+            </Heading>
+            <OrderTimeline history={data.history} />
+          </Box>
+        )}
+      </VStack>
+    </PageContainer>
   )
 }

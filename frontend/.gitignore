@@ -24,3 +24,4 @@ openapi.json
 *.sw?
 
 .env
+.tanstack/

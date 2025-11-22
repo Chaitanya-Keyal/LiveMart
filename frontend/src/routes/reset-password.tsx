@@ -1,4 +1,4 @@
-import { Container, Heading, Text } from "@chakra-ui/react"
+import { Container, Heading, Stack, Text } from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -72,35 +72,47 @@ function ResetPassword() {
       as="form"
       onSubmit={handleSubmit(onSubmit)}
       h="100vh"
-      maxW="sm"
+      maxW="md"
       alignItems="stretch"
       justifyContent="center"
-      gap={4}
+      gap={6}
       centerContent
+      px={{ base: 4, md: 6 }}
     >
-      <Heading size="xl" color="ui.main" textAlign="center" mb={2}>
-        Reset Password
-      </Heading>
-      <Text textAlign="center">
-        Please enter your new password and confirm it to reset your password.
-      </Text>
-      <PasswordInput
-        startElement={<FiLock />}
-        type="new_password"
-        errors={errors}
-        {...register("new_password", passwordRules())}
-        placeholder="New Password"
-      />
-      <PasswordInput
-        startElement={<FiLock />}
-        type="confirm_password"
-        errors={errors}
-        {...register("confirm_password", confirmPasswordRules(getValues))}
-        placeholder="Confirm Password"
-      />
-      <Button variant="solid" type="submit">
-        Reset Password
-      </Button>
+      <Stack
+        gap={6}
+        w="100%"
+        p={{ base: 6, md: 8 }}
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor="border.default"
+        bg="bg.surface"
+        shadow="sm"
+      >
+        <Heading size="xl" textAlign="center" mb={2}>
+          Reset Password
+        </Heading>
+        <Text textAlign="center" color="fg.muted">
+          Please enter your new password and confirm it to reset your password.
+        </Text>
+        <PasswordInput
+          startElement={<FiLock />}
+          type="new_password"
+          errors={errors}
+          {...register("new_password", passwordRules())}
+          placeholder="New Password"
+        />
+        <PasswordInput
+          startElement={<FiLock />}
+          type="confirm_password"
+          errors={errors}
+          {...register("confirm_password", confirmPasswordRules(getValues))}
+          placeholder="Confirm Password"
+        />
+        <Button variant="solid" type="submit" size="lg">
+          Reset Password
+        </Button>
+      </Stack>
     </Container>
   )
 }

@@ -1,4 +1,4 @@
-import { Box, Container, Heading, Stack, Text } from "@chakra-ui/react"
+import { Box, Container, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
@@ -114,21 +114,24 @@ function SelectRole() {
   return (
     <Container
       h="100vh"
-      maxW="2xl"
+      maxW="3xl"
       display="flex"
       flexDirection="column"
       justifyContent="center"
-      gap={6}
+      gap={8}
       centerContent
+      px={{ base: 4, md: 6 }}
     >
-      <Heading size="2xl" textAlign="center">
-        Select Your Role
-      </Heading>
-      <Text color="gray.500" textAlign="center" fontSize="lg">
-        {newUser === "true"
-          ? "Welcome! Please select your primary role to get started."
-          : "Choose the role you want to use for this account."}
-      </Text>
+      <VStack gap={3}>
+        <Heading size="2xl" textAlign="center">
+          Select Your Role
+        </Heading>
+        <Text color="fg.muted" textAlign="center" fontSize="lg" maxW="2xl">
+          {newUser === "true"
+            ? "Welcome! Please select your primary role to get started."
+            : "Choose the role you want to use for this account."}
+        </Text>
+      </VStack>
 
       <Stack direction="column" gap={4} w="100%" mt={4}>
         {roleOptions.map((option) => {
@@ -148,12 +151,14 @@ function SelectRole() {
               key={option.role}
               p={6}
               borderWidth="2px"
-              borderColor={isSelected ? "teal.500" : "gray.200"}
-              borderRadius="lg"
+              borderColor={isSelected ? "brand.primary" : "border.default"}
+              borderRadius="xl"
               cursor="pointer"
               onClick={toggleRole}
+              bg={isSelected ? "brand.primary/5" : "bg.surface"}
               _hover={{
-                borderColor: "teal.300",
+                borderColor: isSelected ? "brand.accent" : "brand.primary",
+                shadow: "md",
               }}
               transition="all 0.2s"
               position="relative"
@@ -166,7 +171,7 @@ function SelectRole() {
                   <Heading size="md" mb={1}>
                     {option.label}
                   </Heading>
-                  <Text color="gray.600" fontSize="sm">
+                  <Text color="fg.muted" fontSize="sm">
                     {option.description}
                   </Text>
                 </Box>

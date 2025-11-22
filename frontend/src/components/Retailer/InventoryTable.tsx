@@ -157,7 +157,7 @@ export const InventoryTable = ({
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>
-                  <Text fontSize="sm" color="gray.600">
+                  <Text fontSize="sm" color="fg.muted">
                     {product.sku}
                   </Text>
                 </Table.Cell>
@@ -166,7 +166,7 @@ export const InventoryTable = ({
                     <Badge colorPalette={stockStatus.color} variant="subtle">
                       {product.inventory?.stock_quantity || 0}
                     </Badge>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text fontSize="xs" color="fg.subtle">
                       {stockStatus.label}
                     </Text>
                   </VStack>
@@ -204,7 +204,6 @@ export const InventoryTable = ({
                     <IconButton
                       size="sm"
                       variant="ghost"
-                      colorPalette="red"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleDelete(product.id)

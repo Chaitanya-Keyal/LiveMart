@@ -1,5 +1,6 @@
-import { Container, Spinner, VStack } from "@chakra-ui/react"
+import { Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
+import { PageContainer } from "@/components/Common/PageContainer"
 import { ProductDetail } from "@/components/Products/ProductDetail"
 import { useProduct } from "@/hooks/useProducts"
 
@@ -13,21 +14,27 @@ function BuyProductDetailPage() {
 
   if (isLoading) {
     return (
-      <Container maxW="6xl" py={8}>
-        <VStack gap={4}>
+      <PageContainer variant="detail">
+        <VStack gap={6} py={20} align="center">
           <Spinner size="xl" />
+          <Text color="fg.muted">Loading product details...</Text>
         </VStack>
-      </Container>
+      </PageContainer>
     )
   }
 
   if (!product) {
     return (
-      <Container maxW="6xl" py={8}>
-        <VStack gap={4}>
-          <p>Product not found</p>
+      <PageContainer variant="detail">
+        <VStack gap={6} py={20} align="center">
+          <Heading size="lg" color="fg.muted">
+            Product not found
+          </Heading>
+          <Text color="fg.muted">
+            The product you're looking for doesn't exist or has been removed.
+          </Text>
         </VStack>
-      </Container>
+      </PageContainer>
     )
   }
 

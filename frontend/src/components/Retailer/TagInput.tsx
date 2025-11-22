@@ -153,7 +153,7 @@ export const TagInput = ({ value, onChange }: TagInputProps) => {
 
         {availableTags.length > 0 && (
           <Box>
-            <Box fontSize="xs" color="gray.600" mb={1}>
+            <Box fontSize="xs" color="fg.muted" mb={1}>
               Common tags:
             </Box>
             <Flex wrap="wrap" gap={1}>
@@ -167,7 +167,7 @@ export const TagInput = ({ value, onChange }: TagInputProps) => {
                   px={2}
                   py={1}
                   onClick={() => handleSuggestionClick(tag)}
-                  _hover={{ bg: "gray.100" }}
+                  _hover={{ bg: "bg.subtle" }}
                 >
                   + {tag}
                 </Badge>

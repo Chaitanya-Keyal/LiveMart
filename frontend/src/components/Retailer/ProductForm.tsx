@@ -706,12 +706,12 @@ export const ProductForm = ({
               Pricing
             </Text>
             {activeRole === "retailer" && (
-              <Text fontSize="sm" color="gray.600" fontWeight="normal" mt={1}>
+              <Text fontSize="sm" color="fg.muted" fontWeight="normal" mt={1}>
                 Set price for customers
               </Text>
             )}
             {activeRole === "wholesaler" && (
-              <Text fontSize="sm" color="gray.600" fontWeight="normal" mt={1}>
+              <Text fontSize="sm" color="fg.muted" fontWeight="normal" mt={1}>
                 Set price for retailers
               </Text>
             )}
@@ -793,7 +793,7 @@ export const ProductForm = ({
             <Text fontSize="lg" fontWeight="semibold">
               Product Images
             </Text>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontSize="sm" color="fg.muted">
               {getTotalImageCount()} / {MAX_IMAGES} images
             </Text>
           </Flex>
@@ -1015,7 +1015,7 @@ export const ProductForm = ({
         {/* Address Requirement Notice */}
         {(addresses?.length ?? 0) === 0 && (
           <Box>
-            <Text color="red.600" fontSize="sm">
+            <Text color="danger.solid" fontSize="sm">
               You need to add an address in Settings before creating a product.
             </Text>
           </Box>
@@ -1024,7 +1024,7 @@ export const ProductForm = ({
         {/* Form Actions */}
         <Flex justify="flex-end" gap={4} pt={4}>
           {onCancel && (
-            <Button type="button" variant="subtle" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
           )}

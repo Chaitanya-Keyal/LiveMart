@@ -65,7 +65,16 @@ def get_order_action_hints(order, user) -> OrderActionHints | None:
     seller_id = order.seller_id
     dp_id = order.delivery_partner_id
 
-    is_seller = (user_id == seller_id) and (active_role in SELLER_ROLES)
+    # Check if user is the seller AND has the correct seller role for this order type
+    is_seller = False
+    if user_id == seller_id and active_role in SELLER_ROLES:
+        # Verify the active role matches what the seller should be for this order
+        required_seller_role = (
+            RoleEnum.RETAILER
+            if order.buyer_type == BuyerType.CUSTOMER
+            else RoleEnum.WHOLESALER
+        )
+        is_seller = active_role == required_seller_role
 
     is_dp = (
         dp_id is not None

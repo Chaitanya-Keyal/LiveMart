@@ -1,8 +1,9 @@
-import { Container, Heading } from "@chakra-ui/react"
+import { Box, Heading, Text, VStack } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
 import type { UserPublic } from "@/client"
+import PageContainer from "@/components/Common/PageContainer"
 import { ProductForm } from "@/components/Retailer/ProductForm"
 
 export const Route = createFileRoute("/_layout/sell/new")({
@@ -25,14 +26,21 @@ function SellNewProductPage() {
   }, [queryClient, navigate])
 
   return (
-    <Container maxW="4xl" py={8}>
-      <Heading size="lg" mb={6}>
-        Add Product
-      </Heading>
-      <ProductForm
-        onSuccess={() => navigate({ to: "/sell" })}
-        onCancel={() => navigate({ to: "/sell" })}
-      />
-    </Container>
+    <PageContainer variant="form">
+      <VStack align="start" gap={8} w="100%">
+        <Box>
+          <Heading size="xl" mb={2}>
+            Add New Product
+          </Heading>
+          <Text fontSize="lg" color="fg.muted">
+            Create a new product listing
+          </Text>
+        </Box>
+        <ProductForm
+          onSuccess={() => navigate({ to: "/sell" })}
+          onCancel={() => navigate({ to: "/sell" })}
+        />
+      </VStack>
+    </PageContainer>
   )
 }

@@ -89,8 +89,8 @@ function SignUp() {
   return (
     <Flex flexDir={{ base: "column", md: "row" }} justify="center" h="100vh">
       <Container
-        maxW="md"
-        px={6}
+        maxW="lg"
+        px={{ base: 4, md: 6 }}
         alignItems="stretch"
         justifyContent="center"
         centerContent
@@ -108,13 +108,21 @@ function SignUp() {
             <Heading size="lg" fontWeight="bold">
               Create your account
             </Heading>
-            <Text color="gray.600" fontSize="sm">
+            <Text color="fg.muted" fontSize="sm">
               Get started with LiveMart today
             </Text>
           </Stack>
 
           {/* Form Fields */}
-          <Stack gap={4} p={8} borderRadius="xl" shadow="sm">
+          <Stack
+            gap={4}
+            p={{ base: 6, md: 8 }}
+            borderRadius="xl"
+            borderWidth="1px"
+            borderColor="border.default"
+            bg="bg.surface"
+            shadow="sm"
+          >
             <Field
               label="Full Name"
               required
@@ -174,7 +182,7 @@ function SignUp() {
                   ))}
                 </SelectContent>
               </SelectRoot>
-              <Text fontSize="xs" color="gray.500" mt={1}>
+              <Text fontSize="xs" color="fg.muted" mt={1}>
                 You can select multiple roles to access different features
               </Text>
             </Field>
@@ -226,7 +234,7 @@ function SignUp() {
           {/* OAuth */}
           <Stack direction="row" align="center" w="100%" my={2}>
             <Separator flex="1" />
-            <Text fontSize="sm" color="gray.500" px={2}>
+            <Text fontSize="sm" color="fg.muted" px={2}>
               or
             </Text>
             <Separator flex="1" />
@@ -244,14 +252,14 @@ function SignUp() {
           </Button>
 
           {/* Login Link */}
-          <Text textAlign="center" fontSize="sm" color="gray.600">
+          <Text textAlign="center" fontSize="sm" color="fg.muted">
             Already have an account?{" "}
             <RouterLink
               to="/login"
               search={{ error: undefined }}
               className="main-link"
             >
-              <Text as="span" fontWeight="semibold" color="teal.600">
+              <Text as="span" fontWeight="semibold" color="brand.primary">
                 Log In
               </Text>
             </RouterLink>

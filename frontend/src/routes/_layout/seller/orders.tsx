@@ -49,7 +49,7 @@ function SellerOrdersPage() {
                 </Link>
                 <OrderStatusBadge status={o.order_status} />
               </HStack>
-              <HStack justify="space-between" fontSize="xs" color="gray.600">
+              <HStack justify="space-between" fontSize="xs" color="fg.muted">
                 <Text>₹{o.order_total}</Text>
                 <HStack gap={2}>
                   {nextStatusMap[o.order_status]?.map((st) => (
@@ -66,7 +66,7 @@ function SellerOrdersPage() {
                     </Button>
                   ))}
                   {o.order_status === "ready_to_ship" && (
-                    <Text fontSize="xs" color="gray.500">
+                    <Text fontSize="xs" color="fg.subtle">
                       Awaiting delivery claim
                     </Text>
                   )}

@@ -31,14 +31,14 @@ const getCategoryLabel = (category: string): string => {
 const getStockStatus = (
   stockQuantity?: number,
   lowStockThreshold?: number,
-): { label: string; color: string } => {
+): { label: string; colorPalette: string } => {
   if (!stockQuantity || stockQuantity === 0) {
-    return { label: "Out of Stock", color: "red" }
+    return { label: "Out of Stock", colorPalette: "red" }
   }
   if (lowStockThreshold && stockQuantity < lowStockThreshold) {
-    return { label: "Low Stock", color: "orange" }
+    return { label: "Low Stock", colorPalette: "orange" }
   }
-  return { label: "In Stock", color: "green" }
+  return { label: "In Stock", colorPalette: "green" }
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
@@ -71,12 +71,23 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       asChild
       size="sm"
       variant="outline"
-      _hover={{ shadow: "md", transform: "translateY(-2px)" }}
-      transition="all 0.2s"
+      _hover={{
+        shadow: "lg",
+        transform: "translateY(-4px)",
+        borderColor: "border.strong",
+      }}
+      transition="all 0.2s ease"
+      cursor="pointer"
     >
       <RouterLink to="/buy/$productId" params={{ productId: product.id }}>
         <Card.Body p={0}>
-          <Box position="relative" w="100%" aspectRatio="1" overflow="hidden">
+          <Box
+            position="relative"
+            w="100%"
+            aspectRatio="1"
+            overflow="hidden"
+            bg="bg.subtle"
+          >
             <Image
               src={primaryImageUrl}
               alt={product.name}
@@ -114,9 +125,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             )}
           </Box>
           <Card.Body p={4}>
-            <VStack align="stretch" gap={3}>
+            <VStack align="stretch" gap={2.5} minH="240px">
               <Badge
-                colorPalette="blue"
+                colorPalette="cyan"
                 variant="subtle"
                 alignSelf="flex-start"
                 fontSize="xs"
@@ -124,46 +135,48 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 {getCategoryLabel(product.category)}
               </Badge>
               <Text
-                fontWeight="semibold"
+                fontWeight="600"
                 fontSize="md"
                 lineClamp={2}
                 minH="2.5rem"
+                color="fg.emphasis"
               >
                 {product.name}
               </Text>
-              {product.average_rating !== null &&
-                product.average_rating !== undefined &&
-                product.review_count !== undefined &&
-                product.review_count > 0 && (
-                  <StarRating
-                    value={product.average_rating}
-                    count={product.review_count}
-                    size="xs"
-                    showCount
-                  />
+              <Box minH="24px">
+                {product.average_rating !== null &&
+                  product.average_rating !== undefined &&
+                  product.review_count !== undefined &&
+                  product.review_count > 0 && (
+                    <StarRating
+                      value={product.average_rating}
+                      count={product.review_count}
+                      size="xs"
+                      showCount
+                    />
+                  )}
+              </Box>
+              <Box minH="24px">
+                {distanceKm != null && (
+                  <HStack gap={1} color="fg.muted" fontSize="sm">
+                    <Icon as={FiMapPin} />
+                    <Text>{distanceKm.toFixed(1)} km away</Text>
+                  </HStack>
                 )}
-              {distanceKm != null && (
-                <HStack gap={1} color="gray.600" fontSize="sm">
-                  <Icon as={FiMapPin} />
-                  <Text>{distanceKm.toFixed(1)} km away</Text>
-                </HStack>
-              )}
-              {product.description && (
-                <Text
-                  fontSize="sm"
-                  color="gray.600"
-                  lineClamp={2}
-                  minH="2.5rem"
-                >
-                  {product.description}
-                </Text>
-              )}
-              <Flex justify="space-between" align="center" mt="auto">
-                <Text fontSize="xl" fontWeight="bold" color="blue.600">
+              </Box>
+              <Box minH="40px" mb={2}>
+                {product.description && (
+                  <Text fontSize="sm" color="fg.muted" lineClamp={2}>
+                    {product.description}
+                  </Text>
+                )}
+              </Box>
+              <Flex justify="space-between" align="center" mt="auto" pt={2}>
+                <Text fontSize="xl" fontWeight="700" color="brand.primary">
                   {formatPrice(price)}
                 </Text>
                 <Badge
-                  colorPalette={stockStatus.color}
+                  colorPalette={stockStatus.colorPalette}
                   variant="subtle"
                   fontSize="xs"
                 >

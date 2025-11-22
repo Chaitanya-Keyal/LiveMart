@@ -87,7 +87,7 @@ export const BulkUploadForm = () => {
           <Heading size="lg" mb={2}>
             Bulk Product Upload
           </Heading>
-          <Text color="gray.600">
+          <Text color="fg.muted">
             Upload a CSV file to import multiple products at once. Maximum 500
             rows per upload.
           </Text>
@@ -158,20 +158,20 @@ export const BulkUploadForm = () => {
             p={4}
             borderWidth={1}
             borderRadius="md"
-            borderColor="red.200"
-            bg="red.50"
+            borderColor="danger.muted"
+            bg="danger.muted"
           >
-            <Text fontWeight="semibold" color="red.600" mb={2}>
+            <Text fontWeight="semibold" color="danger.solid" mb={2}>
               Validation Errors ({errors.length})
             </Text>
             <VStack align="stretch" gap={1}>
               {errors.slice(0, 10).map((error, index) => (
-                <Text key={index} fontSize="sm" color="red.600">
+                <Text key={index} fontSize="sm" color="danger.solid">
                   Row {error.row}, {error.field}: {error.message}
                 </Text>
               ))}
               {errors.length > 10 && (
-                <Text fontSize="sm" color="red.600">
+                <Text fontSize="sm" color="danger.solid">
                   ... and {errors.length - 10} more errors
                 </Text>
               )}
@@ -210,7 +210,7 @@ export const BulkUploadForm = () => {
                 </Table.Body>
               </Table.Root>
               {parsedProducts.length > 10 && (
-                <Text fontSize="sm" color="gray.500" mt={2}>
+                <Text fontSize="sm" color="fg.muted" mt={2}>
                   ... and {parsedProducts.length - 10} more products
                 </Text>
               )}

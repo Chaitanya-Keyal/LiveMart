@@ -105,6 +105,9 @@ export const SearchBar = ({
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 120)}
         onKeyDown={handleKeyDown}
+        size="lg"
+        borderWidth="2px"
+        _focus={{ borderColor: "brand.primary" }}
       />
       {internal ? (
         <IconButton
@@ -132,11 +135,11 @@ export const SearchBar = ({
           left={0}
           right={0}
           mt={1}
-          bg="bg"
+          bg="bg.surface"
           borderWidth="1px"
-          borderColor="border"
-          borderRadius="l2"
-          shadow="sm"
+          borderColor="border.default"
+          borderRadius="md"
+          shadow="lg"
           zIndex={10}
           overflow="hidden"
         >
@@ -158,9 +161,9 @@ export const SearchBar = ({
                   aria-selected={active}
                   px={3}
                   py={2}
-                  borderRadius="none"
-                  bg={active ? "bg.muted" : "transparent"}
-                  _hover={{ bg: "bg.subtle", cursor: "pointer" }}
+                  borderRadius="md"
+                  bg={active ? "bg.subtle" : "transparent"}
+                  _hover={{ bg: "bg.muted", cursor: "pointer" }}
                   onMouseEnter={() => setActiveIndex(idx)}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
@@ -170,7 +173,7 @@ export const SearchBar = ({
                     setOpen(false)
                   }}
                 >
-                  <Text fontSize="sm" color="fg">
+                  <Text fontSize="sm" color="fg.default">
                     {s}
                   </Text>
                 </Box>
