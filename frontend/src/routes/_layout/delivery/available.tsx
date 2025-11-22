@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import React from "react"
 import { OrdersService } from "@/client"
 import PageContainer from "@/components/Common/PageContainer"
@@ -39,6 +39,7 @@ function DeliveryAvailablePage() {
   const toast = useCustomToast()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { addresses, isLoading: addressesLoading } = useAddresses()
   const { lat: geoLat, lon: geoLon, loading: geoLoading } = useGeolocation()
 
@@ -76,6 +77,7 @@ function DeliveryAvailablePage() {
       toast.showSuccessToast("Order claimed successfully")
       queryClient.invalidateQueries({ queryKey: ["delivery", "available"] })
       queryClient.invalidateQueries({ queryKey: ["delivery", "mine"] })
+      navigate({ to: "/delivery/mine" })
     },
     onError: (e: any) =>
       toast.showErrorToast(e?.body?.detail || "Failed to claim order"),

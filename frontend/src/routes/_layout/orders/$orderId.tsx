@@ -127,11 +127,10 @@ function OrderDetailPage() {
       ["retailer", "wholesaler", "delivery_partner"].includes(activeRole),
   )
 
-  // Only allow cloning for retailers when viewing orders they placed (as buyers, not sellers)
   const enableClone = Boolean(
     activeRole === "retailer" &&
       user?.id === data.buyer_id &&
-      user?.id !== data.seller_id,
+      data.order_status === "delivered",
   )
 
   return (

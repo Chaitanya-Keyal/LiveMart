@@ -253,33 +253,35 @@ function OrdersMePage() {
                             >
                               View Product
                             </Link>
-                            {enableClone && item.product_id && (
-                              <Button
-                                size="xs"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  if (cloneMutation.isPending) return
-                                  cloneMutation.mutate(item.id, {
-                                    onSuccess: (newProd) => {
-                                      const newId =
-                                        (newProd as any)?.id ||
-                                        (newProd as any)?.product?.id
-                                      if (newId) {
-                                        navigate({
-                                          to: "/sell/$productId",
-                                          params: { productId: newId },
-                                          search: { cloned: "1" },
-                                        })
-                                      }
-                                    },
-                                  })
-                                }}
-                                loading={cloneMutation.isPending}
-                              >
-                                Clone
-                              </Button>
-                            )}
+                            {enableClone &&
+                              item.product_id &&
+                              o.order_status === "delivered" && (
+                                <Button
+                                  size="xs"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    if (cloneMutation.isPending) return
+                                    cloneMutation.mutate(item.id, {
+                                      onSuccess: (newProd) => {
+                                        const newId =
+                                          (newProd as any)?.id ||
+                                          (newProd as any)?.product?.id
+                                        if (newId) {
+                                          navigate({
+                                            to: "/sell/$productId",
+                                            params: { productId: newId },
+                                            search: { cloned: "1" },
+                                          })
+                                        }
+                                      },
+                                    })
+                                  }}
+                                  loading={cloneMutation.isPending}
+                                >
+                                  Clone
+                                </Button>
+                              )}
                           </HStack>
                         </Stack>
                       </HStack>
