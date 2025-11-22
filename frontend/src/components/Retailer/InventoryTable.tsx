@@ -97,129 +97,136 @@ export const InventoryTable = ({
 
   return (
     <>
-      <Table.Root size={{ base: "sm", md: "md" }}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader>Image</Table.ColumnHeader>
-            <Table.ColumnHeader>Name</Table.ColumnHeader>
-            <Table.ColumnHeader>Category</Table.ColumnHeader>
-            <Table.ColumnHeader>SKU</Table.ColumnHeader>
-            <Table.ColumnHeader>Stock</Table.ColumnHeader>
-            <Table.ColumnHeader>Price</Table.ColumnHeader>
-            <Table.ColumnHeader>Status</Table.ColumnHeader>
-            <Table.ColumnHeader>Actions</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {products.map((product) => {
-            const targetBuyerType =
-              sellerType === "wholesaler" ? "retailer" : "customer"
-            const pricing = product.pricing_tiers?.find(
-              (tier) => tier.buyer_type === targetBuyerType && tier.is_active,
-            )
-            const price = pricing?.price || "0"
-            const stockStatus = getStockStatus(
-              product.inventory?.stock_quantity,
-              product.inventory?.low_stock_threshold,
-            )
+      <Box
+        borderWidth={1}
+        borderRadius="lg"
+        overflow="hidden"
+        borderColor="muted"
+      >
+        <Table.Root size={{ base: "sm", md: "md" }}>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>Image</Table.ColumnHeader>
+              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Category</Table.ColumnHeader>
+              <Table.ColumnHeader>SKU</Table.ColumnHeader>
+              <Table.ColumnHeader>Stock</Table.ColumnHeader>
+              <Table.ColumnHeader>Price</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {products.map((product) => {
+              const targetBuyerType =
+                sellerType === "wholesaler" ? "retailer" : "customer"
+              const pricing = product.pricing_tiers?.find(
+                (tier) => tier.buyer_type === targetBuyerType && tier.is_active,
+              )
+              const price = pricing?.price || "0"
+              const stockStatus = getStockStatus(
+                product.inventory?.stock_quantity,
+                product.inventory?.low_stock_threshold,
+              )
 
-            return (
-              <Table.Row
-                key={product.id}
-                cursor="pointer"
-                _hover={{ background: "gray.subtle" }}
-                onClick={() =>
-                  navigate({
-                    to: "/sell/$productId",
-                    params: { productId: product.id },
-                  })
-                }
-              >
-                <Table.Cell>
-                  <Box w="50px" h="50px" borderRadius="md" overflow="hidden">
-                    <Image
-                      src={getPrimaryImageUrl(product)}
-                      alt={product.name}
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                    />
-                  </Box>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontWeight="semibold" lineClamp={1}>
-                    {product.name}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge variant="subtle">
-                    {getCategoryLabel(product.category)}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="sm" color="fg.muted">
-                    {product.sku}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <VStack align="start" gap={1}>
-                    <Badge colorPalette={stockStatus.color} variant="subtle">
-                      {product.inventory?.stock_quantity || 0}
-                    </Badge>
-                    <Text fontSize="xs" color="fg.subtle">
-                      {stockStatus.label}
+              return (
+                <Table.Row
+                  key={product.id}
+                  cursor="pointer"
+                  _hover={{ background: "gray.subtle" }}
+                  onClick={() =>
+                    navigate({
+                      to: "/sell/$productId",
+                      params: { productId: product.id },
+                    })
+                  }
+                >
+                  <Table.Cell>
+                    <Box w="50px" h="50px" borderRadius="md" overflow="hidden">
+                      <Image
+                        src={getPrimaryImageUrl(product)}
+                        alt={product.name}
+                        w="100%"
+                        h="100%"
+                        objectFit="cover"
+                      />
+                    </Box>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Text fontWeight="semibold" lineClamp={1}>
+                      {product.name}
                     </Text>
-                  </VStack>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontWeight="semibold">{formatPrice(price)}</Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    colorPalette={product.is_active ? "green" : "gray"}
-                    variant="subtle"
-                  >
-                    {product.is_active ? "Active" : "Inactive"}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  <Flex gap={2}>
-                    <Link
-                      to="/sell/$productId"
-                      params={{ productId: product.id }}
-                      onClick={(e) => e.stopPropagation()}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge variant="subtle">
+                      {getCategoryLabel(product.category)}
+                    </Badge>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Text fontSize="sm" color="fg.muted">
+                      {product.sku}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <VStack align="start" gap={1}>
+                      <Badge colorPalette={stockStatus.color} variant="subtle">
+                        {product.inventory?.stock_quantity || 0}
+                      </Badge>
+                      <Text fontSize="xs" color="fg.subtle">
+                        {stockStatus.label}
+                      </Text>
+                    </VStack>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Text fontWeight="semibold">{formatPrice(price)}</Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge
+                      colorPalette={product.is_active ? "green" : "gray"}
+                      variant="subtle"
                     >
+                      {product.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Flex gap={2}>
+                      <Link
+                        to="/sell/$productId"
+                        params={{ productId: product.id }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <IconButton
+                          size="sm"
+                          variant="ghost"
+                          aria-label="Edit"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <FiEdit />
+                        </IconButton>
+                      </Link>
+                      <Box onClick={(e) => e.stopPropagation()}>
+                        <StockUpdateDialog product={product} />
+                      </Box>
                       <IconButton
                         size="sm"
                         variant="ghost"
-                        aria-label="Edit"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(product.id)
+                        }}
+                        aria-label="Delete"
+                        loading={deleteProductMutation.isPending}
                       >
-                        <FiEdit />
+                        <FiTrash2 />
                       </IconButton>
-                    </Link>
-                    <Box onClick={(e) => e.stopPropagation()}>
-                      <StockUpdateDialog product={product} />
-                    </Box>
-                    <IconButton
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDelete(product.id)
-                      }}
-                      aria-label="Delete"
-                      loading={deleteProductMutation.isPending}
-                    >
-                      <FiTrash2 />
-                    </IconButton>
-                  </Flex>
-                </Table.Cell>
-              </Table.Row>
-            )
-          })}
-        </Table.Body>
-      </Table.Root>
+                    </Flex>
+                  </Table.Cell>
+                </Table.Row>
+              )
+            })}
+          </Table.Body>
+        </Table.Root>
+      </Box>
       {count > PER_PAGE && onPageChange && (
         <Flex justifyContent="center" mt={6}>
           <PaginationRoot

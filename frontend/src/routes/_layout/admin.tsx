@@ -69,44 +69,53 @@ function UsersTable() {
 
   return (
     <>
-      <Table.Root size={{ base: "sm", md: "md" }}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Role</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Status</Table.ColumnHeader>
-            <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {users?.map((user) => (
-            <Table.Row key={user.id} opacity={isPlaceholderData ? 0.5 : 1}>
-              <Table.Cell color={user.full_name ? "inherit" : "gray"}>
-                {user.full_name || "N/A"}
-                {currentUser?.id === user.id && (
-                  <Badge ml="1" colorPalette="cyan">
-                    You
-                  </Badge>
-                )}
-              </Table.Cell>
-              <Table.Cell truncate maxW="sm">
-                {user.email}
-              </Table.Cell>
-              <Table.Cell>
-                {user.roles?.includes("admin") ? "Admin" : "User"}
-              </Table.Cell>
-              <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
-              <Table.Cell>
-                <UserActionsMenu
-                  user={user}
-                  disabled={currentUser?.id === user.id}
-                />
-              </Table.Cell>
+      <Box
+        borderWidth={1}
+        borderRadius="lg"
+        overflow="hidden"
+        borderColor="muted"
+      >
+        <Table.Root size={{ base: "sm", md: "md" }}>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
+              <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
+              <Table.ColumnHeader w="sm">Role</Table.ColumnHeader>
+              <Table.ColumnHeader w="sm">Status</Table.ColumnHeader>
+              <Table.ColumnHeader w="sm">Actions</Table.ColumnHeader>
             </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
+          </Table.Header>
+          <Table.Body>
+            {users?.map((user) => (
+              <Table.Row key={user.id} opacity={isPlaceholderData ? 0.5 : 1}>
+                <Table.Cell color={user.full_name ? "inherit" : "gray"}>
+                  {user.full_name || "N/A"}
+                  {currentUser?.id === user.id && (
+                    <Badge ml="1" colorPalette="cyan">
+                      You
+                    </Badge>
+                  )}
+                </Table.Cell>
+                <Table.Cell truncate maxW="sm">
+                  {user.email}
+                </Table.Cell>
+                <Table.Cell>
+                  {user.roles?.includes("admin") ? "Admin" : "User"}
+                </Table.Cell>
+                <Table.Cell>
+                  {user.is_active ? "Active" : "Inactive"}
+                </Table.Cell>
+                <Table.Cell>
+                  <UserActionsMenu
+                    user={user}
+                    disabled={currentUser?.id === user.id}
+                  />
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      </Box>
       <Flex justifyContent="flex-end" mt={4}>
         <PaginationRoot
           count={count}

@@ -94,7 +94,7 @@ function DeliveryAvailablePage() {
     items: [
       { label: "Current Location", value: "current" },
       ...addresses.map((addr) => ({
-        label: `${addr.label}${addr.custom_label ? ` (${addr.custom_label})` : ""} - ${addr.street_address}, ${addr.city}`,
+        label: `${(addr.label ?? "").toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase())}${addr.custom_label ? ` (${addr.custom_label})` : ""} - ${addr.street_address}, ${addr.city}`,
         value: addr.id,
       })),
     ],
@@ -138,13 +138,15 @@ function DeliveryAvailablePage() {
                     <SelectItem
                       key={addr.id}
                       item={{
-                        label: `${addr.label}${addr.custom_label ? ` (${addr.custom_label})` : ""} - ${addr.street_address}, ${addr.city}`,
+                        label: `${(addr.label ?? "").toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase())}${addr.custom_label ? ` (${addr.custom_label})` : ""} - ${addr.street_address}, ${addr.city}`,
                         value: addr.id,
                       }}
                     >
                       <VStack align="start" gap={0}>
                         <Text fontWeight="medium">
-                          {addr.label}
+                          {(addr.label ?? "")
+                            .toLowerCase()
+                            .replace(/\b\w/g, (s) => s.toUpperCase())}
                           {addr.custom_label && ` (${addr.custom_label})`}
                         </Text>
                         <Text fontSize="xs" color="fg.muted">

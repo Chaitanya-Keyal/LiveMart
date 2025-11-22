@@ -246,37 +246,46 @@ export const BulkUploadForm = () => {
               <Text fontWeight="semibold" mb={2}>
                 Preview ({parsedProducts.length} products)
               </Text>
-              <Table.Root size="sm">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Name</Table.ColumnHeader>
-                    <Table.ColumnHeader>Brand</Table.ColumnHeader>
-                    <Table.ColumnHeader>Category</Table.ColumnHeader>
-                    <Table.ColumnHeader>Price</Table.ColumnHeader>
-                    <Table.ColumnHeader>Min Qty</Table.ColumnHeader>
-                    <Table.ColumnHeader>Max Qty</Table.ColumnHeader>
-                    <Table.ColumnHeader>Stock</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {parsedProducts.slice(0, 10).map((item, index) => {
-                    const pricing = item.product.pricing_tiers?.[0]
-                    return (
-                      <Table.Row key={index}>
-                        <Table.Cell>{item.product.name}</Table.Cell>
-                        <Table.Cell>{item.product.brand || "-"}</Table.Cell>
-                        <Table.Cell>{item.product.category}</Table.Cell>
-                        <Table.Cell>${pricing?.price || "N/A"}</Table.Cell>
-                        <Table.Cell>{pricing?.min_quantity || 1}</Table.Cell>
-                        <Table.Cell>{pricing?.max_quantity ?? "-"}</Table.Cell>
-                        <Table.Cell>
-                          {item.product.initial_stock || 0}
-                        </Table.Cell>
-                      </Table.Row>
-                    )
-                  })}
-                </Table.Body>
-              </Table.Root>
+              <Box
+                borderWidth={1}
+                borderRadius="lg"
+                overflow="hidden"
+                borderColor="muted"
+              >
+                <Table.Root size="sm">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Name</Table.ColumnHeader>
+                      <Table.ColumnHeader>Brand</Table.ColumnHeader>
+                      <Table.ColumnHeader>Category</Table.ColumnHeader>
+                      <Table.ColumnHeader>Price</Table.ColumnHeader>
+                      <Table.ColumnHeader>Min Qty</Table.ColumnHeader>
+                      <Table.ColumnHeader>Max Qty</Table.ColumnHeader>
+                      <Table.ColumnHeader>Stock</Table.ColumnHeader>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {parsedProducts.slice(0, 10).map((item, index) => {
+                      const pricing = item.product.pricing_tiers?.[0]
+                      return (
+                        <Table.Row key={index}>
+                          <Table.Cell>{item.product.name}</Table.Cell>
+                          <Table.Cell>{item.product.brand || "-"}</Table.Cell>
+                          <Table.Cell>{item.product.category}</Table.Cell>
+                          <Table.Cell>${pricing?.price || "N/A"}</Table.Cell>
+                          <Table.Cell>{pricing?.min_quantity || 1}</Table.Cell>
+                          <Table.Cell>
+                            {pricing?.max_quantity ?? "-"}
+                          </Table.Cell>
+                          <Table.Cell>
+                            {item.product.initial_stock || 0}
+                          </Table.Cell>
+                        </Table.Row>
+                      )
+                    })}
+                  </Table.Body>
+                </Table.Root>
+              </Box>
               {parsedProducts.length > 10 && (
                 <Text fontSize="sm" color="fg.muted" mt={2}>
                   ... and {parsedProducts.length - 10} more products

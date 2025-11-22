@@ -186,13 +186,13 @@ export const ProductReviewsSection = ({
         {/* Reviews List */}
         {count === 0 ? (
           hasPurchased && !isPurchaseCheckPending ? (
-            <Box textAlign="center" py={8}>
+            <Box py={8}>
               <Text fontSize="lg" color="fg.muted">
                 No reviews yet. Be the first to review this product!
               </Text>
             </Box>
           ) : (
-            <Box textAlign="center" py={8}>
+            <Box py={8}>
               <Text fontSize="lg" color="fg.muted">
                 No reviews yet.
               </Text>
