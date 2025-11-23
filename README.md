@@ -38,6 +38,7 @@ Update `SECRET_KEY`, `FIRST_SUPERUSER_PASSWORD`, `POSTGRES_PASSWORD`, and any SM
 
 ## Project Docs
 
+- Report: [project_report.md](project_report.md)
 - Backend guide: [backend/README.md](backend/README.md)
 - Frontend guide: [frontend/README.md](frontend/README.md)
 - Local development reference: [development.md](development.md)

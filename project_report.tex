@@ -1,0 +1,559 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{titlesec}
+
+% Page setup
+\geometry{a4paper, margin=1in}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+% Code listing setup
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegray},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% Unified image macro to constrain size
+\newcommand{\reportimage}[1]{\includegraphics[width=0.7\textwidth,height=0.55\textheight,keepaspectratio]{#1}}
+
+\title{LiveMart Project Report}
+\author{Group-10}
+\date{\today}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+
+    \Huge
+    \textbf{CS F213 Project Report}
+
+    \vspace{1.5cm}
+
+    \reportimage{frontend/public/assets/images/logo.png}
+
+    \vspace{1.5cm}
+
+    \Large
+    \textbf{Group-10}
+
+    \vspace{0.5cm}
+
+    \begin{itemize}
+        \item Chaitanya Keyal - 2023B4A70727H
+        \item Arpit - 2023B3A70482H
+        \item Abhishek Verma - 2023B4A71256H
+        \item Vishesh Agarwal - 2023B4A70611H
+    \end{itemize}
+
+    \vspace{0.75cm}
+
+    \large
+    \textbf{Website}: \href{https://dashboard.livemart.okaybro.dev}{dashboard.livemart.okaybro.dev}\\[0.25cm]
+    \textbf{GitHub Repository}: \href{https://github.com/Chaitanya-Keyal/LiveMart}{github.com/Chaitanya-Keyal/LiveMart}
+
+    \vfill
+
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Summary}
+
+LiveMart is an e-commerce platform designed to unify the fragmented supply chain of local commerce. Unlike traditional platforms that serve either B2C (Business to Consumer) or B2B (Business to Business) markets, LiveMart integrates \textbf{Customers}, \textbf{Retailers}, \textbf{Wholesalers} and \textbf{Delivery Partners} into a single, cohesive ecosystem.
+
+The platform solves a critical problem in the retail industry: the disconnect between local inventory and digital visibility. Retailers struggle to source products efficiently from wholesalers while simultaneously failing to reach nearby customers online. LiveMart bridges this gap through a unified platform that enables seamless role switching, allowing users to operate as customers, retailers, wholesalers, or delivery partners within a single account. The system leverages geolocation-powered discovery using Google Maps integration and Haversine distance calculations to prioritize nearby sellers in search results, ensuring customers find local shops within walking distance while retailers discover wholesalers in their vicinity. Products support tiered pricing based on buyer type, enabling wholesalers to offer bulk discounts to retailers while maintaining higher retail prices for individual customers. Dynamic delivery fees are calculated based on distance to ensure fair pricing.
+
+The platform provides comprehensive business automation including automated financial settlements that track all transactions, calculate platform commissions, and generate detailed payout records for transparent reconciliation. Wholesalers can upload thousands of products via CSV files with automated validation and error reporting, while retailers can clone purchased products into their own catalog with a single click. Secure payment processing through Razorpay with webhook verification ensures no successful payment goes unrecorded, supporting credit cards, UPI, and net banking. Orders progress through eleven distinct states with delivery partner assignment and real-time tracking, accompanied by responsive MJML email notifications at each transition. The system includes an admin dashboard for platform oversight, smart coupon management with usage limits and targeted distribution, verified purchaser reviews and ratings, low stock alerts for inventory management, email verification via OTP codes, and Google OAuth for single-click registration and login.
+
+\section{Core Functionality and Workflow}
+
+The platform operates on a cyclic commerce model:
+
+\begin{enumerate}
+    \item \textbf{Wholesale Supply}: Wholesalers upload bulk inventory (via CSV or manual entry) and set pricing tiers.
+    \item \textbf{Retail Procurement}: Retailers browse wholesale catalogs, benefiting from bulk discounts. They place orders, which are tracked and fulfilled through the platform.
+    \item \textbf{Inventory Transformation}: Once a retailer receives stock, they can "clone" these items into their own retail catalog with a single click, setting a new retail price.
+    \item \textbf{Consumer Purchase}: Customers search for products. The system prioritizes nearby sellers using geolocation. They place orders, pay online, and track delivery.
+    \item \textbf{Delivery}: Delivery partners can claim available orders, update statuses, and complete deliveries.
+    \item \textbf{Settlement}: The platform automatically calculates commissions and settles payments to sellers, ensuring a transparent financial flow.
+\end{enumerate}
+
+\section{Specialized Features}
+
+\subsection{Google Maps Integration and Geolocation}
+
+\begin{itemize}
+    \item \textbf{How it works}: When a user searches for a product, the backend calculates the Haversine distance between the user's coordinates and every seller's shop location.
+    \item \textbf{The Result}: Search results are sorted by proximity. A customer sees the shop 500 meters away before the one 5 kilometers away.
+    \item \textbf{Address Management}: The system uses the Google Maps Autocomplete API to let users pinpoint their exact delivery location, storing the latitude and longitude for precise delivery routing.
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/add-address.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/address-management.png}\end{figure}
+
+\subsection{Razorpay Payment Gateway with Webhooks}
+
+The platform implements a robust payment flow that handles the unpredictability of real-world internet connections.
+
+\begin{itemize}
+    \item \textbf{The Flow}: When a user initiates payment, the system creates a secure order on Razorpay's servers.
+    \item \textbf{Webhooks}: The system relies on webhooks for confirmation. If a user pays but closes their browser immediately, Razorpay sends a secure, signed signal to the backend endpoint (\texttt{/payments/razorpay/webhook}).
+    \item \textbf{Reliability}: This ensures that no successful payment goes unrecorded. The system automatically clears the cart, generates an invoice, and notifies the seller only after cryptographic verification.
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/payment.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/payment-success.png}\end{figure}
+
+\subsection{Bulk Product Upload for Wholesalers}
+
+Wholesalers manage thousands of SKUs, making individual product entry impractical.
+
+\begin{itemize}
+    \item \textbf{The Solution}: The platform provides a dedicated Bulk Import feature (\texttt{/products/bulk-import}).
+    \item \textbf{How it works}: Wholesalers can upload a structured JSON or CSV payload containing hundreds of products.
+    \item \textbf{Validation}: The backend processes this data, validating every row for data integrity (ensuring price is greater than zero, stock is valid) before committing to the database. The system provides a detailed report of successes and failures (such as "Row 45 failed: Invalid Category").
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/wholesaler-bulk-upload.png}\end{figure}
+
+\subsection{Admin Panel and Financial Settlements}
+
+The platform includes a comprehensive Admin Dashboard for system oversight and financial management.
+
+\begin{itemize}
+    \item \textbf{Settlements}: The system tracks every order and calculates:
+          \begin{itemize}
+              \item Total Amount Paid
+              \item Platform Commission (for example, 5\%)
+              \item Net Payable to Seller
+          \end{itemize}
+    \item \textbf{Reconciliation}: Admins can view pending settlements aggregated by seller. They can mark a payout as completed, which updates the ledger and creates a permanent financial record.
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/admin-panel.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/settlements-admin.png}\end{figure}
+
+\subsection{Smart Coupon System}
+
+The platform implements a comprehensive coupon system (\texttt{/coupons}) with advanced validation logic.
+
+\begin{itemize}
+    \item \textbf{Validation Logic}: The system checks multiple constraints in real-time:
+          \begin{itemize}
+              \item Is the coupon active?
+              \item Has the usage limit been reached?
+              \item Does the cart meet the minimum order value?
+          \end{itemize}
+    \item \textbf{Targeting}: Coupons can be public (available to all users) or targeted (sent to specific email lists via background tasks).
+    \item \textbf{Usage Tracking}: The system atomically increments usage counters to prevent race conditions where more users apply a limited coupon than allowed.
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/coupon-creation.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/coupon-applied.png}\end{figure}
+
+\subsection{Dynamic Role Switching}
+
+This represents a key architectural feature of the platform.
+
+\begin{itemize}
+    \item \textbf{The Problem}: In most applications, users are either buyers or sellers. Supporting both roles typically requires two separate accounts.
+    \item \textbf{The Solution}: The system decouples \texttt{User} from \texttt{Role}. A user can have a list of roles (for example, \texttt{[CUSTOMER, RETAILER]}).
+    \item \textbf{The Experience}: A toggle switch in the UI allows users to change their active context. When switching to "Retailer", the entire UI transforms: search bars become inventory tools, and cart icons become order management dashboards. The backend validates every request against the active role, ensuring strict security boundaries.
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/role-switching.png}\end{figure}
+
+\section{Technology Stack}
+
+\subsection{Frontend}
+
+The frontend is built as a Single Page Application (SPA) designed for performance, scalability, and developer experience.
+
+\begin{itemize}
+    \item \textbf{Framework}: \textbf{React 19} - Leveraging the latest features like Actions and optimistic UI updates for a responsive user experience.
+    \item \textbf{Build Tool}: \textbf{Vite} - Chosen for its lightning-fast hot module replacement (HMR) and optimized production builds.
+    \item \textbf{Language}: \textbf{TypeScript} - Ensures type safety across the entire application, significantly reducing runtime errors. The frontend types are auto-generated from the backend OpenAPI schema, guaranteeing 100\% contract synchronization.
+    \item \textbf{UI Library}: \textbf{Chakra UI v3} - A modular, accessible component library. The platform utilizes a custom theme system (\texttt{createSystem}) with semantic tokens for consistent design and easy dark mode implementation.
+    \item \textbf{State Management \& Data Fetching}: \textbf{TanStack Query (React Query)} - Handles server state, caching, background refetching, and optimistic updates, eliminating the need for complex global state management for API data.
+    \item \textbf{Routing}: \textbf{TanStack Router} - A type-safe router that manages URL state, search parameters, and nested layouts (such as \texttt{\_layout/admin}, \texttt{\_layout/seller}). It ensures that broken links are caught at compile time.
+    \item \textbf{Maps Integration}: \textbf{Google Maps API} (@react-google-maps/api) - Powers the location-based features, allowing users to pinpoint addresses and find nearby sellers.
+    \item \textbf{Linting \& Formatting}: \textbf{Biome} - A fast, all-in-one toolchain for linting and formatting, ensuring code consistency.
+\end{itemize}
+
+\subsection{Backend}
+
+The backend is a high-performance, asynchronous REST API designed for reliability and ease of maintenance.
+
+\begin{itemize}
+    \item \textbf{Framework}: \textbf{FastAPI} - Selected for its speed (Starlette), ease of use, and automatic OpenAPI documentation generation. It supports asynchronous request handling, making it ideal for I/O-bound operations like database queries and external API calls.
+    \item \textbf{Database ORM}: \textbf{SQLModel} - A library that combines SQLAlchemy and Pydantic. It allows defining models that serve as both database tables and data validation schemas, reducing code duplication.
+    \item \textbf{Database}: \textbf{PostgreSQL 16+} - A robust, open-source relational database used for its reliability, complex query support, and JSON capabilities (used for storing snapshots of addresses and order history).
+    \item \textbf{Authentication}: \textbf{OAuth2 with Password Flow (JWT)} - Secure stateless authentication. Access tokens are short-lived (8 days), and the system supports \textbf{Google OAuth} for frictionless onboarding.
+    \item \textbf{Security}: \textbf{Passlib (bcrypt)} for password hashing. Role-based access control (RBAC) is enforced via dependency injection (\texttt{require\_role}).
+    \item \textbf{Migrations}: \textbf{Alembic} - Handles database schema changes, ensuring smooth transitions between versions without data loss.
+    \item \textbf{Email}: \textbf{MJML} - Responsive email templates are designed in MJML and compiled to HTML. \textbf{SMTP} is used for reliable delivery of OTPs, order confirmations, and notifications.
+    \item \textbf{Payments}: \textbf{Razorpay} - Integrated for secure payment processing, supporting webhooks for real-time payment status updates.
+    \item \textbf{Linting \& Formatting}: \textbf{Ruff} - An extremely fast Python linter and formatter.
+\end{itemize}
+
+\subsection{Other Libraries and Tools}
+
+\begin{itemize}
+    \item \textbf{Containerization}: \textbf{Docker \& Docker Compose} - The entire stack (Frontend, Backend, DB, Traefik, Adminer) is containerized, ensuring consistency across development, staging, and production environments.
+    \item \textbf{Reverse Proxy}: \textbf{Traefik} - Automatically discovers Docker services and routes traffic. It handles SSL termination (Let's Encrypt) and load balancing.
+    \item \textbf{Database Management}: \textbf{Adminer} - A lightweight web interface for managing the PostgreSQL database directly.
+    \item \textbf{Version Control}: \textbf{Git} - Source code management.
+\end{itemize}
+
+\subsection{DevTools, CI/CD, and Deployment}
+
+\begin{itemize}
+    \item \textbf{CI/CD}: \textbf{GitHub Actions} - Automated workflows for:
+          \begin{itemize}
+              \item \textbf{Linting}: Checks code quality on every push.
+              \item \textbf{Staging Deployment}: Deploys to the staging environment on merges to the main branch.
+              \item \textbf{Production Deployment}: Deploys to production on release tags.
+          \end{itemize}
+    \item \textbf{Pre-commit Hooks}: Automatically runs Ruff and Biome before commits to prevent bad code from entering the repository.
+\end{itemize}
+
+\section{Features Implemented}
+
+\subsection{Registration and Sign-Up}
+
+This module handles the onboarding and identity management of users.
+
+\begin{itemize}
+    \item \textbf{Multi-role Registration}: Users select their primary role (Customer, Retailer, Wholesaler) during sign-up. The system allows users to add additional roles later.
+    \item \textbf{Secure Authentication}:
+          \begin{itemize}
+              \item \textbf{Flow}: User enters credentials, backend validates and issues JWT, frontend stores token.
+              \item \textbf{Security}: Passwords are never stored in plain text but are hashed using bcrypt.
+          \end{itemize}
+    \item \textbf{Email Verification}:
+          \begin{itemize}
+              \item \textbf{Flow}: After sign-up, the system generates a 6-digit OTP, sends it via email, user enters the OTP, and the account is verified.
+              \item \textbf{Purpose}: Prevents spam accounts and ensures communication channels are valid.
+          \end{itemize}
+    \item \textbf{Social Login}:
+          \begin{itemize}
+              \item \textbf{Google OAuth}: Users can sign up or log in with one click. The system automatically retrieves their email and name, creating a seamless entry point.
+          \end{itemize}
+    \item \textbf{Role Management}:
+          \begin{itemize}
+              \item \textbf{Dynamic Switching}: Users can switch their active role in the dashboard. For example, a user can switch from Customer mode to Retailer mode to manage their shop without logging out.
+          \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/login.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/signup.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/email-verification-email.png}\end{figure}
+
+\subsection{User Dashboards}
+
+Tailored interfaces for each user type ensure relevant information is always at hand.
+
+\begin{itemize}
+    \item \textbf{Customer Dashboard}:
+          \begin{itemize}
+              \item \textbf{Home Feed}: Personalized product recommendations and nearby shop listings.
+              \item \textbf{Order History}: List of past orders with status tracking.
+          \end{itemize}
+    \item \textbf{Retailer/Wholesaler Dashboard}:
+          \begin{itemize}
+              \item \textbf{Inventory Management}: CRUD operations for products. Sellers can set stock levels, low-stock alerts, and pricing.
+              \item \textbf{Sales Overview}: Charts and metrics showing daily and weekly sales performance.
+              \item \textbf{Order Management}: Interface to view incoming orders, update status (for example, "Ready to Ship"), and assign delivery partners.
+          \end{itemize}
+    \item \textbf{Product Management}:
+          \begin{itemize}
+              \item \textbf{Rich Details}: Support for multiple images, detailed descriptions, and categorization.
+              \item \textbf{Pricing Tiers}: Sellers can define different prices for different buyer types (for example, a Wholesaler sets a lower price for Retailers buying in bulk).
+          \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/customer-dashboard.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/retailer-inventory-management.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/product-edit.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/stock-management.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/retailer-order-with-clone-product-button.png}\end{figure}
+
+\subsection{Search \& Navigation}
+
+Helping users find what they need quickly and efficiently.
+
+\begin{itemize}
+    \item \textbf{Smart Filtering}:
+          \begin{itemize}
+              \item \textbf{Facets}: Filter by Category, Price Range, Brand, and Availability.
+              \item \textbf{Logic}: Filters are applied server-side for performance.
+          \end{itemize}
+    \item \textbf{Location-Based Services}:
+          \begin{itemize}
+              \item \textbf{Geospatial Search}: The platform provides location-based shop discovery. The backend uses the Haversine formula to sort sellers by distance.
+          \end{itemize}
+    \item \textbf{Product Search}:
+          \begin{itemize}
+              \item \textbf{Full-Text Search}: Users can search for product names, descriptions, or SKUs.
+          \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/product-search.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/product-detail-with-reviews.png}\end{figure}
+
+\subsection{Order \& Payment Management}
+
+The core commerce engine of the platform.
+
+\begin{itemize}
+    \item \textbf{Cart System}:
+          \begin{itemize}
+              \item \textbf{Persistence}: Cart items are stored in the database, so they persist across devices.
+              \item \textbf{Validation}: Real-time stock checks prevent adding out-of-stock items.
+          \end{itemize}
+    \item \textbf{Checkout Process}:
+          \begin{itemize}
+              \item \textbf{Address Selection}: Users choose from saved addresses or add a new one using Google Maps autocomplete.
+              \item \textbf{Coupon Application}: Users can apply discount codes. The system validates validity, usage limits, and minimum order values.
+          \end{itemize}
+    \item \textbf{Payment Gateway}:
+          \begin{itemize}
+              \item \textbf{Razorpay Integration}: Seamless flow for credit cards, UPI, and net banking.
+              \item \textbf{Webhooks}: The backend listens for Razorpay webhooks to automatically mark orders as "Paid" even if the user closes the browser.
+          \end{itemize}
+    \item \textbf{Order Tracking}:
+          \begin{itemize}
+              \item \textbf{Granular Statuses}: Orders progress through multiple states: Pending, Confirmed, Preparing, Ready to Ship, Out for Delivery, and Delivered.
+              \item \textbf{History}: A timeline view shows when each status change occurred.
+          \end{itemize}
+    \item \textbf{Settlements}:
+          \begin{itemize}
+              \item \textbf{Automated Logic}: The system calculates the platform commission and the net amount due to the seller.
+              \item \textbf{Transparency}: Sellers can view a report of all settlements and their status (Pending or Completed).
+          \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/cart.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/checkout.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/order-details.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/retailers-order-list.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/deliveries-list.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/delivery-partner-claim.png}\end{figure}
+
+\subsection{Feedback and Dashboard Updates}
+
+Ensuring quality and keeping users informed.
+
+\begin{itemize}
+    \item \textbf{Reviews \& Ratings}:
+          \begin{itemize}
+              \item \textbf{Verified Purchase Only}: Only users who have bought a product can review it, ensuring authenticity.
+              \item \textbf{Aggregates}: Product pages show average ratings and review counts.
+          \end{itemize}
+    \item \textbf{Notifications}:
+          \begin{itemize}
+              \item \textbf{Email Triggers}: System sends emails for: OTP, Order Confirmation, Status Updates, Coupons.
+          \end{itemize}
+    \item \textbf{Admin Panel}:
+          \begin{itemize}
+              \item \textbf{Superuser Access}: A special role for platform administrators.
+              \item \textbf{Capabilities}: Manage global settings, view all users, manage coupons, and oversee platform-wide settlements.
+          \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]\centering\reportimage{images/add-review.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/order-confirm-email.png}\end{figure}
+\begin{figure}[H]\centering\reportimage{images/order-status-update-email.png}\end{figure}
+
+\section{Key Platform Highlights}
+
+\begin{itemize}
+    \item \textbf{Dynamic Role Switching Architecture}: Unlike traditional platforms where a user is either a buyer or a seller, LiveMart treats roles as attributes. A single \texttt{User} entity can possess multiple \texttt{UserRole} links. The \texttt{active\_role} field on the user model determines the current context, allowing for a fluid user experience where a Retailer can buy stock (as a customer of a Wholesaler) and sell goods (to end Customers) using the same account.
+    \item \textbf{Tiered Pricing Model}: The \texttt{ProductPricing} model allows a single product to have multiple price points based on the \texttt{BuyerType}. This enables complex B2B and B2C scenarios within a single catalog.
+    \item \textbf{Automated Settlements System}: The platform includes a dedicated \texttt{PaymentSettlement} module. It aggregates orders, calculates the platform commission, and generates payout records for sellers. This automates the financial reconciliation process, which is often a manual pain point.
+\end{itemize}
+
+\section{Unique Selling Points (USPs)}
+
+\begin{enumerate}
+    \item \textbf{Unified Supply Chain Ecosystem}: LiveMart is not just a B2C store or a B2B marketplace; it is both. It connects the entire chain (Wholesaler to Retailer to Customer) in one application, reducing friction and intermediaries.
+    \item \textbf{Hyper-Local Focus}: The architecture is designed to prioritize proximity. Search results and shop listings default to the user's location, supporting local commerce initiatives and reducing delivery times.
+    \item \textbf{Transparent Operations}: Real-time visibility into stock levels and order statuses builds trust. Retailers can track when their wholesale stock will arrive, and Customers can track their delivery status.
+    \item \textbf{Developer-Friendly Architecture}: The project uses a schema-first approach. The backend OpenAPI schema drives the frontend TypeScript client generation. This means if a backend developer changes an API response, the frontend build will fail immediately, preventing subtle runtime bugs.
+\end{enumerate}
+
+\section{System Architecture}
+
+The system follows a modern, containerized microservices-ready architecture. While currently deployed as a modular monolith for simplicity, the clear separation of concerns allows for easy splitting into microservices in the future.
+
+\subsection{Directory Structure and Organization}
+
+\begin{itemize}
+    \item \textbf{\texttt{backend/app/models}}: Contains SQLModel definitions. These serve as both database tables and Pydantic schemas.
+    \item \textbf{\texttt{backend/app/api}}: Holds the route handlers, organized by resource (users, products, orders).
+    \item \textbf{\texttt{backend/app/crud}}: Encapsulates all database logic. The API layer does not access the database directly but calls CRUD functions.
+    \item \textbf{\texttt{frontend/src/routes}}: Follows the file-based routing convention of TanStack Router.
+    \item \textbf{\texttt{frontend/src/client}}: Contains the auto-generated API client SDK.
+\end{itemize}
+
+\subsection{Database Schema Diagrams}
+
+The following diagrams show the core domain models and their relationships, split by functional area for clarity.
+
+\subsubsection{User and Authentication Domain}
+\begin{figure}[H]\centering\reportimage{images/uml-user-auth.png}\end{figure}
+
+\subsubsection{Product Catalog Domain}
+\begin{figure}[H]\centering\reportimage{images/uml-product-catalog.png}\end{figure}
+
+\subsubsection{Shopping Cart Domain}
+\begin{figure}[H]\centering\reportimage{images/uml-cart.png}\end{figure}
+
+\subsubsection{Order and Payment Domain}
+\begin{figure}[H]\centering\reportimage{images/uml-order-payment.png}\end{figure}
+
+\subsubsection{Coupon and Settlement Domain}
+\begin{figure}[H]\centering\reportimage{images/uml-coupon-settlement.png}\end{figure}
+
+\section{Database Overview}
+
+The database is normalized to 3NF to ensure data integrity.
+
+\begin{itemize}
+    \item \textbf{\texttt{user}}: The central identity table. Stores credentials and profile info.
+    \item \textbf{\texttt{user\_role}}: A many-to-many link table between users and roles.
+    \item \textbf{\texttt{address}}: Stores geocoded locations. Linked to users. Used for both shipping addresses and shop locations.
+    \item \textbf{\texttt{product}}: The main catalog table. Contains static data (name, description).
+    \item \textbf{\texttt{product\_pricing}}: One-to-Many with Product. Allows different prices for different buyer types.
+    \item \textbf{\texttt{product\_inventory}}: One-to-One with Product. Separates volatile stock data from static catalog data to reduce locking contention.
+    \item \textbf{\texttt{cart} and \texttt{cart\_item}}: Transient data for shopping sessions.
+    \item \textbf{\texttt{order}}: The central transaction record. Contains snapshots of addresses to preserve history even if the user changes their address later.
+    \item \textbf{\texttt{order\_item}}: Details of what was bought. Stores a snapshot of the price at the time of purchase.
+    \item \textbf{\texttt{payment}}: Tracks Razorpay transaction details and statuses.
+    \item \textbf{\texttt{payment\_settlement}}: Records the financial payouts to sellers.
+\end{itemize}
+
+\section{Deployment and Developer Guide}
+
+\subsection{Prerequisites}
+
+\begin{itemize}
+    \item \textbf{Docker Engine and Docker Compose} (v2.0+)
+    \item \textbf{Node.js 20+} (Only for local frontend development outside Docker)
+    \item \textbf{Python 3.12+} (Only for local backend development outside Docker)
+\end{itemize}
+
+\subsection{Quick Start with Docker (Recommended)}
+
+This is the easiest way to get the full stack running.
+
+\begin{enumerate}
+    \item \textbf{Clone the repository}:
+          \begin{lstlisting}[language=bash]
+git clone https://github.com/Chaitanya-Keyal/LiveMart.git
+cd LiveMart\end{lstlisting}
+
+
+    \item \textbf{Configure Environment}:
+          \begin{itemize}
+              \item Copy \texttt{.env.example} to \texttt{.env}.
+              \item Generate a secure secret key: \texttt{openssl rand -hex 32}.
+              \item Set \texttt{SECRET\_KEY}, \texttt{POSTGRES\_PASSWORD}, \texttt{FIRST\_SUPERUSER}, and \texttt{FIRST\_SUPERUSER\_PASSWORD}.
+              \item (Optional) Add Google Maps API Key and Razorpay Keys for full functionality.
+          \end{itemize}
+
+    \item \textbf{Run the Stack}:
+          \begin{lstlisting}[language=bash]
+docker compose watch\end{lstlisting}
+
+          \begin{itemize}
+              \item The \texttt{watch} command enables hot-reloading for both frontend and backend containers.
+          \end{itemize}
+
+    \item \textbf{Access the App}:
+          \begin{itemize}
+              \item \textbf{Frontend}: \href{http://localhost:5173}{http://localhost:5173}
+              \item \textbf{Backend API Docs}: \href{http://localhost:8000/docs}{http://localhost:8000/docs}
+              \item \textbf{Adminer (Database UI)}: \href{http://localhost:8080}{http://localhost:8080}
+              \item \textbf{Traefik Dashboard}: \href{http://localhost:8090}{http://localhost:8090}
+          \end{itemize}
+\end{enumerate}
+
+\subsection{Local Development (Hybrid)}
+
+If you prefer running services natively for faster debugging:
+
+\begin{itemize}
+    \item \textbf{Backend}:
+          \begin{enumerate}
+              \item Navigate to \texttt{backend/}.
+              \item Install dependencies: \texttt{uv sync} (or \texttt{pip install -r requirements.txt}).
+              \item Run the server: \texttt{fastapi dev app/main.py}.
+              \item The API will be available at \href{http://localhost:8000}{http://localhost:8000}.
+          \end{enumerate}
+
+    \item \textbf{Frontend}:
+          \begin{enumerate}
+              \item Navigate to \texttt{frontend/}.
+              \item Install dependencies: \texttt{npm install}.
+              \item Run the dev server: \texttt{npm run dev}.
+              \item The UI will be available at \href{http://localhost:5173}{http://localhost:5173}.
+          \end{enumerate}
+\end{itemize}
+
+\subsection{Deployment to Production}
+
+The project is designed for easy deployment using Docker Compose and Traefik.
+
+\begin{enumerate}
+    \item \textbf{Provision a Server}: A VPS (such as AWS EC2, DigitalOcean Droplet) with Docker installed.
+    \item \textbf{DNS Configuration}: Point your domain (such as \texttt{livemart.com}) and subdomains (\texttt{api.livemart.com}, \texttt{dashboard.livemart.com}) to the server IP.
+    \item \textbf{Traefik Setup}:
+          \begin{itemize}
+              \item Deploy the \texttt{docker-compose.traefik.yml} stack.
+              \item This sets up the reverse proxy and automatic SSL certificate management (Let's Encrypt).
+          \end{itemize}
+    \item \textbf{App Deployment}:
+          \begin{itemize}
+              \item Set \texttt{ENVIRONMENT=production} in \texttt{.env}.
+              \item Run \texttt{docker compose -f docker-compose.yml up -d}.
+              \item Traefik will automatically detect the new containers and route traffic securely via HTTPS.
+          \end{itemize}
+\end{enumerate}
+
+\end{document}
